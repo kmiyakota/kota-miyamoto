@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=yes">
+<meta name="theme-color" content="#fff9fb" id="themeColorMeta">
+<title>好きからつくる。｜キャラクター工房 v0.8.6.2 スマホ導線・画像おかえり開発候補</title>
+<style>
+:root{
+  --bg:#fff9fb; --paper:#ffffff; --ink:#372f3d; --muted:#746b77; --line:#eadfe6;
+  --pink:#df6f94; --pink2:#f8e2eb; --lav:#8379c4; --lav2:#efecfa;
+  --teal:#419f99; --teal2:#e5f5f3; --gold:#cd9439; --gold2:#fbf0d7;
+  --red:#c85f72; --green:#4c9a63; --shadow:0 18px 44px rgba(74,49,70,.12);
+  --radius:24px; --safe-bottom: env(safe-area-inset-bottom,0px); --theme-glow:#fff1f7;
+}
+html[data-theme="pink"]{--bg:#fff9fb;--pink:#df6f94;--pink2:#f8e2eb;--theme-glow:#fff1f7}
+html[data-theme="blue"]{--bg:#f8fbff;--pink:#5f88c8;--pink2:#e7f0fc;--theme-glow:#edf5ff}
+html[data-theme="green"]{--bg:#f8fcf8;--pink:#5b9a70;--pink2:#e7f4eb;--theme-glow:#edf9f0}
+html[data-theme="purple"]{--bg:#fbf9ff;--pink:#8a73c5;--pink2:#eee9fb;--theme-glow:#f2edff}
+html[data-text-size="small"]{--text-scale:.93}
+html[data-text-size="normal"]{--text-scale:1}
+html[data-text-size="large"]{--text-scale:1.1}
+*{box-sizing:border-box} html,body{height:100%;margin:0;overflow:hidden}
+html{--text-scale:1}html[data-font="standard"] body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif}html[data-font="maru"] body{font-family:"Hiragino Maru Gothic ProN","Yu Gothic","Meiryo",sans-serif}html[data-font="mincho"] body{font-family:"Yu Mincho","Hiragino Mincho ProN","HGS明朝E",serif}body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;background:radial-gradient(circle at top left,var(--theme-glow) 0,var(--bg) 30%,#f4fbfa 72%,#f7f4ff 100%);color:var(--ink);transition:background .2s ease,color .2s ease}
+button,input,select,textarea{font:inherit} button{cursor:pointer} textarea{resize:none}
+.app{height:100dvh;width:min(430px,100%);margin:0 auto;padding:8px 10px calc(8px + var(--safe-bottom));display:flex;flex-direction:column;gap:8px}
+.top{height:54px;display:flex;align-items:center;gap:9px;flex:0 0 auto}
+.logo{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;line-height:1.15}.logo b{display:block;font-size:16px;letter-spacing:.02em;white-space:nowrap}.logo small{display:block;color:var(--muted);font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}.pill{font-size:10px;border:1px solid var(--line);background:rgba(255,255,255,.72);padding:5px 7px;border-radius:999px;color:var(--muted)}
+.save-status{max-width:92px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;border:1px solid var(--line);background:rgba(255,255,255,.8);padding:5px 7px;border-radius:999px;color:var(--muted);transition:.18s}.save-status[data-state="saving"]{color:#6b5ca5;border-color:#d8d1f0;background:var(--lav2)}.save-status[data-state="saved"]{color:#39734c;border-color:#cfe5d5;background:#eef8f1}.save-status[data-state="error"]{color:#a94659;border-color:#efc7cf;background:#fff0f3;font-weight:800}.integrity-note{margin-top:8px;font-size:10.5px;line-height:1.55;border-radius:13px;padding:8px 10px;background:#faf7fa;border:1px solid var(--line)}.integrity-note.ok{background:#eef8f1;border-color:#cfe5d5;color:#39734c}.integrity-note.warn{background:#fff7e7;border-color:#efd7a8;color:#765b26}
+.shell{position:relative;flex:1 1 auto;min-height:0;background:rgba(255,255,255,.88);border:1px solid rgba(234,223,230,.92);border-radius:30px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;backdrop-filter:blur(10px)}
+.progress{height:8px;background:#f0e9ee;overflow:hidden;flex:0 0 auto}.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--lav),var(--teal));transition:width .32s ease}
+.screen{display:none;flex:1 1 auto;min-height:0;padding:15px;overflow:hidden}.screen.active{display:flex;flex-direction:column;animation:screenIn .22s ease both}@keyframes screenIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.scroll{flex:1 1 auto;min-height:0;overflow:auto;padding-right:2px;scrollbar-width:thin}.scroll::-webkit-scrollbar{width:5px}.scroll::-webkit-scrollbar-thumb{background:#e3d8df;border-radius:99px}
+h1,h2,h3,p{margin-top:0} h1{font-size:27px;line-height:1.25;margin-bottom:10px;letter-spacing:.02em} h2{font-size:22px;line-height:1.35;margin-bottom:8px} h3{font-size:15px;margin-bottom:7px}.lead{font-size:14px;line-height:1.75;color:#564b59}.hint{font-size:11.5px;line-height:1.55;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:15px;padding:11px 14px;font-weight:800;box-shadow:none;transition:transform .15s,filter .15s,background .15s;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:42px}.btn:active{transform:scale(.98)}.btn.primary{background:linear-gradient(100deg,var(--pink),#d85a8b);color:#fff}.btn.secondary{background:#fff;border:1px solid var(--line);color:var(--ink)}.btn.ghost{background:transparent;color:var(--muted)}.btn.teal{background:var(--teal);color:#fff}.btn.lav{background:var(--lav);color:#fff}.btn.small{font-size:12px;min-height:34px;padding:8px 10px;border-radius:12px}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.hero{display:flex;flex-direction:column;gap:10px;height:100%}.hero-visual{height:142px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,var(--pink2),#fff 55%,var(--teal2));position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}.hero-visual .shelf-demo{display:flex;gap:9px;align-items:flex-end}.demo-card{width:72px;height:96px;border-radius:18px;background:#fff;border:1px solid var(--line);box-shadow:0 14px 24px rgba(91,64,77,.10);padding:8px;transform:rotate(-2deg);animation:floaty 3s ease-in-out infinite}.demo-card:nth-child(2){height:112px;transform:rotate(2deg);animation-delay:.3s}.demo-card:nth-child(3){height:86px;transform:rotate(-1deg);animation-delay:.6s}.demo-face{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f0b7c9,#8f86ca);margin:0 auto 8px}.demo-line{height:7px;border-radius:99px;background:#eee2ea;margin:5px 0}.demo-line:nth-child(3){width:70%}@keyframes floaty{0%,100%{translate:0 0}50%{translate:0 -5px}}.spark{position:absolute;font-size:18px;opacity:.82;animation:pop 1.8s infinite}.sp1{left:24px;top:18px}.sp2{right:26px;top:23px;animation-delay:.4s}.sp3{right:55px;bottom:18px;animation-delay:.8s}@keyframes pop{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.2);opacity:1}}
+.ad-slot{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.ad-label{font-size:9px;letter-spacing:.16em;color:#8a818c;text-align:center;margin-bottom:5px}.ad-frame{border:1px solid #e6dce2;border-radius:14px;background:#fbfafb;min-height:72px;display:flex;align-items:center;justify-content:center;overflow:hidden}.ad-preview{padding:12px 14px;text-align:center;color:#746b77}.ad-preview b{display:block;font-size:11.5px;color:#5f5662;margin-bottom:3px}.ad-preview span{font-size:10px;line-height:1.5}.ad-live{width:100%;min-height:72px;text-align:center}.ad-live .adsbygoogle{min-width:250px}.ad-meta{display:flex;justify-content:center;gap:12px;margin-top:5px;font-size:9.5px}.ad-meta a{color:#746b77;text-decoration:underline;text-underline-offset:2px}.ad-error{font-size:10px;color:#a14f61;padding:10px}.settings-ad-state{border:1px solid #e5dce2;border-radius:14px;background:#fbfafb;padding:10px 11px;font-size:11px;line-height:1.6;color:#625963}.settings-ad-state b{color:#4e4551}.settings-ad-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.settings-ad-links a{font-size:10.5px;color:#6b6170;text-decoration:underline;text-underline-offset:2px}
+.route-grid,.choice-grid{display:grid;gap:9px}.route{border:1px solid var(--line);background:#fff;border-radius:19px;padding:13px;text-align:left;transition:.16s;position:relative;overflow:hidden}.route.selected,.choice.selected{border-color:var(--pink);background:linear-gradient(135deg,var(--pink2),#fff);box-shadow:0 0 0 2px rgba(223,111,148,.10)}.route b{display:block;font-size:14px}.route span{font-size:11.5px;color:var(--muted);line-height:1.55}.choice{border:1px solid var(--line);background:#fff;border-radius:15px;padding:11px 12px;text-align:left;min-height:44px}.choice b{font-size:13.5px}.choice em{font-style:normal;color:var(--muted);font-size:10.5px;display:block;margin-top:2px}.choice:active,.route:active{transform:scale(.985)}
+.notice{background:var(--gold2);border:1px solid #efd7a8;color:#67522d;border-radius:16px;padding:10px 12px;font-size:12px;line-height:1.65;margin:8px 0}.info{border:1px solid var(--line);border-radius:18px;background:#fff;padding:12px}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chip{font-size:11px;padding:5px 8px;border-radius:999px;background:var(--lav2);color:#5c558f;font-weight:700}.chip.teal{background:var(--teal2);color:#39736f}.chip.pink{background:var(--pink2);color:#a84f68}.field{width:100%;border:1px solid var(--line);border-radius:14px;padding:10px 11px;background:#fff;color:var(--ink);outline:none}.field:focus{border-color:var(--lav);box-shadow:0 0 0 3px rgba(131,121,196,.12)}textarea.field{min-height:84px}.form-row{display:grid;gap:8px;margin:10px 0}.label{font-size:12px;font-weight:900;display:block;margin-bottom:5px;color:#4c414f}
+.nav{flex:0 0 auto;padding:10px 15px 12px;border-top:1px solid var(--line);background:rgba(255,255,255,.86);display:flex;gap:8px;justify-content:space-between}.nav .btn{flex:1}.bottom-tabs{height:54px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex:0 0 auto}.tabbtn{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.82);font-size:10px;color:var(--muted);font-weight:800;padding:6px 4px}.tabbtn.active{background:var(--pink2);color:#9f4962;border-color:#ebb6c7}.tabbtn span{display:block;font-size:17px;line-height:1}
+.discovery-card{background:linear-gradient(135deg,#fff,var(--lav2));border:1px solid #d8d1f0;border-radius:22px;padding:16px;position:relative;overflow:hidden}.discovery-card:before{content:"";position:absolute;right:-22px;top:-22px;width:88px;height:88px;background:rgba(255,255,255,.55);border-radius:50%}.discovery-label{font-size:11px;font-weight:900;color:#6e63a8;margin-bottom:8px}.discovery-title{font-size:18px;font-weight:900;line-height:1.45}.discovery-text{line-height:1.8;font-size:13px;color:#504754}.micro-spark{position:absolute;right:18px;bottom:16px;font-size:22px;animation:pop 1.8s infinite}
+.preview-img{width:78px;height:78px;border-radius:22px;border:1px solid var(--line);background:linear-gradient(135deg,#fff,var(--pink2));display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:34px}.preview-img img{width:100%;height:100%;object-fit:cover}.result-layout{display:grid;grid-template-columns:88px 1fr;gap:12px}.result-title{font-size:18px;font-weight:900;line-height:1.35}.prompt-box{background:#fbf8fb;border:1px solid var(--line);border-radius:16px;padding:10px;font-size:11px;line-height:1.55;max-height:115px;overflow:auto;white-space:pre-wrap}.kana{display:block;color:var(--muted);font-size:10px;letter-spacing:.06em;margin-top:2px}.copy-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0}.copy-row .hint{margin:0;flex:1}.save-pop{animation:savePop .55s ease both}@keyframes savePop{0%{transform:scale(.95);opacity:.4}70%{transform:scale(1.02);opacity:1}100%{transform:scale(1)}}
+.shelf-grid{display:grid;grid-template-columns:1fr;gap:8px}.char-card{border:1px solid var(--line);background:#fff;border-radius:18px;padding:10px;display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:center;animation:cardIn .25s ease both}.char-card .thumb{width:58px;height:58px;border-radius:17px;background:linear-gradient(135deg,var(--pink2),var(--lav2));border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover}.char-card h3{margin:0 0 3px;font-size:15px}.char-card p{font-size:11.2px;color:var(--muted);line-height:1.5;margin:0}.card-actions{display:flex;gap:6px;margin-top:7px}.empty{border:1px dashed var(--line);border-radius:20px;background:#fff;padding:18px;text-align:center;color:var(--muted);line-height:1.7;font-size:13px}@keyframes cardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.rel-picker{display:grid;grid-template-columns:1fr 1fr;gap:8px}.select-card{border:1px solid var(--line);border-radius:16px;padding:9px;background:#fff;text-align:center}.select-card.selected{border-color:var(--teal);background:var(--teal2)}.relation-map{border:1px solid var(--line);border-radius:20px;background:linear-gradient(135deg,#fff,var(--teal2));padding:12px;text-align:center}.avatars{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0}.avatar{width:46px;height:46px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.heartline{font-size:22px;color:var(--pink)}.story-card{background:linear-gradient(135deg,#fff,var(--gold2));border:1px solid #ecd3a1;border-radius:20px;padding:13px;line-height:1.7;font-size:13px}.toast{pointer-events:none;position:fixed;left:50%;bottom:calc(18px + var(--safe-bottom));transform:translateX(-50%) translateY(18px);opacity:0;background:#39313c;color:#fff;padding:10px 14px;border-radius:14px;font-size:13px;transition:.25s;z-index:20}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.fade-tip{animation:fadeTip .7s ease}@keyframes fadeTip{0%{background:#fff9d8}100%{background:inherit}}
+.staff-note{display:flex;gap:8px;align-items:flex-start}.staff-note .mini{width:36px;height:36px;border-radius:50%;background:var(--teal2);display:flex;align-items:center;justify-content:center;border:1px solid var(--line);flex:0 0 auto}.staff-note p{margin:0;font-size:12px;line-height:1.65}.staff-note b{color:#39736f}
+@media (max-width:360px){.app{padding-left:7px;padding-right:7px}.screen{padding:12px} h1{font-size:24px} h2{font-size:20px}.btn{padding:10px 10px}.route{padding:11px}.result-layout{grid-template-columns:72px 1fr}.preview-img{width:72px;height:72px}.hero-visual{height:124px}.demo-card{width:61px;height:86px}.demo-card:nth-child(2){height:101px}.demo-card:nth-child(3){height:76px}}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* v0.8.4.3: 端末内保存・わくわく導線 */
+.route,.choice,.select-card,.relation-type{position:relative;overflow:hidden}
+.route.selected:after,.choice.selected:after,.select-card.selected:after,.relation-type.selected:after{content:"✓";position:absolute;right:9px;top:8px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--pink);color:#fff;font-size:12px;font-weight:900;box-shadow:0 6px 16px rgba(223,111,148,.25)}
+.route.picked,.choice.picked,.select-card.picked,.relation-type.picked{animation:choiceBounce .24s ease both}
+@keyframes choiceBounce{0%{transform:scale(1)}45%{transform:scale(1.035)}100%{transform:scale(1)}}
+.screen.active.forward{animation:screenForward .22s ease both}.screen.active.back{animation:screenBack .2s ease both}
+@keyframes screenForward{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+@keyframes screenBack{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.phase-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.phase-name{font-size:11px;font-weight:900;color:#39736f;background:var(--teal2);padding:5px 8px;border-radius:999px}
+.welcome-card{margin:2px 0 10px;background:linear-gradient(135deg,#fff,var(--pink2));border-color:#efcad7}.welcome-card .welcome-main{display:grid;grid-template-columns:54px 1fr;gap:10px;align-items:center}.welcome-card .welcome-thumb{width:54px;height:54px;border-radius:16px;background:#fff;border:1px solid var(--line);overflow:hidden;display:grid;place-items:center;font-size:25px}.welcome-card img{width:100%;height:100%;object-fit:cover}.welcome-card h3{margin:0 0 3px}.welcome-card p{margin:0;font-size:11.5px;color:var(--muted);line-height:1.5}
+.discovery-card.revealing .discovery-label{animation:revealPiece .32s ease both}.discovery-card.revealing .discovery-title{animation:revealPiece .36s .12s ease both}.discovery-card.revealing .discovery-text{animation:revealPiece .4s .25s ease both}.discovery-card.revealing .micro-spark{animation:revealPiece .4s .38s ease both,pop 1.8s .8s infinite}
+@keyframes revealPiece{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.save-stage{text-align:center;padding:12px 4px}.save-check{width:76px;height:76px;margin:4px auto 12px;border-radius:50%;display:grid;place-items:center;font-size:35px;color:#fff;background:linear-gradient(135deg,var(--pink),var(--lav));box-shadow:0 16px 34px rgba(223,111,148,.22);animation:saveCheck .55s ease both}.save-stage h2{margin-bottom:5px}.save-stage .lead{margin-bottom:12px}.saved-preview{margin:10px 0;text-align:left}.next-grid{display:grid;gap:8px;margin-top:10px}.next-action{border:1px solid var(--line);border-radius:16px;background:#fff;padding:11px;text-align:left;display:flex;align-items:center;gap:10px}.next-action span{font-size:22px}.next-action b{display:block;font-size:13px}.next-action small{display:block;color:var(--muted);margin-top:2px;line-height:1.4}
+@keyframes saveCheck{0%{opacity:0;transform:scale(.55) rotate(-8deg)}70%{opacity:1;transform:scale(1.08) rotate(2deg)}100%{transform:scale(1)}}
+.petals{height:22px;position:relative;margin-bottom:-4px}.petals i{position:absolute;font-style:normal;animation:petalFall 1.15s ease both}.petals i:nth-child(1){left:18%;animation-delay:.05s}.petals i:nth-child(2){left:40%;animation-delay:.2s}.petals i:nth-child(3){left:62%;animation-delay:.1s}.petals i:nth-child(4){left:78%;animation-delay:.28s}@keyframes petalFall{from{opacity:0;transform:translateY(-9px) rotate(0)}to{opacity:.8;transform:translateY(12px) rotate(80deg)}}
+.storage-card{display:grid;gap:7px}.storage-row{display:flex;justify-content:space-between;gap:12px;font-size:11.5px;border-bottom:1px dashed var(--line);padding-bottom:6px}.storage-row:last-child{border-bottom:0;padding-bottom:0}.storage-row b{color:#4c414f}.storage-row span{text-align:right;color:var(--muted);overflow-wrap:anywhere}.status-ok{color:var(--green)!important;font-weight:800}.status-warn{color:var(--red)!important;font-weight:800}.origin-box{font-size:10.5px;line-height:1.5;word-break:break-all;background:#faf7fa;border:1px solid var(--line);padding:8px;border-radius:12px}
+.relation-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.relation-type{border:1px solid var(--line);border-radius:15px;background:#fff;padding:10px;text-align:left;min-height:66px}.relation-type b{font-size:12.5px;display:block;padding-right:20px}.relation-type small{display:block;color:var(--muted);font-size:10px;margin-top:3px;line-height:1.4}.relation-type.selected{border-color:var(--pink);background:linear-gradient(135deg,var(--pink2),#fff)}
+.relation-question{font-size:16px;font-weight:900;line-height:1.5;margin:10px 0}.relation-flow{border:1px solid #ecd3a1;background:linear-gradient(135deg,#fff,var(--gold2));border-radius:20px;padding:12px;text-align:center}.relation-flow .flow-name{font-weight:900}.relation-flow .flow-arrow{font-size:21px;color:var(--pink);margin:4px}.relation-flow .flow-type{font-size:14px;font-weight:900}.saved-relations{margin-top:8px;border:1px solid var(--line);border-radius:17px;background:#fff;overflow:hidden}.saved-relations summary{cursor:pointer;padding:11px 12px;font-weight:900;font-size:13px;list-style:none}.saved-relations summary::-webkit-details-marker{display:none}.saved-relations summary:after{content:"＋";float:right;color:var(--muted)}.saved-relations[open] summary:after{content:"−"}.saved-relations .inside{padding:0 10px 10px}
+.save-note{font-size:10.5px;color:var(--muted);line-height:1.55;margin:7px 0}.save-note strong{color:#4c414f}.import-label{display:inline-flex;align-items:center;justify-content:center}.import-label input{display:none}
+
+#home.has-returning .hero-visual{display:none}
+@media (max-height:680px){.hero-visual{height:98px}.hero{gap:7px}h1{font-size:24px;margin-bottom:7px}.lead{line-height:1.58}.ad-slot{min-height:38px;padding:6px 8px}.welcome-card{padding:9px}.welcome-card .actions{gap:5px}.welcome-card .btn{min-height:32px;padding:7px 8px}}
+@media (max-height:590px){#home.has-returning .scroll>.hint,#home.has-returning .scroll>.lead{display:none}.hero-visual{height:76px}h1{font-size:21px;line-height:1.22}.welcome-card{margin-top:2px}.welcome-card .actions .ghost{display:none}}
+@media (max-width:360px){.relation-type-grid{grid-template-columns:1fr}.next-action{padding:9px}.save-check{width:66px;height:66px}.welcome-card .welcome-main{grid-template-columns:48px 1fr}.welcome-card .welcome-thumb{width:48px;height:48px}}
+
+
+/* STEP 2: 自動命名 */
+.naming-box{margin-top:9px;background:linear-gradient(135deg,#fff,#fff8fb);border-color:#ebcbd7}.naming-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.naming-head h3{margin-bottom:3px}.mode-switch{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}.mode-btn{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px 8px;font-size:12px;font-weight:900;color:var(--muted)}.mode-btn.selected{border-color:var(--pink);background:var(--pink2);color:#9f4962;box-shadow:0 0 0 2px rgba(223,111,148,.08)}.name-type-grid{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0 10px}.name-type-btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:900;color:var(--muted)}.name-type-btn.selected{background:var(--lav2);border-color:#cfc7ec;color:#5c558f}.name-proposal{border:1px solid #d8d1f0;background:linear-gradient(135deg,var(--lav2),#fff 68%);border-radius:20px;padding:14px;position:relative;overflow:hidden}.name-proposal:after{content:'✦';position:absolute;right:15px;top:12px;color:#8d82c7;font-size:20px}.proposal-name{font-size:27px;line-height:1.15;font-weight:950;letter-spacing:.04em;padding-right:32px}.proposal-reading{font-size:12px;color:var(--muted);letter-spacing:.1em;margin-top:4px}.proposal-reason{font-size:11px;line-height:1.6;color:#5d5360;margin:9px 0 0}.proposal-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.accepted-note{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;font-weight:900;color:#39734c;background:#eef8f1;border:1px solid #cfe5d5;border-radius:12px;padding:7px 9px}.manual-name-fields{display:grid;gap:8px}.name-help{font-size:10.5px;color:var(--muted);line-height:1.55;margin-top:7px}.name-source-chip{background:#fff7e7;color:#765b26}.naming-error{font-size:11px;font-weight:800;color:#a94659;margin-top:7px}.btn.pending{opacity:.56}.candidate-count{font-size:10px;color:var(--muted);white-space:nowrap}.name-preview-pending{color:var(--muted);font-size:15px;font-weight:900}
+
+.top-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}.settings-btn{width:32px;height:32px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.82);display:grid;place-items:center;color:var(--muted);font-size:16px;padding:0}.settings-btn:active{transform:scale(.96)}
+.settings-group{margin:10px 0}.settings-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.setting-option{position:relative;border:1px solid var(--line);border-radius:16px;background:#fff;padding:11px;text-align:left;min-height:64px;color:var(--ink)}.setting-option.selected{border-color:var(--pink);background:linear-gradient(135deg,var(--pink2),#fff);box-shadow:0 0 0 2px rgba(120,100,150,.10)}.setting-option.selected:after{content:"✓";position:absolute;right:8px;top:8px;width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:var(--pink);color:#fff;font-size:11px;font-weight:900}.setting-option b{display:block;font-size:13px;padding-right:22px}.setting-option small{display:block;color:var(--muted);font-size:10px;line-height:1.45;margin-top:3px}.theme-dots{display:flex;gap:5px;margin-top:7px}.theme-dot{width:17px;height:17px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}.theme-dot.pink{background:#df6f94}.theme-dot.blue{background:#5f88c8}.theme-dot.green{background:#5b9a70}.theme-dot.purple{background:#8a73c5}.settings-preview{border:1px solid var(--line);border-radius:20px;background:linear-gradient(135deg,var(--pink2),#fff);padding:14px;margin:10px 0}.settings-preview .sample-title{font-size:18px;font-weight:900;margin-bottom:4px}.settings-preview p{font-size:12px;line-height:1.65;color:var(--muted);margin:0}.settings-save-note{font-size:10.5px;line-height:1.55;color:var(--muted);background:#faf7fa;border:1px solid var(--line);border-radius:13px;padding:8px 10px;margin:8px 0}.settings-status{font-size:11px;font-weight:800;color:#39734c;min-height:18px;margin-top:5px}.danger-separate{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+html[data-text-size="small"] h1{font-size:25px}html[data-text-size="small"] h2{font-size:20.5px}html[data-text-size="small"] h3{font-size:14px}html[data-text-size="small"] .lead{font-size:13px}html[data-text-size="small"] .hint{font-size:10.8px}html[data-text-size="small"] .label{font-size:11.2px}html[data-text-size="small"] .btn{font-size:13px}html[data-text-size="small"] .choice b,html[data-text-size="small"] .route b{font-size:12.7px}
+html[data-text-size="large"] h1{font-size:29px}html[data-text-size="large"] h2{font-size:24px}html[data-text-size="large"] h3{font-size:16.5px}html[data-text-size="large"] .lead{font-size:15.2px}html[data-text-size="large"] .hint{font-size:12.5px}html[data-text-size="large"] .label{font-size:13px}html[data-text-size="large"] .btn{font-size:15px}html[data-text-size="large"] .choice b,html[data-text-size="large"] .route b{font-size:14.5px}html[data-text-size="large"] .char-card p,html[data-text-size="large"] .story-card{font-size:12.3px}html[data-text-size="large"] .tabbtn{font-size:10.8px}
+@media(max-width:360px){.mode-switch{grid-template-columns:1fr}.name-type-btn{padding:7px 9px}.proposal-name{font-size:24px}.settings-options{grid-template-columns:1fr}.save-status{max-width:72px}.logo b{font-size:13px}.logo small{font-size:9px}.settings-btn{width:30px;height:30px}.top-actions{gap:3px}}
+
+
+/* STEP 4: 物語の芽 */
+.story-pair{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;border:1px solid var(--line);background:linear-gradient(135deg,var(--pink2),#fff 48%,var(--teal2));border-radius:20px;padding:11px;margin-bottom:10px}.story-person{text-align:center;min-width:0}.story-person .avatar{width:52px;height:52px;margin:0 auto 5px;border-radius:17px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden;font-size:24px}.story-person .avatar img{width:100%;height:100%;object-fit:cover}.story-person b{font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.story-link{font-size:20px;color:var(--pink);font-weight:900}.story-relation-summary{border:1px solid var(--line);background:#fff;border-radius:17px;padding:10px 12px;margin-bottom:11px}.story-relation-summary b{font-size:13px}.story-relation-summary p{font-size:11px;line-height:1.6;color:var(--muted);margin:4px 0 0}.story-step{display:flex;align-items:center;gap:7px;margin-bottom:8px}.story-step .chip{margin:0}.story-question-grid{display:grid;gap:8px}.story-option{border:1px solid var(--line);border-radius:16px;background:#fff;padding:11px 12px;text-align:left;min-height:58px}.story-option.selected{border-color:var(--pink);background:linear-gradient(135deg,var(--pink2),#fff);box-shadow:0 0 0 2px color-mix(in srgb,var(--pink) 15%,transparent)}.story-option b{font-size:13px;display:block}.story-option small{display:block;color:var(--muted);line-height:1.45;margin-top:3px}.story-proposals{display:grid;gap:10px}.seed-proposal{border:1px solid var(--line);background:#fff;border-radius:20px;padding:12px;position:relative;overflow:hidden}.seed-proposal::before{content:'';position:absolute;inset:0 auto 0 0;width:5px;background:var(--pink)}.seed-proposal.axis-daily::before{background:var(--teal)}.seed-proposal.axis-shift::before{background:var(--pink)}.seed-proposal.axis-world::before{background:var(--lav)}.seed-proposal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}.seed-proposal-head h3{margin:0;font-size:14px}.seed-axis{font-size:10px;padding:4px 7px;border-radius:999px;background:var(--pink2);color:#9b4b63;font-weight:900;white-space:nowrap}.seed-proposal p{font-size:12px;line-height:1.7;margin:5px 0}.seed-section{border-top:1px dashed var(--line);padding-top:7px;margin-top:7px}.seed-section b{font-size:10.5px;color:var(--muted);display:block;margin-bottom:3px}.seed-questions{margin:4px 0 0;padding-left:18px;color:#514754;font-size:11.5px;line-height:1.65}.seed-basis{margin-top:8px;background:#faf7fb;border-radius:13px;padding:8px 9px;font-size:10.5px;color:var(--muted);line-height:1.55}.seed-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.seed-actions .btn{flex:1 1 auto}.seed-saved{margin-top:8px;border-radius:12px;padding:7px 9px;font-size:10.5px;font-weight:800;background:#eef8f1;color:#39734c}.seed-saved.held{background:#fff7e7;color:#765b26}.seed-saved.rejected{background:#f6f2f5;color:#746b77}.seed-source-badge{font-size:9.5px;border-radius:999px;padding:4px 7px;background:var(--lav2);color:#5c558f;font-weight:800}.seed-source-badge.author{background:#e7f4eb;color:#39734c}.seed-library{display:grid;gap:8px;margin-top:10px}.seed-library-card{border:1px solid var(--line);border-radius:17px;background:#fff;padding:10px 11px}.seed-library-card h3{font-size:13px;margin:0 0 5px}.seed-library-card p{font-size:11.5px;line-height:1.65;margin:4px 0}.seed-meta{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px}.seed-empty{border:1px dashed var(--line);border-radius:17px;padding:14px;text-align:center;color:var(--muted);font-size:11.5px}.relation-seed-row{margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.relation-seed-count{font-size:10px;color:var(--muted)}.deleted-person{color:#9b5369;font-style:italic}.story-finish{border:1px solid #cfe5d5;background:#eef8f1;color:#39734c;border-radius:16px;padding:10px 12px;font-size:11.5px;line-height:1.6;margin-bottom:10px}.story-intro-note{border:1px solid var(--line);background:#fff;border-radius:17px;padding:11px;margin:9px 0}.story-intro-note ul{margin:6px 0 0;padding-left:19px;font-size:11.5px;line-height:1.7}.story-nav-spacer{flex:1}.seed-status-line{font-size:10px;color:var(--muted);margin-top:5px}
+
+/* v0.8.6.1: 広告受け皿・プライバシー準備候補 */
+.home-path-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:11px 0}.home-path-card{border:1px solid var(--line);border-radius:21px;background:#fff;padding:13px;text-align:left;min-height:132px;display:flex;flex-direction:column;gap:7px;position:relative;overflow:hidden;color:var(--ink);box-shadow:0 9px 22px rgba(85,67,78,.06)}.home-path-card::after{content:"";position:absolute;width:76px;height:76px;border-radius:50%;right:-22px;bottom:-27px;background:var(--pink2);opacity:.72}.home-path-card.primary-path{border-color:color-mix(in srgb,var(--pink) 42%,var(--line));background:linear-gradient(145deg,var(--pink2),#fff 58%)}.home-path-card.shelf-path{background:linear-gradient(145deg,var(--teal2),#fff 58%)}.home-path-card:active{transform:scale(.985)}.home-path-card .path-icon{width:38px;height:38px;border-radius:13px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:19px}.home-path-card b{font-size:14px;line-height:1.35;position:relative;z-index:1}.home-path-card p{font-size:10.8px;line-height:1.55;color:var(--muted);margin:0;position:relative;z-index:1}.home-path-card small{font-size:9.8px;color:#8b7784;font-weight:800;margin-top:auto;position:relative;z-index:1}.welcome-card.return-card{border-color:#d9d0ec;background:linear-gradient(135deg,#fff,var(--lav2));padding:13px}.return-eyebrow{font-size:10px;color:#6e63a8;font-weight:900;letter-spacing:.03em;margin-bottom:8px}.return-question{font-size:13px;line-height:1.7;color:#4d4451;margin:8px 0 0}.return-question::before{content:"「";color:var(--lav);font-weight:900}.return-question::after{content:"」";color:var(--lav);font-weight:900}.home-guidance{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.76);padding:9px 11px;font-size:10.5px;line-height:1.6;color:var(--muted);margin:9px 0}.home-guidance b{color:var(--ink)}
+@media(max-width:360px){.home-path-grid{grid-template-columns:1fr}.home-path-card{min-height:104px;padding:11px}.home-path-card .path-icon{width:34px;height:34px}.home-path-card p{font-size:10.5px}}
+
+@media(max-width:360px){.story-pair{padding:9px;gap:5px}.story-person .avatar{width:44px;height:44px}.seed-actions .btn{font-size:11px;padding:8px}.seed-proposal{padding:10px}}
+
+/* v0.8.6.2 RC1: small-screen copy + image round-trip */
+.home-save-badge{display:inline-flex;align-items:center;gap:5px;margin:2px 0 9px;padding:6px 9px;border:1px solid #d9e7df;border-radius:999px;background:#f2faf5;color:#39734c;font-size:10.5px;font-weight:800}
+.home-save-badge span{color:#9eb4a6}.home-intro{margin-bottom:10px}.home-intro h1{margin-bottom:7px}.home-intro .lead{margin-bottom:0}
+.pending-image-card{margin:9px 0;border-color:#cfdff1;background:linear-gradient(135deg,#f2f7ff,#fff)}.pending-image-card .pending-eyebrow{font-size:10px;font-weight:900;color:#5077a7;margin-bottom:5px}.pending-image-card h3{margin:0 0 4px}.pending-image-card p{margin:0 0 9px;font-size:11px;line-height:1.55;color:var(--muted)}
+.image-flow-head{display:flex;gap:10px;align-items:center;margin-bottom:10px}.image-flow-avatar{width:58px;height:58px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(135deg,var(--pink2),var(--lav2));display:grid;place-items:center;overflow:hidden;font-size:25px;flex:0 0 auto}.image-flow-avatar img{width:100%;height:100%;object-fit:cover}.image-flow-head h2{margin:0 0 3px}.image-flow-head p{margin:0;font-size:11px;color:var(--muted);line-height:1.5}
+.image-step-list{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 11px}.image-step{border:1px solid var(--line);border-radius:13px;padding:7px 5px;text-align:center;background:#fff;font-size:9.5px;line-height:1.4;color:var(--muted)}.image-step b{display:block;color:var(--ink);font-size:11px;margin-bottom:2px}.image-step.active{border-color:#9db9da;background:#f1f7ff}.image-step.done{border-color:#b9ddc4;background:#f2faf5}
+.image-work-card{margin-top:8px}.image-work-card h3{display:flex;align-items:center;gap:7px}.step-number{width:23px;height:23px;border-radius:50%;display:inline-grid;place-items:center;background:var(--lav2);color:#5c558f;font-size:11px;flex:0 0 auto}.service-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#eef5ff;color:#426b9b;font-size:10px;font-weight:900}.temp-chat-note{margin:8px 0 0;padding:8px 10px;border-radius:13px;background:#f8f6fb;border:1px solid #e4def1;font-size:10.5px;line-height:1.55;color:#635b70}.return-banner{display:none;margin:8px 0;padding:10px 12px;border-radius:15px;background:#eef8f1;border:1px solid #cfe5d5;color:#39734c;font-size:12px;font-weight:800}.return-banner.show{display:block;animation:screenIn .22s ease both}
+.image-import-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.image-import-actions .btn{width:100%}.image-import-preview{margin-top:9px;border:1px dashed #d8cbd4;border-radius:18px;min-height:146px;background:#fcfafb;display:grid;place-items:center;overflow:hidden;color:#918791;font-size:12px;text-align:center;padding:10px}.image-import-preview img{width:100%;height:auto;max-height:300px;object-fit:contain;border-radius:12px}.image-import-preview.has-image{border-style:solid;background:#fff}.clipboard-help{font-size:9.8px;color:var(--muted);line-height:1.5;margin:7px 0 0}.image-candidate-note{font-size:10.5px;line-height:1.55;color:#725d67;margin-top:8px}.image-quick-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.ad-slot[hidden]{display:none!important}
+@media(max-width:360px){.home-intro h1{font-size:24px}.home-intro .lead{font-size:13px;line-height:1.58}.image-import-actions{grid-template-columns:1fr}.image-step{font-size:9px}.image-step b{font-size:10.5px}.image-flow-avatar{width:52px;height:52px}}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="logo"><small id="subLabel">好きからつくる。</small><b>キャラクター工房</b></div>
+    <div class="save-status" id="saveStatus" data-state="idle" role="status" aria-live="polite">準備中</div>
+    <div class="top-actions"><div class="pill" id="countPill">0/5</div><button class="settings-btn" type="button" onclick="openWorkshopSettings()" aria-label="工房設定を開く" title="工房設定">⚙</button></div>
+  </div>
+  <div class="shell">
+    <div class="progress"><i id="bar"></i></div>
+
+    <section class="screen active" id="home">
+      <div class="hero">
+        <div class="scroll">
+          <div class="home-intro">
+            <h1>好きから、キャラクターを見つけよう。</h1>
+            <p class="lead">質問に答えて人物設定をつくれます。関係や物語も、棚で続きを育てられます。</p>
+          </div>
+          <div class="home-save-badge">登録不要 <span>｜</span> この端末に保存</div>
+          <div class="info pending-image-card" id="pendingImageCard" hidden></div>
+          <div class="info welcome-card return-card" id="welcomeCard" hidden></div>
+          <div class="home-path-grid" aria-label="工房の入口">
+            <button class="home-path-card primary-path" type="button" onclick="startCreate()"><span class="path-icon">✨</span><b>新しいひとを見つける</b><p>質問に答えて、最初の輪郭をつくります。</p><small>まだ曖昧でも始められます</small></button>
+            <button class="home-path-card shelf-path" type="button" onclick="go('shelf')"><span class="path-icon">📚</span><b>棚のひとに会いにいく</b><p>保存した人物の続きを見ます。</p><small id="homeShelfStatus">棚はまだ空です</small></button>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="shelf-demo"><div class="demo-card"><div class="demo-face"></div><div class="demo-line"></div><div class="demo-line"></div></div><div class="demo-card"><div class="demo-face"></div><div class="demo-line"></div><div class="demo-line"></div></div><div class="demo-card"><div class="demo-face"></div><div class="demo-line"></div><div class="demo-line"></div></div></div>
+            <span class="spark sp1">✦</span><span class="spark sp2">♡</span><span class="spark sp3">🌱</span>
+          </div>
+          <div class="ad-slot" data-ad-placement="home">
+            <div class="ad-label">広告</div>
+            <div class="ad-frame">
+              <div class="ad-preview"><b>広告表示テスト枠</b><span>公開用IDを設定するまでは外部広告を読み込みません。</span></div>
+              <div class="ad-live" hidden></div>
+            </div>
+            <div class="ad-meta"><a href="about-ads.html" target="_blank" rel="noopener">広告について</a><a href="privacy.html" target="_blank" rel="noopener">プライバシー</a></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="route">
+      <div class="scroll">
+        <div class="phase-line"><span class="chip">1/5</span><span class="phase-name">好きの入口を選ぶ</span></div>
+        <h2>好きの入口</h2>
+        <p class="lead">選んだ入口に合わせて、途中で返ってくる発見が少し変わります。</p>
+        <div class="route-grid" id="routeGrid"></div>
+        <div class="notice">△ これは入口の違いを見るための最小試作です。結果はいつでも直せます。</div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="go('home')">戻る</button><button class="btn primary" onclick="nextFromRoute()">次へ</button></div>
+    </section>
+
+    <section class="screen" id="question">
+      <div class="scroll">
+        <div class="chips"><span class="chip pink" id="routeChip">入口</span><span class="chip" id="stepChip">2/5</span><span class="chip teal" id="phaseChip">好きの入口</span></div>
+        <h2 id="qTitle">質問</h2>
+        <p class="hint" id="qHint"></p>
+        <div class="choice-grid" id="qChoices"></div>
+        <div class="form-row" id="freeWrap" style="display:none"><label class="label" for="freeText">自由メモ</label><textarea class="field" id="freeText" placeholder="まだ断片のままで大丈夫です"></textarea></div>
+        <div class="info staff-note"><div class="mini">✨</div><p><b>今の発見</b><br><span id="miniInsight">選んだ答えから、人物の輪郭を少しだけ見ています。</span></p></div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="prevQuestion()">戻る</button><button class="btn primary" onclick="nextQuestion()" id="qNextBtn">次へ</button></div>
+    </section>
+
+    <section class="screen" id="discovery">
+      <div class="scroll">
+        <div class="phase-line"><span class="chip">5/5</span><span class="phase-name">最初の輪郭を受け取る</span></div>
+        <h2>見えてきたこと</h2>
+        <div class="discovery-card" id="discoveryCard"><div class="discovery-label">△ 今見えている候補</div><div class="discovery-title" id="discoverTitle"></div><p class="discovery-text" id="discoverText"></p><span class="micro-spark">✦</span></div>
+        <div class="notice">この発見は確定設定ではありません。違うと感じたら、戻って選び直せます。</div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="goQuestion(2)">直す</button><button class="btn primary" onclick="go('visual')">この発見を持って進む</button></div>
+    </section>
+
+    <section class="screen" id="visual">
+      <div class="scroll">
+        <h2>見た目</h2>
+        <p class="lead">未指定の外見は画像化先が補います。ズレを減らしたい場合は、性別印象と年代だけでも指定すると安定しやすいです。</p>
+        <div class="form-row"><label class="label">性別印象</label><div class="choice-grid" id="genderChoices"></div></div>
+        <div class="form-row"><label class="label">年代</label><div class="choice-grid" id="ageChoices"></div></div>
+        <div class="form-row"><label class="label" for="lookMemo">見た目メモ（任意）</label><textarea class="field" id="lookMemo" placeholder="例：ボーイッシュ、淡い服、眼鏡、短髪など"></textarea></div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="go('discovery')">戻る</button><button class="btn primary" onclick="buildResult()">設定を見る</button></div>
+    </section>
+
+    <section class="screen" id="result">
+      <div class="scroll">
+        <h2>この人の候補</h2>
+        <div class="info save-pop" id="resultBox"></div>
+        <div class="info naming-box">
+          <div class="naming-head"><div><h3>名前はどうしますか？</h3><p class="hint" style="margin:0">工房に任せる場合は、名前とフリガナを一緒に提案します。</p></div><span class="candidate-count" id="candidateCount"></span></div>
+          <div class="mode-switch" id="namingModeSwitch">
+            <button class="mode-btn" id="modeManual" type="button" onclick="setNamingMode('manual')">自分で決める</button>
+            <button class="mode-btn" id="modeWorkshop" type="button" onclick="setNamingMode('workshop')">工房に任せる</button>
+          </div>
+          <div id="workshopNamingPanel">
+            <label class="label">名前の表記</label>
+            <div class="name-type-grid" id="nameTypeChoices"></div>
+            <div id="nameProposalArea"></div>
+          </div>
+          <div id="manualNamingPanel" hidden>
+            <div class="manual-name-fields">
+              <div><label class="label" for="manualNameInput">名前</label><input class="field" id="manualNameInput" placeholder="名前を入力"></div>
+              <div><label class="label" for="manualFuriganaInput">フリガナ（任意）</label><input class="field" id="manualFuriganaInput" placeholder="例：アカリメ、トモメ"></div>
+            </div>
+            <p class="name-help">手入力では同じ名前も保存できます。同名人物は固有IDで別人物として扱います。</p>
+          </div>
+          <div class="naming-error" id="namingError" hidden></div>
+        </div>
+        <div class="form-row"><label class="label" for="imgInput">すでに作った画像を持ち込む（任意）</label><input class="field" type="file" id="imgInput" accept="image/*"><div class="image-quick-actions"><button class="btn small secondary" type="button" onclick="pasteImageFromClipboard('draft')">クリップボードから貼り付け</button></div><p class="clipboard-help">画像づくりは棚へ保存したあと、人物画面の「画像にしてみる」からChatGPTへ往復できます。</p></div>
+        <div class="copy-row"><p class="hint">画像化文章は名前の採用後に更新されます。</p><button class="btn small secondary" type="button" onclick="copyPromptFromResult()">文章をコピー</button></div>
+        <div class="prompt-box" id="promptBox"></div>
+        
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="go('visual')">直す</button><button class="btn primary pending" id="saveCharacterBtn" onclick="saveCharacter()">📚 棚に保存</button></div>
+    </section>
+
+    <section class="screen" id="saved">
+      <div class="scroll">
+        <div class="save-stage">
+          <div class="petals" aria-hidden="true"><i>🌸</i><i>✦</i><i>🌸</i><i>♡</i></div>
+          <div class="save-check">✓</div>
+          <h2>棚に迎えました</h2>
+          <p class="lead">この端末に保存しました。次は、この人物の続きを選べます。</p>
+        </div>
+        <div class="info saved-preview" id="savedCard"></div>
+        <h3>次はどうする？</h3>
+        <div class="next-grid" id="savedNext"></div>
+        <p class="save-note"><strong>端末内保存：</strong>現在のブラウザとURLに保存されます。別の端末や別URLには自動共有されません。</p>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="go('shelf')">棚を見る</button><button class="btn primary" onclick="openSavedDetail()">続きを見る</button></div>
+    </section>
+
+    <section class="screen" id="shelf">
+      <div class="scroll">
+        <h2>キャラ棚</h2>
+        <p class="hint">このブラウザのIndexedDBに最大5人まで保存します。同じURLから開けば、画像や関係性も続きから使えます。</p>
+        <div class="shelf-grid" id="shelfList"></div>
+        <div class="ad-slot" data-ad-placement="shelf">
+          <div class="ad-label">広告</div>
+          <div class="ad-frame">
+            <div class="ad-preview"><b>広告表示テスト枠</b><span>キャラ棚の内容と十分に間を空けた、インライン配置候補です。</span></div>
+            <div class="ad-live" hidden></div>
+          </div>
+          <div class="ad-meta"><a href="about-ads.html" target="_blank" rel="noopener">広告について</a><a href="privacy.html" target="_blank" rel="noopener">プライバシー</a></div>
+        </div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="go('home')">ホーム</button><button class="btn primary" onclick="startCreate()">新しいひとを探す</button></div>
+    </section>
+
+    <section class="screen" id="detail">
+      <div class="scroll" id="detailContent"></div>
+      <div class="nav"><button class="btn secondary" onclick="go('shelf')">棚へ</button><button class="btn primary" onclick="openRelationFromDetail()">関係をつなぐ</button></div>
+    </section>
+
+    <section class="screen" id="imageJourney">
+      <div class="scroll">
+        <div class="image-flow-head"><div class="image-flow-avatar" id="imageJourneyAvatar">👤</div><div><h2 id="imageJourneyTitle">画像にしてみる</h2><p>ChatGPTで画像候補をつくり、この人物へ戻します。</p></div></div>
+        <div class="image-step-list" aria-label="画像づくりの手順"><div class="image-step" id="imageStep1"><b>1 コピー</b>文章を用意</div><div class="image-step" id="imageStep2"><b>2 ChatGPT</b>画像を作成</div><div class="image-step" id="imageStep3"><b>3 工房へ</b>画像を保存</div></div>
+        <div class="return-banner" id="imageReturnBanner">おかえりなさい。できた画像を、この人物へ追加できます。</div>
+        <div class="info image-work-card"><h3><span class="step-number">1</span>ChatGPTで画像をつくる</h3><span class="service-chip">初期サービス：ChatGPT</span><p class="hint" style="margin:8px 0">画像化文章をコピーして、ChatGPTを新しいタブで開きます。</p><button class="btn primary" type="button" onclick="startChatGPTImageJourney()">文章をコピーしてChatGPTを開く</button><div class="temp-chat-note"><b>一時チャット推奨</b><br>ChatGPTを開いたあと、画面右上の「一時」を選んでから文章を貼り付けます。開かなかった場合は、<a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPTだけ開く</a>を使えます。</div></div>
+        <div class="info image-work-card"><h3><span class="step-number">2</span>完成した画像を工房へ戻す</h3><div class="image-import-actions"><button class="btn secondary" type="button" onclick="chooseImageJourneyFile()">保存した画像を選ぶ</button><button class="btn secondary" type="button" onclick="pasteImageFromClipboard('journey')">クリップボードから貼り付け</button></div><input type="file" id="imageJourneyInput" accept="image/*" hidden><p class="clipboard-help">PCでは画像をコピーしてこの画面で貼り付けられます。ブラウザが対応しない場合は、画像を保存して選んでください。</p><div class="image-import-preview" id="imageJourneyPreview">画像を選ぶと、ここで確認できます</div><p class="image-candidate-note">この画像は正解ではなく、作者が選ぶための候補として保存されます。外見設定を自動確定しません。</p></div>
+        <div class="info" style="margin-top:8px"><h3>画像化文章</h3><div class="copy-row"><p class="hint">必要なら、もう一度コピーできます。</p><button class="btn small secondary" type="button" onclick="copyImageJourneyPrompt()">文章をコピー</button></div><div class="prompt-box" id="imageJourneyPrompt"></div></div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="cancelImageJourneyView()">人物へ戻る</button><button class="btn primary" id="saveJourneyImageBtn" onclick="saveImageJourney()" disabled>この画像を保存</button></div>
+    </section>
+
+    <section class="screen" id="edit">
+      <div class="scroll">
+        <h2>キャラクターを編集</h2>
+        <p class="hint">保存済みの内容を直します。IDは変えないので、関係性メモとのつながりは残ります。</p>
+        <div class="form-row"><label class="label" for="editName">名前</label><input class="field" id="editName" placeholder="名前"></div>
+        <div class="form-row"><label class="label" for="editFurigana">フリガナ</label><input class="field" id="editFurigana" placeholder="例：アカリメ、トモメ"></div>
+        <div class="form-row"><label class="label" for="editCore">人物の核</label><input class="field" id="editCore" placeholder="大切にしているもの・関係性の入口など"></div>
+        <div class="form-row"><label class="label" for="editSummary">ひとこと説明</label><textarea class="field" id="editSummary" placeholder="人物の説明"></textarea></div>
+        <div class="form-row"><label class="label" for="editTension">内面の矛盾・揺らぎ</label><input class="field" id="editTension" placeholder="近すぎる／譲れない／本音を言えない など"></div>
+        <div class="form-row"><label class="label" for="editVisual">外見方向</label><input class="field" id="editVisual" placeholder="女性寄り・20代 など"></div>
+        <div class="form-row"><label class="label" for="editPrompt">画像化文章</label><textarea class="field" id="editPrompt" placeholder="画像化用プロンプト"></textarea></div>
+        <div class="form-row">
+          <label class="label" for="editImageInput">画像を差し替え</label>
+          <div class="result-layout">
+            <div class="preview-img" id="editImagePreview">👤</div>
+            <div>
+              <input class="field" type="file" id="editImageInput" accept="image/*">
+              <p class="hint">外部で作った画像をもう一度選び直せます。画像だけ差し替えても、設定文はそのまま残ります。</p>
+              <div class="image-quick-actions"><button class="btn small secondary" type="button" onclick="pasteImageFromClipboard('edit')">クリップボードから貼り付け</button><button class="btn small ghost" type="button" onclick="clearEditImage()">画像を外す</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="openDetail(state.detailId)">戻る</button><button class="btn primary" onclick="saveEditCharacter()">変更を保存</button></div>
+    </section>
+
+    <section class="screen" id="relation">
+      <div class="scroll">
+        <h2>関係性メモ</h2>
+        <p class="hint">キャラ詳細から始めると、その人物を起点に相手を選べます。まだ決めない項目があっても大丈夫です。</p>
+        <div id="relationContent"></div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="go('shelf')">棚へ</button><button class="btn primary" onclick="saveRelation()">関係を保存</button></div>
+    </section>
+
+
+    <section class="screen" id="story">
+      <div class="scroll" id="storyContent"></div>
+      <div class="nav" id="storyNav"></div>
+    </section>
+
+    <section class="screen" id="world">
+      <div class="scroll">
+        <h2>世界観メモ</h2>
+        <p class="hint">キャラ同士の関係が生きる土台です。長編ではなく、共通の空気だけを保存します。</p>
+        <div class="form-row"><label class="label" for="worldTitle">世界の名前</label><input class="field" id="worldTitle" placeholder="まだ名前のない日常"></div>
+        <div class="form-row"><label class="label" for="worldGenre">ジャンル・場所</label><input class="field" id="worldGenre" placeholder="現代・日常／小さな町／学園など"></div>
+        <div class="form-row"><label class="label" for="worldValues">この世界で大事にされるもの</label><textarea class="field" id="worldValues" placeholder="約束、好きなこと、居場所、自由など"></textarea></div>
+        <div class="form-row"><label class="label" for="worldProblem">起こりやすい問題</label><textarea class="field" id="worldProblem" placeholder="距離が近すぎる、誤解されやすい、守りたいものがぶつかるなど"></textarea></div>
+        <div class="story-card" id="worldPreview">🌍 保存すると、関係性メモのストーリーの種にも反映できます。</div>
+        <div class="info" style="margin-top:10px"><h3>この世界に結びついた物語の芽</h3><p class="hint">採用・保留した案を、工房提案と作者設定に分けて残します。世界観本文は自動で書き換えません。</p><div class="seed-library" id="worldSeedList"></div></div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="go('home')">戻る</button><button class="btn primary" onclick="saveWorld()">世界観を保存</button></div>
+    </section>
+
+    <section class="screen" id="settings">
+      <div class="scroll">
+        <h2>工房設定</h2>
+        <p class="lead">この端末の工房を、落ち着いて使える見た目に整えます。キャラクターや世界観のデータとは別に保存されます。</p>
+        <div class="settings-preview" aria-live="polite">
+          <div class="sample-title">好きからつくる。</div>
+          <p>テーマ、フォント、文字サイズを選ぶと、この画面ですぐに確認できます。</p>
+        </div>
+        <div class="settings-group">
+          <label class="label">テーマカラー</label>
+          <div class="settings-options" id="themeOptions"></div>
+        </div>
+        <div class="settings-group">
+          <label class="label">フォント</label>
+          <div class="settings-options" id="fontOptions"></div>
+        </div>
+        <div class="settings-group">
+          <label class="label">文字サイズ</label>
+          <div class="settings-options" id="textSizeOptions"></div>
+        </div>
+        <div class="settings-group">
+          <label class="label">広告とプライバシー</label>
+          <div class="settings-ad-state" id="settingsAdState"><b>広告配信：準備中</b><br>現在の候補版は外部広告を読み込みません。公開用IDと同意管理を設定してから有効化します。
+            <div class="settings-ad-links"><a href="about-ads.html" target="_blank" rel="noopener">広告について</a><a href="privacy.html" target="_blank" rel="noopener">プライバシー方針案</a></div>
+          </div>
+        </div>
+        <div class="settings-save-note"><b>この端末だけの設定です。</b><br>JSONバックアップには含まれず、キャラクター・関係性・世界観・物語の芽の内容も変更しません。</div>
+        <div class="settings-status" id="settingsStatus" role="status" aria-live="polite"></div>
+        <div class="danger-separate">
+          <button class="btn secondary" type="button" onclick="resetWorkshopSettings()">見た目を初期状態に戻す</button>
+          <p class="hint" style="margin:7px 0 0">テーマ、フォント、文字サイズだけを戻します。創作データは削除されません。</p>
+        </div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="closeWorkshopSettings()">戻る</button><button class="btn primary" onclick="closeWorkshopSettings()">この見た目で使う</button></div>
+    </section>
+
+    <section class="screen" id="export">
+      <div class="scroll">
+        <h2>データ管理</h2>
+        <p class="hint">画像を含むキャラ棚を、このブラウザのIndexedDBへ保存します。念のためJSONバックアップも利用できます。</p>
+        <div class="info storage-card">
+          <h3>端末内保存</h3>
+          <div class="storage-row"><b>保存方式</b><span id="storageMode">確認中</span></div>
+          <div class="storage-row"><b>データ形式</b><span id="dataVersion">確認中</span></div>
+          <div class="storage-row"><b>整合性</b><span id="integrityState">確認中</span></div>
+          <div class="storage-row"><b>最終保存</b><span id="lastSavedAt">未保存</span></div>
+          <div class="storage-row"><b>保存容量</b><span id="storageUsage">確認中</span></div>
+          <div class="storage-row"><b>永続保存</b><span id="persistentState">確認中</span></div>
+          <div class="origin-box" id="originBox"></div>
+          <div class="integrity-note" id="integrityNote">データを確認しています。</div>
+          <div class="actions"><button class="btn small secondary" onclick="requestPersistentStorage()">保存を安定させる</button></div>
+        </div>
+        <div class="info" style="margin-top:8px"><h3>保存数</h3><p class="lead" id="exportStats"></p><div class="actions"><button class="btn secondary" onclick="downloadJSON()">JSON保存</button><button class="btn secondary" onclick="downloadTXT()">TXT保存</button><label class="btn secondary import-label">JSON読込<input type="file" id="importInput" accept="application/json,.json" onchange="importJSONFile(event)"></label><button class="btn ghost" onclick="clearAll()">全削除</button></div></div>
+        <div class="notice">同じ端末でも、<b>ドメイン・IPアドレス・localhost</b>は別の保存領域です。普段使うURLを一つに決めてください。プライベートブラウズやブラウザデータの消去では失われる場合があります。</div>
+        <div class="notice">実広告・課金・API連携は未実装です。ChatGPTは作者がボタンを押した時だけ別タブで開き、画像化文章はクリップボード経由で本人が貼り付けます。</div>
+      </div>
+      <div class="nav"><button class="btn secondary" onclick="go('home')">ホーム</button><button class="btn primary" onclick="go('shelf')">棚を見る</button></div>
+    </section>
+  </div>
+  <div class="bottom-tabs">
+    <button class="tabbtn active" id="tab-home" onclick="go('home')"><span>🏠</span>ホーム</button>
+    <button class="tabbtn" id="tab-shelf" onclick="go('shelf')"><span>📚</span>キャラ棚</button>
+    <button class="tabbtn" id="tab-world" onclick="go('world')"><span>🌍</span>世界観</button>
+    <button class="tabbtn" id="tab-export" onclick="go('export')"><span>⚙️</span>管理</button>
+  </div>
+</div>
+<div class="toast" id="toast">保存しました</div>
+<script>
+const APP_VERSION='0.8.6.2';
+const AD_CONFIG=Object.freeze({
+  provider:'adsense',
+  enabled:false,
+  client:'',
+  slots:Object.freeze({home:'',shelf:''})
+});
+let adScriptPromise=null;
+const DATA_VERSION=4;
+const LEGACY_KEYS=['sukikara_v084_state','sukikara_v0843_state'];
+const FALLBACK_KEY='sukikara_v0850_state';
+const MAX_CHARACTERS=5;
+const DB_NAME='sukikara_character_kobo';
+const DB_VERSION=1;
+const STORE_NAME='app';
+const STATE_KEY='main';
+const ROUTES={
+  personality:{label:'性格・価値観から',icon:'🌱',sub:'大切にしたいことから人物の核を探す'},
+  relationship:{label:'関係性から',icon:'💞',sub:'誰とどう関わるかから距離感を探す'},
+  visual:{label:'見た目の雰囲気から',icon:'🖼️',sub:'好きな空気や外見から内面を探す'}
+};
+const QUESTIONS={
+  personality:[
+    {id:'value',phase:'大切なものを選ぶ',title:'あなたにとって大切なことは？',hint:'3つまで選べます。',multi:3,options:['正直でいること','誰かを守ること','自由でいること','好きなことを守ること','約束を守ること','居場所を作ること','まだ分からない']},
+    {id:'weakness',phase:'人物の揺らぎ',title:'その価値観の中で、揺らぐことは？',hint:'矛盾や弱さは人物の魅力になります。',options:['本当は守りきれないかも','踏み込みすぎるかも','自分の気持ちを後回しにする','正しさを譲れない','好きなことしか見えなくなる','まだ決めない']},
+    {id:'vibe',phase:'周囲からの印象',title:'周囲からはどう見られやすい？',hint:'第一印象を選んでください。',multi:2,options:['親しみやすい','明るい','静か','頼れそう','不器用そう','近寄りがたい','何を考えているか分からない']}
+  ],
+  relationship:[
+    {id:'relationNeed',phase:'惹かれる距離',title:'惹かれる関係性は？',hint:'1つ選んでください。',options:['そばで支える','ぶつかりながら守る','遠くから見守る','一緒に成長する','憧れと追いつきたい気持ち','ライバルでも離れない','まだ決めない']},
+    {id:'distance',phase:'関係のひっかかり',title:'その関係で近すぎる／遠すぎる部分は？',hint:'関係性のひっかかりを作ります。',options:['距離が近すぎる','本音を言えない','相手を守りすぎる','頼りたいのに頼れない','誤解されたまま進む','まだ決めない']},
+    {id:'vibe',phase:'相手からの印象',title:'その人物は、相手にどう見えている？',hint:'相手から見た印象です。',multi:2,options:['安心できる','少し危なっかしい','放っておけない','頼りになる','分かりにくい','まぶしい','まだ分からない']}
+  ],
+  visual:[
+    {id:'vibe',phase:'好きな空気',title:'どんな雰囲気の人物が好き？',hint:'3つまで選べます。',multi:3,options:['やさしい雰囲気','透明感がある','明るい','少し影がある','ボーイッシュ','大人っぽい','日常にいそう','ミステリアス']},
+    {id:'visualHook',phase:'惹かれるところ',title:'その見た目のどこに惹かれる？',hint:'画像化の方向につながります。',options:['表情','目元','服装','姿勢','髪型','小物','全体の空気']},
+    {id:'innerGap',phase:'外見と内面の差',title:'見た目と内面に差はありそう？',hint:'外見と人物の核をつなぎます。',options:['やさしそうだが頑固','明るいが不器用','静かだが情が深い','強そうだが寂しがり','かわいいが譲れない','まだ決めない']}
+  ]
+};
+
+const NAME_TYPE_LABELS={auto:'おまかせ',kanji:'漢字',hiragana:'ひらがな',katakana:'カタカナ',alphabet:'アルファベット'};
+const NAME_POOLS={
+  kanji:[
+    {name:'澪',reading:'ミオ',tags:['静か','透明感','ミステリアス']},{name:'結',reading:'ユイ',tags:['関係','やさしい','居場所']},{name:'灯芽',reading:'アカリメ',tags:['好き','守る','少し影']},{name:'凪',reading:'ナギ',tags:['静か','透明感','自由']},{name:'紬',reading:'ツムギ',tags:['関係','やさしい','成長']},{name:'朔',reading:'サク',tags:['少し影','大人っぽい','ミステリアス']},{name:'律',reading:'リツ',tags:['正直','約束','頼れそう']},{name:'遥',reading:'ハルカ',tags:['自由','明るい','成長']},{name:'翠',reading:'スイ',tags:['透明感','静か','自然']},{name:'奏',reading:'カナデ',tags:['明るい','やさしい','関係']},{name:'伊織',reading:'イオリ',tags:['大人っぽい','静か','中性的']},{name:'朝陽',reading:'アサヒ',tags:['明るい','親しみやすい','守る']},{name:'柊',reading:'シュウ',tags:['静か','少し影','頑固']},{name:'蓮',reading:'レン',tags:['静か','頼れそう','守る']},{name:'碧',reading:'アオ',tags:['透明感','自由','静か']},{name:'千景',reading:'チカゲ',tags:['ミステリアス','少し影','大人っぽい']},{name:'真白',reading:'マシロ',tags:['透明感','やさしい','分かりにくい']},{name:'七瀬',reading:'ナナセ',tags:['日常','親しみやすい','関係']},{name:'楓',reading:'カエデ',tags:['日常','やさしい','自由']},{name:'椿',reading:'ツバキ',tags:['大人っぽい','譲れない','静か']},{name:'司',reading:'ツカサ',tags:['頼れそう','約束','正しさ']},{name:'怜',reading:'レイ',tags:['静か','分かりにくい','透明感']},{name:'泉',reading:'イズミ',tags:['やさしい','居場所','透明感']},{name:'透',reading:'トオル',tags:['透明感','正直','静か']}
+  ],
+  hiragana:[
+    {name:'つむぎ',reading:'ツムギ',tags:['関係','やさしい','成長']},{name:'ひより',reading:'ヒヨリ',tags:['明るい','親しみやすい','日常']},{name:'なぎ',reading:'ナギ',tags:['静か','自由','透明感']},{name:'こはく',reading:'コハク',tags:['少し影','透明感','ミステリアス']},{name:'すい',reading:'スイ',tags:['静か','透明感','分かりにくい']},{name:'かなで',reading:'カナデ',tags:['明るい','関係','やさしい']},{name:'あお',reading:'アオ',tags:['自由','透明感','日常']},{name:'いおり',reading:'イオリ',tags:['大人っぽい','中性的','静か']},{name:'しの',reading:'シノ',tags:['静か','少し影','大人っぽい']},{name:'ゆら',reading:'ユラ',tags:['揺らぎ','自由','ミステリアス']},{name:'みこと',reading:'ミコト',tags:['約束','守る','頼れそう']},{name:'ほたる',reading:'ホタル',tags:['少し影','好き','静か']},{name:'そら',reading:'ソラ',tags:['自由','明るい','成長']},{name:'かなた',reading:'カナタ',tags:['遠く','自由','憧れ']},{name:'まひろ',reading:'マヒロ',tags:['親しみやすい','中性的','日常']},{name:'ちあき',reading:'チアキ',tags:['日常','頼れそう','正直']},{name:'つかさ',reading:'ツカサ',tags:['約束','頼れそう','正しさ']},{name:'ひかる',reading:'ヒカル',tags:['明るい','守る','好き']},{name:'るい',reading:'ルイ',tags:['分かりにくい','大人っぽい','静か']},{name:'せな',reading:'セナ',tags:['明るい','関係','自由']}
+  ],
+  katakana:[
+    {name:'レイ',reading:'レイ',tags:['静か','透明感','分かりにくい']},{name:'ナギ',reading:'ナギ',tags:['静か','自由','透明感']},{name:'ルカ',reading:'ルカ',tags:['親しみやすい','中性的','関係']},{name:'ノア',reading:'ノア',tags:['やさしい','自由','中性的']},{name:'リオ',reading:'リオ',tags:['明るい','日常','自由']},{name:'ソラ',reading:'ソラ',tags:['自由','明るい','成長']},{name:'カナタ',reading:'カナタ',tags:['遠く','憧れ','自由']},{name:'イオ',reading:'イオ',tags:['ミステリアス','透明感','静か']},{name:'シオン',reading:'シオン',tags:['少し影','大人っぽい','守る']},{name:'セナ',reading:'セナ',tags:['明るい','関係','親しみやすい']},{name:'リツ',reading:'リツ',tags:['正直','約束','頼れそう']},{name:'ハル',reading:'ハル',tags:['明るい','成長','日常']},{name:'ユラ',reading:'ユラ',tags:['揺らぎ','自由','ミステリアス']},{name:'トワ',reading:'トワ',tags:['約束','大人っぽい','ミステリアス']},{name:'ニコ',reading:'ニコ',tags:['明るい','親しみやすい','やさしい']},{name:'ミオ',reading:'ミオ',tags:['静か','透明感','関係']},{name:'エマ',reading:'エマ',tags:['親しみやすい','やさしい','日常']},{name:'カイ',reading:'カイ',tags:['自由','頼れそう','少し影']},{name:'リン',reading:'リン',tags:['静か','正直','中性的']},{name:'アサ',reading:'アサ',tags:['明るい','新しい','日常']}
+  ],
+  alphabet:[
+    {name:'Noah',reading:'ノア',tags:['やさしい','自由','中性的']},{name:'Luca',reading:'ルカ',tags:['親しみやすい','中性的','関係']},{name:'Theo',reading:'テオ',tags:['頼れそう','大人っぽい','正直']},{name:'Mia',reading:'ミア',tags:['親しみやすい','日常','やさしい']},{name:'Leo',reading:'レオ',tags:['明るい','守る','頼れそう']},{name:'Emma',reading:'エマ',tags:['やさしい','親しみやすい','日常']},{name:'Eli',reading:'イーライ',tags:['静か','中性的','分かりにくい']},{name:'Alex',reading:'アレックス',tags:['中性的','頼れそう','自由']},{name:'Rowan',reading:'ローワン',tags:['自然','静か','少し影']},{name:'Jules',reading:'ジュール',tags:['大人っぽい','中性的','ミステリアス']},{name:'Robin',reading:'ロビン',tags:['自由','親しみやすい','関係']},{name:'Iris',reading:'アイリス',tags:['透明感','静か','大人っぽい']},{name:'Ciel',reading:'シエル',tags:['透明感','自由','ミステリアス']},{name:'Noel',reading:'ノエル',tags:['やさしい','約束','静か']},{name:'Leon',reading:'レオン',tags:['守る','頼れそう','大人っぽい']},{name:'Nina',reading:'ニナ',tags:['親しみやすい','明るい','日常']},{name:'Clara',reading:'クララ',tags:['正直','明るい','やさしい']},{name:'Eden',reading:'エデン',tags:['居場所','自由','ミステリアス']},{name:'Kai',reading:'カイ',tags:['自由','少し影','頼れそう']},{name:'Remy',reading:'レミー',tags:['関係','中性的','親しみやすい']}
+  ]
+};
+
+const RELATION_TYPES=[
+  {value:'そばで支える',label:'そばにいると安心する',sub:'静かに支え合う',icon:'🤝'},
+  {value:'放っておけない',label:'放っておけない',sub:'気づくと手を伸ばす',icon:'🫶'},
+  {value:'追いつきたい',label:'追いつきたい',sub:'憧れと悔しさがある',icon:'✨'},
+  {value:'守る／守られる',label:'守りたい',sub:'相手の大切なものを守る',icon:'🛡️'},
+  {value:'本音を見抜かれそう',label:'本音を見抜かれそう',sub:'近づくほど落ち着かない',icon:'👀'},
+  {value:'まだ決めない',label:'まだ分からない',sub:'関係の余白を残す',icon:'△'}
+];
+
+const STORY_AXIS={
+  daily:{label:'日常の芽',icon:'☕'},
+  shift:{label:'関係が揺れる芽',icon:'↔'},
+  world:{label:'世界へ広がる芽',icon:'🌍'}
+};
+const STORY_QUESTIONS=[
+  {id:'stability',title:'この二人の関係は、今どんな状態ですか？',hint:'今の関係に近いものを一つ選びます。',options:[
+    {value:'stable',label:'安定している',sub:'今の距離が心地よく続いている'},
+    {value:'wavering',label:'少し揺れている',sub:'小さな違和感や変化が始まっている'},
+    {value:'breaking',label:'壊れかけている',sub:'何かを選ばないと今の関係を保てない'},
+    {value:'unknown',label:'まだ分からない',sub:'決めずに、複数の可能性を残す'}]},
+  {id:'scale',title:'どのくらいの出来事を考えますか？',hint:'物語の大きさを選びます。',options:[
+    {value:'scene',label:'小さな一場面',sub:'会話、習慣、短い出来事'},
+    {value:'episode',label:'一話分の出来事',sub:'一つの問題と小さな変化'},
+    {value:'whole',label:'物語全体の入口',sub:'世界や長い物語へつながる始まり'}]},
+  {id:'supportLevel',title:'どのくらい工房から提案しますか？',hint:'踏み込み具合は毎回変えられます。',options:[
+    {value:'questions',label:'問いをもらう',sub:'答えを決めず、考えるきっかけだけ'},
+    {value:'candidates',label:'短い候補を見る',sub:'一文程度の方向を三つ'},
+    {value:'hypothesis',label:'まとまった仮説を見る',sub:'世界・入口・揺らぎ・未決定を分けて提示'}]}
+];
+const emptyData=()=>({version:DATA_VERSION,characters:[],relations:[],orphanRelations:[],world:null,storySeeds:[],meta:{lastSavedAt:null,lastOpenedCharacterId:null,lastOrigin:location.origin||location.href,migratedFrom:null,migratedFromVersion:null,migratedToVersion4At:null,integrityReport:{changed:false,repairedCharacterIds:0,repairedRelationIds:0,orphanedRelations:0,ambiguousDuplicateCharacterIds:0,normalizedAt:null}}});
+const SETTINGS_KEY='sukikara_v085_settings';
+const PENDING_IMAGE_KEY='sukikara_v0862_pending_image';
+const CHATGPT_URL='https://chatgpt.com/';
+const DEFAULT_SETTINGS=Object.freeze({version:1,theme:'pink',font:'standard',textSize:'normal'});
+const THEME_OPTIONS={pink:{label:'標準ピンク',sub:'現在のやさしい工房色'},blue:{label:'ブルー',sub:'静かで澄んだ印象'},green:{label:'グリーン',sub:'自然で落ち着く印象'},purple:{label:'パープル',sub:'幻想的で創作的な印象'}};
+const FONT_OPTIONS={standard:{label:'標準',sub:'端末で読みやすい書体'},maru:{label:'丸ゴシック',sub:'やわらかく親しみやすい'},mincho:{label:'明朝',sub:'物語らしい落ち着いた印象'}};
+const TEXT_SIZE_OPTIONS={small:{label:'小',sub:'一度に多く表示'},normal:{label:'標準',sub:'基本の読みやすさ'},large:{label:'大',sub:'文字を少し大きく表示'}};
+function normalizeSettings(raw){const r=raw&&typeof raw==='object'?raw:{};return{version:1,theme:THEME_OPTIONS[r.theme]?r.theme:'pink',font:FONT_OPTIONS[r.font]?r.font:'standard',textSize:TEXT_SIZE_OPTIONS[r.textSize]?r.textSize:'normal'}}
+function readWorkshopSettings(){try{return normalizeSettings(JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}'))}catch(_){return{...DEFAULT_SETTINGS}}}
+const state={data:emptyData(),draft:null,route:null,qIndex:0,detailId:null,editImageDataUrl:null,imageJourneyCharacterId:null,imageJourneyDataUrl:'',imageJourneyReturned:false,relationSelect:[],relationDraft:{type:'',tension:''},storyFlow:null,lastSavedId:null,currentScreen:'home',settingsReturnScreen:'home',settings:readWorkshopSettings(),storageMode:'準備中',storageError:'',db:null};
+let saveQueue=Promise.resolve();
+
+function applyWorkshopSettings(){
+  const root=document.documentElement;
+  root.dataset.theme=state.settings.theme;
+  root.dataset.font=state.settings.font;
+  root.dataset.textSize=state.settings.textSize;
+  const colors={pink:'#fff9fb',blue:'#f8fbff',green:'#f8fcf8',purple:'#fbf9ff'};
+  const meta=document.getElementById('themeColorMeta');if(meta)meta.setAttribute('content',colors[state.settings.theme]||colors.pink);
+}
+function persistWorkshopSettings(message='工房設定を保存しました'){
+  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(state.settings));setSettingsStatus(message);return true}
+  catch(e){console.error(e);setSettingsStatus('工房設定を保存できませんでした',true);return false}
+}
+function setSettingsStatus(message,isError=false){const el=document.getElementById('settingsStatus');if(!el)return;el.textContent=message;el.style.color=isError?'#a94659':'#39734c';clearTimeout(setSettingsStatus.timer);if(!isError)setSettingsStatus.timer=setTimeout(()=>{if(el.textContent===message)el.textContent=''},2200)}
+function renderWorkshopSettings(){
+  const themeBox=document.getElementById('themeOptions');
+  if(themeBox)themeBox.innerHTML=Object.entries(THEME_OPTIONS).map(([key,o])=>`<button class="setting-option ${state.settings.theme===key?'selected':''}" type="button" aria-pressed="${state.settings.theme===key}" onclick="chooseWorkshopSetting('theme','${key}')"><b>${escapeHtml(o.label)}</b><small>${escapeHtml(o.sub)}</small><span class="theme-dots"><i class="theme-dot ${key}"></i></span></button>`).join('');
+  const fontBox=document.getElementById('fontOptions');
+  if(fontBox)fontBox.innerHTML=Object.entries(FONT_OPTIONS).map(([key,o])=>`<button class="setting-option ${state.settings.font===key?'selected':''}" type="button" aria-pressed="${state.settings.font===key}" onclick="chooseWorkshopSetting('font','${key}')"><b>${escapeHtml(o.label)}</b><small>${escapeHtml(o.sub)}</small></button>`).join('');
+  const sizeBox=document.getElementById('textSizeOptions');
+  if(sizeBox)sizeBox.innerHTML=Object.entries(TEXT_SIZE_OPTIONS).map(([key,o])=>`<button class="setting-option ${state.settings.textSize===key?'selected':''}" type="button" aria-pressed="${state.settings.textSize===key}" onclick="chooseWorkshopSetting('textSize','${key}')"><b>${escapeHtml(o.label)}</b><small>${escapeHtml(o.sub)}</small></button>`).join('');
+}
+function chooseWorkshopSetting(kind,value){
+  const allowed=kind==='theme'?THEME_OPTIONS:kind==='font'?FONT_OPTIONS:kind==='textSize'?TEXT_SIZE_OPTIONS:null;
+  if(!allowed||!allowed[value])return;
+  state.settings={...state.settings,[kind]:value,version:1};
+  applyWorkshopSettings();renderWorkshopSettings();persistWorkshopSettings();
+}
+function openWorkshopSettings(){state.settingsReturnScreen=state.currentScreen==='settings'?'home':state.currentScreen;go('settings')}
+function closeWorkshopSettings(){go(state.settingsReturnScreen&&state.settingsReturnScreen!=='settings'?state.settingsReturnScreen:'home')}
+function resetWorkshopSettings(){
+  if(!confirm('テーマ、フォント、文字サイズを初期状態に戻します。\n\nキャラクターや世界観などの創作データは削除されません。\n\n戻しますか？'))return;
+  state.settings={...DEFAULT_SETTINGS};applyWorkshopSettings();renderWorkshopSettings();persistWorkshopSettings('見た目を初期状態に戻しました');
+}
+applyWorkshopSettings();
+
+function createId(prefix){
+  const uuid=globalThis.crypto&&typeof globalThis.crypto.randomUUID==='function'?globalThis.crypto.randomUUID():null;
+  return uuid?`${prefix}_${uuid}`:`${prefix}_${Date.now()}_${Math.random().toString(36).slice(2,10)}`;
+}
+function cleanId(value){return typeof value==='string'?value.trim():''}
+function makeUniqueId(prefix,preferred,seen){let id=cleanId(preferred);if(!id||seen.has(id)){do{id=createId(prefix)}while(seen.has(id))}seen.add(id);return id}
+
+function normalizeStorySeed(source){
+  const seed=source&&typeof source==='object'?{...source}:{};
+  const now=seed.createdAt||new Date().toISOString();
+  return {...seed,id:seed.id||createId('seed'),sourceCharacterIds:Array.isArray(seed.sourceCharacterIds)?seed.sourceCharacterIds:[],sourceCharacterSnapshots:Array.isArray(seed.sourceCharacterSnapshots)?seed.sourceCharacterSnapshots.map(x=>({...x})):[],sourceRelationId:seed.sourceRelationId||null,sourceRelationSnapshot:seed.sourceRelationSnapshot&&typeof seed.sourceRelationSnapshot==='object'?{...seed.sourceRelationSnapshot}:null,answers:seed.answers&&typeof seed.answers==='object'?{...seed.answers}:{},axis:seed.axis||'daily',content:seed.content&&typeof seed.content==='object'?{...seed.content,openQuestions:Array.isArray(seed.content.openQuestions)?seed.content.openQuestions:[]}:null,basis:Array.isArray(seed.basis)?seed.basis.map(x=>({...x})):[],disposition:['adopted','held','rejected'].includes(seed.disposition)?seed.disposition:'held',authorship:seed.authorship==='author'?'author':'workshop',templateId:seed.templateId||'',createdAt:now,updatedAt:seed.updatedAt||now,confirmedAt:seed.confirmedAt||null};
+}
+function normalizeData(raw){
+  const base=emptyData();
+  const d=raw&&typeof raw==='object'?raw:{};
+  const sourceVersion=Number.isFinite(Number(d.version))?Number(d.version):3;
+  const report={changed:sourceVersion!==DATA_VERSION,repairedCharacterIds:0,repairedRelationIds:0,orphanedRelations:0,ambiguousDuplicateCharacterIds:0,normalizedAt:new Date().toISOString()};
+  const charIds=new Set();
+  const firstIdMap=new Map();
+  const duplicateOldIds=new Set();
+  const chars=Array.isArray(d.characters)?d.characters:[];
+  base.characters=chars.map((source,index)=>{
+    const c=source&&typeof source==='object'?{...source}:{};
+    const oldId=cleanId(c.id);
+    let id=oldId;
+    if(!id||charIds.has(id)){
+      if(oldId&&charIds.has(oldId)){duplicateOldIds.add(oldId);report.ambiguousDuplicateCharacterIds++}
+      id=makeUniqueId('char','',charIds);
+      report.repairedCharacterIds++;
+      report.changed=true;
+    }else charIds.add(id);
+    if(oldId&&!firstIdMap.has(oldId))firstIdMap.set(oldId,id);
+    const createdAt=c.createdAt||new Date().toISOString();
+    return {...c,id,name:String(c.name||'名前未定'),furigana:String(c.furigana||''),nameType:c.nameType||'unknown',nameSource:c.nameSource||'legacy',nameProposalAcceptedAt:c.nameProposalAcceptedAt||null,discoveryHistory:Array.isArray(c.discoveryHistory)?c.discoveryHistory:[],imageDataUrl:c.imageDataUrl||'',createdAt,updatedAt:c.updatedAt||createdAt};
+  });
+  const relationIds=new Set();
+  const activeRelations=[];
+  const orphans=[];
+  const incomingRelations=Array.isArray(d.relations)?d.relations:[];
+  for(const source of incomingRelations){
+    const r=source&&typeof source==='object'?{...source}:{};
+    const oldRelId=cleanId(r.id);
+    const id=makeUniqueId('rel',oldRelId,relationIds);
+    if(id!==oldRelId){report.repairedRelationIds++;report.changed=true}
+    const rawFrom=cleanId(r.from),rawTo=cleanId(r.to);
+    const from=firstIdMap.get(rawFrom)||rawFrom;
+    const to=firstIdMap.get(rawTo)||rawTo;
+    const normalized={...r,id,from,to,type:r.type||r.distance||'まだ決めない',distance:r.distance||r.type||'まだ決めない',tension:r.tension||'まだ言葉になっていない',direction:r.direction||'unknown',stability:r.stability||'unknown',createdAt:r.createdAt||new Date().toISOString(),updatedAt:r.updatedAt||r.createdAt||new Date().toISOString()};
+    if(!charIds.has(from)||!charIds.has(to)){
+      orphans.push({...normalized,orphanedAt:new Date().toISOString(),orphanReason:!charIds.has(from)&&!charIds.has(to)?'両方の人物を参照できません':!charIds.has(from)?'起点の人物を参照できません':'相手の人物を参照できません'});
+      report.orphanedRelations++;
+      report.changed=true;
+    }else activeRelations.push(normalized);
+  }
+  const priorOrphans=Array.isArray(d.orphanRelations)?d.orphanRelations.map(r=>({...r})):[];
+  base.relations=activeRelations;
+  base.orphanRelations=[...priorOrphans,...orphans];
+  base.world=d.world&&typeof d.world==='object'?{...d.world}:null;
+  base.storySeeds=Array.isArray(d.storySeeds)?d.storySeeds.map(seed=>normalizeStorySeed(seed)):[];
+  const previousMeta=d.meta&&typeof d.meta==='object'?d.meta:{};
+  base.meta={...base.meta,...previousMeta,integrityReport:report};
+  if(report.changed)base.meta.lastMigrationReport=report;
+  else if(previousMeta.lastMigrationReport)base.meta.lastMigrationReport={...previousMeta.lastMigrationReport};
+  if(sourceVersion!==DATA_VERSION){base.meta.migratedFromVersion=sourceVersion;base.meta.migratedToVersion4At=base.meta.migratedToVersion4At||new Date().toISOString()}
+  base.version=DATA_VERSION;
+  return base;
+}
+function openDatabase(){return new Promise((resolve,reject)=>{if(!('indexedDB'in window)){reject(new Error('IndexedDB非対応'));return}const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(STORE_NAME))db.createObjectStore(STORE_NAME)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error('IndexedDBを開けません'))})}
+function idbGet(key){return new Promise((resolve,reject)=>{const tx=state.db.transaction(STORE_NAME,'readonly');const req=tx.objectStore(STORE_NAME).get(key);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+function idbPut(key,value){return new Promise((resolve,reject)=>{const tx=state.db.transaction(STORE_NAME,'readwrite');tx.objectStore(STORE_NAME).put(value,key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('保存が中断されました'))})}
+function idbDelete(key){return new Promise((resolve,reject)=>{const tx=state.db.transaction(STORE_NAME,'readwrite');tx.objectStore(STORE_NAME).delete(key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+function dataUrlToBlob(dataUrl){const [head,body]=String(dataUrl).split(',');const mime=(head.match(/data:([^;]+)/)||[])[1]||'application/octet-stream';const bin=atob(body||'');const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return new Blob([bytes],{type:mime})}
+function blobToDataUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result||'');r.onerror=()=>reject(r.error);r.readAsDataURL(blob)})}
+async function prepareForStorage(data){
+  const copy={version:DATA_VERSION,relations:(data.relations||[]).map(r=>({...r})),orphanRelations:(data.orphanRelations||[]).map(r=>({...r})),world:data.world?{...data.world}:null,storySeeds:(data.storySeeds||[]).map(seed=>({...seed})),meta:{...(data.meta||{})},characters:[]};
+  for(const ch of data.characters||[]){const c={...ch};if(c.imageDataUrl&&String(c.imageDataUrl).startsWith('data:')){try{c.imageBlob=dataUrlToBlob(c.imageDataUrl);delete c.imageDataUrl}catch(_){c.imageDataUrl=c.imageDataUrl||''}}copy.characters.push(c)}
+  return copy;
+}
+async function hydrateStoredData(raw){const d=normalizeData(raw);for(const ch of d.characters){if(ch.imageBlob instanceof Blob){try{ch.imageDataUrl=await blobToDataUrl(ch.imageBlob)}catch(_){ch.imageDataUrl=''}delete ch.imageBlob}}return d}
+async function load(){
+  let loaded=null;
+  let shouldPersistMigration=false;
+  try{
+    state.db=await openDatabase();
+    const raw=await idbGet(STATE_KEY);
+    if(raw){
+      const sourceVersion=Number(raw.version||3);
+      loaded=await hydrateStoredData(raw);
+      shouldPersistMigration=sourceVersion!==DATA_VERSION||Boolean(loaded.meta?.integrityReport?.changed);
+      state.storageMode='IndexedDB';
+    }
+  }catch(e){state.storageError=e?.message||String(e)}
+  if(!loaded){
+    for(const key of LEGACY_KEYS){
+      try{
+        const raw=localStorage.getItem(key);
+        if(raw){loaded=normalizeData(JSON.parse(raw));loaded.meta.migratedFrom=key;shouldPersistMigration=true;break}
+      }catch(_){}
+    }
+  }
+  state.data=loaded||emptyData();
+  updateCount();renderHome();refreshStorageInfo();
+  if(shouldPersistMigration){
+    const ok=await persist({silent:true,migration:true});
+    if(ok)showToast(state.data.meta?.migratedFrom?'以前の棚をデータ形式4へ移しました':'データ形式4へ安全に整えました');
+  }else setSaveStatus(state.data.meta?.lastSavedAt?'saved':'idle',state.data.meta?.lastSavedAt?'保存済み':'未保存');
+}
+function setSaveStatus(status,label){
+  const el=document.getElementById('saveStatus');
+  if(!el)return;
+  el.dataset.state=status;
+  el.textContent=label||({saving:'保存中…',saved:'保存済み',error:'保存失敗',idle:'未保存'}[status]||'未保存');
+  if(status==='saved'){
+    clearTimeout(setSaveStatus.timer);
+    setSaveStatus.timer=setTimeout(()=>{if(el.dataset.state==='saved')el.textContent='保存済み'},2600);
+  }
+}
+function persist(options={}){
+  const task=saveQueue.catch(()=>{}).then(()=>persistNow(options));
+  saveQueue=task;
+  return task;
+}
+async function persistNow({silent=false,migration=false}={}){
+  setSaveStatus('saving',migration?'移行保存中…':'保存中…');
+  const previousSavedAt=state.data.meta?.lastSavedAt||null;
+  const previousOrigin=state.data.meta?.lastOrigin||null;
+  const savedAt=new Date().toISOString();
+  state.data.meta={...(state.data.meta||{}),lastSavedAt:savedAt,lastOrigin:location.origin||location.href};
+  let success=false;
+  try{
+    if(!state.db)state.db=await openDatabase();
+    const stored=await prepareForStorage(state.data);
+    await idbPut(STATE_KEY,stored);
+    state.storageMode='IndexedDB';state.storageError='';success=true;
+  }catch(e){
+    state.storageError=e?.message||String(e);
+    try{localStorage.setItem(FALLBACK_KEY,JSON.stringify(state.data));state.storageMode='localStorage（予備）';success=true}catch(e2){state.storageMode='保存できません';state.storageError=e2?.message||String(e2)}
+  }
+  if(!success){state.data.meta.lastSavedAt=previousSavedAt;state.data.meta.lastOrigin=previousOrigin;setSaveStatus('error','保存失敗')}else setSaveStatus('saved','保存しました');
+  updateCount();renderHome();refreshStorageInfo();
+  if(!silent)showToast(success?'この端末に保存しました':'保存できませんでした');
+  return success;
+}
+function updateCount(){const el=document.getElementById('countPill');if(el)el.textContent=`${state.data.characters.length}/${MAX_CHARACTERS}`}
+function screenOrder(id){const order=['home','route','question','discovery','visual','result','saved','shelf','detail','imageJourney','edit','relation','story','world','settings','export'];return order.indexOf(id)}
+function adConfigReady(place){
+  return Boolean(AD_CONFIG.enabled&&/^ca-pub-\d+$/.test(AD_CONFIG.client)&&/^\d+$/.test(AD_CONFIG.slots?.[place]||''));
+}
+function loadAdProviderScript(){
+  if(adScriptPromise)return adScriptPromise;
+  adScriptPromise=new Promise((resolve,reject)=>{
+    const existing=document.querySelector('script[data-kobo-ad-provider="adsense"]');
+    if(existing){if(existing.dataset.loaded==='1')resolve();else{existing.addEventListener('load',resolve,{once:true});existing.addEventListener('error',reject,{once:true})}return}
+    const script=document.createElement('script');script.async=true;script.crossOrigin='anonymous';script.dataset.koboAdProvider='adsense';script.src=`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(AD_CONFIG.client)}`;
+    script.addEventListener('load',()=>{script.dataset.loaded='1';resolve()},{once:true});script.addEventListener('error',reject,{once:true});document.head.appendChild(script);
+  });
+  return adScriptPromise;
+}
+function clearLiveAds(){
+  document.querySelectorAll('[data-ad-placement]').forEach(slot=>{const place=slot.dataset.adPlacement||'';slot.hidden=!adConfigReady(place);const live=slot.querySelector('.ad-live');const preview=slot.querySelector('.ad-preview');if(live){live.replaceChildren();live.hidden=true}if(preview)preview.hidden=false});
+}
+async function mountAdPlacement(place){
+  const slot=document.querySelector(`[data-ad-placement="${place}"]`);if(!slot)return;
+  const live=slot.querySelector('.ad-live');const preview=slot.querySelector('.ad-preview');if(!live||!preview)return;
+  if(!adConfigReady(place)){slot.hidden=true;preview.hidden=false;live.hidden=true;return}
+  slot.hidden=false
+  preview.hidden=true;live.hidden=false;live.replaceChildren();
+  const ins=document.createElement('ins');ins.className='adsbygoogle';ins.style.display='block';ins.dataset.adClient=AD_CONFIG.client;ins.dataset.adSlot=AD_CONFIG.slots[place];ins.dataset.adFormat='auto';ins.dataset.fullWidthResponsive='true';live.appendChild(ins);
+  try{await loadAdProviderScript();(window.adsbygoogle=window.adsbygoogle||[]).push({})}catch(error){live.innerHTML='<div class="ad-error">広告を読み込めませんでした。接続後にもう一度お試しください。</div>'}
+}
+function updateAdPresentation(screenId){
+  clearLiveAds();if(screenId==='home'||screenId==='shelf')requestAnimationFrame(()=>mountAdPlacement(screenId));
+  const stateBox=document.getElementById('settingsAdState');if(stateBox){const ready=adConfigReady('home')&&adConfigReady('shelf');stateBox.firstElementChild.textContent=`広告配信：${ready?'有効化可能':'準備中'}`}
+}
+function go(id){
+  const old=state.currentScreen;const direction=screenOrder(id)>=screenOrder(old)?'forward':'back';state.currentScreen=id;
+  document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active','forward','back');if(s.id===id){s.classList.add('active',direction)}});
+  const order=['home','route','question','discovery','visual','result'];const idx=order.indexOf(id);document.getElementById('bar').style.width=(idx<0?0:idx/(order.length-1)*100)+'%';
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));const tab=document.getElementById('tab-'+(id==='detail'||id==='imageJourney'||id==='edit'||id==='relation'||id==='story'||id==='saved'?'shelf':id));if(tab)tab.classList.add('active');
+  if(id==='home')renderHome();if(id==='shelf')renderShelf();if(id==='imageJourney')renderImageJourney();if(id==='story')renderStoryFlow();if(id==='world')renderWorld();if(id==='settings')renderWorkshopSettings();if(id==='export')renderExport();if(id==='relation')renderRelation();if(id==='saved')renderSaved();if(id==='discovery')replayDiscovery();
+  updateAdPresentation(id);
+}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove('show'),1800)}
+function dailyReturnPrompt(ch){
+  const prompts=['この人が、誰にも見せていない小さな習慣は？','この人が安心して沈黙できる相手は？','この人が譲れないのに、うまく言えないことは？','この人が今日、少しだけ迷っていることは？','この人が「帰りたい」と思う場所は？','この人が強がらなくていい瞬間は？'];
+  const dateKey=new Date().toISOString().slice(0,10);const key=`${ch?.id||''}${dateKey}`;let score=0;for(let i=0;i<key.length;i++)score=(score+key.charCodeAt(i)*(i+1))%997;return prompts[score%prompts.length];
+}
+function renderHome(){
+  updateAdPresentation('home');
+  renderPendingImageCard();
+  const card=document.getElementById('welcomeCard');const home=document.getElementById('home');const shelfStatus=document.getElementById('homeShelfStatus');if(!card)return;const chars=state.data.characters||[];home?.classList.toggle('has-returning',chars.length>0);if(shelfStatus)shelfStatus.textContent=chars.length?`${chars.length}人が棚にいます`:'棚はまだ空です';if(!chars.length){card.hidden=true;return}
+  const id=state.data.meta?.lastOpenedCharacterId||chars[chars.length-1].id;const ch=chars.find(c=>c.id===id)||chars[chars.length-1];const prompt=dailyReturnPrompt(ch);card.hidden=false;card.innerHTML=`<div class="return-eyebrow">今日、この人について一つだけ。</div><div class="welcome-main"><div class="welcome-thumb">${ch.imageDataUrl?'<img src="'+ch.imageDataUrl+'" alt="">':'👤'}</div><div><h3>${escapeHtml(ch.name||'名前未定')}に会いにいく</h3><p>前に決めたことを残したまま、続きを考えられます。</p></div></div><p class="return-question">${escapeHtml(prompt)}</p><div class="actions" style="margin-top:9px"><button class="btn small primary" onclick="openDetail('${ch.id}')">この人を見る</button><button class="btn small secondary" onclick="go('shelf')">棚を開く</button></div>`;
+}
+function startCreate(){if(state.data.characters.length>=MAX_CHARACTERS){showToast(`棚は最大${MAX_CHARACTERS}人です。編集や削除はキャラ棚から行えます`);go('shelf');return}state.draft={name:'',furigana:'',nameType:'unknown',nameSource:'workshop',nameProposalAcceptedAt:null,namingMode:'workshop',requestedNameType:'auto',currentNameCandidate:null,seenNameKeys:[],nameAccepted:false,answers:{},gender:'まだ決めない',age:'20代',lookMemo:'',imageDataUrl:''};state.route=null;state.qIndex=0;renderRoutes();go('route')}
+function renderRoutes(highlight=''){const box=document.getElementById('routeGrid');box.innerHTML='';Object.entries(ROUTES).forEach(([key,r])=>{const b=document.createElement('button');b.className='route'+(state.route===key?' selected':'')+(highlight===key?' picked':'');b.setAttribute('aria-pressed',state.route===key?'true':'false');b.innerHTML=`<b>${r.icon} ${r.label}</b><span>${r.sub}</span>`;b.onclick=()=>{state.route=key;renderRoutes(key)};box.appendChild(b)})}
+function nextFromRoute(){if(!state.route){showToast('入口を選んでください');return}state.qIndex=0;renderQuestion();go('question')}
+function currentQuestions(){return QUESTIONS[state.route||'personality']}
+function renderQuestion(highlight=''){const qs=currentQuestions();const q=qs[state.qIndex];document.getElementById('routeChip').textContent=ROUTES[state.route].icon+' '+ROUTES[state.route].label;document.getElementById('stepChip').textContent=(state.qIndex+2)+'/5';document.getElementById('phaseChip').textContent=q.phase;document.getElementById('qTitle').textContent=q.title;document.getElementById('qHint').textContent=q.hint||'';
+  const box=document.getElementById('qChoices');box.innerHTML='';const values=state.draft.answers[q.id]||[];q.options.forEach(opt=>{const b=document.createElement('button');b.className='choice'+(values.includes(opt)?' selected':'')+(highlight===opt?' picked':'');b.setAttribute('aria-pressed',values.includes(opt)?'true':'false');b.innerHTML='<b>'+escapeHtml(opt)+'</b>';b.onclick=()=>{let arr=state.draft.answers[q.id]||[];if(q.multi){arr=arr.includes(opt)?arr.filter(x=>x!==opt):[...arr,opt].slice(-q.multi)}else{arr=[opt]}state.draft.answers[q.id]=arr;renderQuestion(opt)};box.appendChild(b)});
+  document.getElementById('freeWrap').style.display=state.qIndex===2?'block':'none';document.getElementById('freeText').value=state.draft.answers.memo||'';document.getElementById('freeText').oninput=e=>state.draft.answers.memo=e.target.value;document.getElementById('miniInsight').textContent=miniInsight();document.getElementById('qNextBtn').textContent=state.qIndex===qs.length-1?'最初の発見を見る':'次へ';}
+function miniInsight(){const a=state.draft.answers;const val=(a.value||a.relationNeed||a.vibe||['まだ未定']).join('、');const weak=(a.weakness||a.distance||a.innerGap||[])[0];if(state.route==='relationship')return weak?`「${val}」に惹かれながら、${weak}ことが物語の入口になりそうです。`:`関係性から見ると、「${val}」が人物の入口になりそうです。`;if(state.route==='visual')return weak?`「${val}」の印象と、${weak}という内面の差が見えてきました。`:`見た目の空気から見ると、「${val}」が内面へのヒントになりそうです。`;return weak?`「${val}」を大切にするほど、${weak}ところが揺らぎになりそうです。`:`価値観から見ると、「${val}」が人物の核になりそうです。`}
+function prevQuestion(){if(state.qIndex===0)go('route');else{state.qIndex--;renderQuestion()}}
+function nextQuestion(){const qs=currentQuestions();if(state.qIndex<qs.length-1){state.qIndex++;renderQuestion()}else{buildDiscovery();go('discovery')}}
+function goQuestion(i){state.qIndex=i;renderQuestion();go('question')}
+function getFirst(id,fb='未定'){return(state.draft.answers[id]&&state.draft.answers[id][0])||fb}
+function getJoin(id,fb='未定'){return(state.draft.answers[id]||[]).join('、')||fb}
+function buildDiscovery(){let title='',text='';if(state.route==='personality'){title=`「${getJoin('value')}」を守りたい人物かもしれません。`;text=`ただし、${getFirst('weakness')}という揺らぎがあります。強さだけでなく、守ろうとして不器用になるところが魅力の種になります。`}else if(state.route==='relationship'){title=`「${getFirst('relationNeed')}」距離から見えてくる人物です。`;text=`この関係には、${getFirst('distance')}というひっかかりがあります。相手との距離が、そのまま物語の入口になりそうです。`}else{title=`「${getJoin('vibe')}」外見から内面が見えてきます。`;text=`惹かれるポイントは${getFirst('visualHook')}。そこに「${getFirst('innerGap')}」という差を重ねると、見た目だけではない人物の奥行きが生まれます。`}document.getElementById('discoverTitle').textContent=title;document.getElementById('discoverText').textContent=text;state.draft.discovery={title,text,route:state.route}}
+function replayDiscovery(){const card=document.getElementById('discoveryCard');if(!card)return;card.classList.remove('revealing');void card.offsetWidth;card.classList.add('revealing')}
+function renderChoices(id,items,current,cb,highlight=''){const box=document.getElementById(id);box.innerHTML='';items.forEach(it=>{const b=document.createElement('button');b.className='choice'+(current===it?' selected':'')+(highlight===it?' picked':'');b.innerHTML='<b>'+it+'</b>';b.onclick=()=>{cb(it);renderVisualChoices(it)};box.appendChild(b)})}
+function renderVisualChoices(highlight=''){renderChoices('genderChoices',['女性寄り','男性寄り','中性的','性別を限定しない','まだ決めない'],state.draft.gender,v=>state.draft.gender=v,highlight);renderChoices('ageChoices',['10代後半','20代','30代','年齢を限定しない'],state.draft.age,v=>state.draft.age=v,highlight)}
+const visualScreen=document.getElementById('visual');const observer=new MutationObserver(()=>{if(visualScreen.classList.contains('active')&&state.draft){renderVisualChoices();document.getElementById('lookMemo').value=state.draft.lookMemo||'';document.getElementById('lookMemo').oninput=e=>state.draft.lookMemo=e.target.value}});observer.observe(visualScreen,{attributes:true});
+function buildResult(){
+  state.draft.lookMemo=document.getElementById('lookMemo').value||'';
+  const core=state.route==='relationship'?getFirst('relationNeed'):state.route==='visual'?getJoin('vibe'):getJoin('value');
+  const tension=state.route==='relationship'?getFirst('distance'):state.route==='visual'?getFirst('innerGap'):getFirst('weakness');
+  state.draft.core=core;
+  state.draft.tension=tension;
+  state.draft.summary=`${core}を入口に、${tension}という揺らぎを持つ人物。`;
+  state.draft.visualDirection=`${state.draft.gender}・${state.draft.age}`;
+  if(!state.draft.namingMode)state.draft.namingMode='workshop';
+  if(!state.draft.requestedNameType)state.draft.requestedNameType='auto';
+  if(!Array.isArray(state.draft.seenNameKeys))state.draft.seenNameKeys=[];
+  if(state.draft.namingMode==='workshop'&&!state.draft.currentNameCandidate)generateNameCandidate(false);
+  const input=document.getElementById('imgInput');
+  input.value='';
+  input.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.draft.imageDataUrl=r.result;refreshResultPresentation()};r.readAsDataURL(f)};
+  renderNamingUI();
+  refreshResultPresentation();
+  go('result');
+}
+function normalizeNameValue(value){return String(value||'').normalize('NFKC').replace(/\s+/g,'').toLowerCase()}
+function normalizeReading(value){return String(value||'').normalize('NFKC').replace(/[ぁ-ゖ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)+0x60)).replace(/\s+/g,'').toUpperCase()}
+function nameCandidateKey(candidate){return`${normalizeNameValue(candidate?.name)}|${normalizeReading(candidate?.reading)}`}
+function collectNameTags(){
+  const values=Object.values(state.draft?.answers||{}).flat().map(String);
+  const joined=values.join(' ');
+  const tags=[];
+  const rules=[
+    ['守る','守る'],['好き','好き'],['自由','自由'],['約束','約束'],['居場所','居場所'],['正直','正直'],['明る','明るい'],['静か','静か'],['透明','透明感'],['ミステリアス','ミステリアス'],['近寄りがたい','少し影'],['何を考えて','分かりにくい'],['頼れ','頼れそう'],['親しみ','親しみやすい'],['大人','大人っぽい'],['成長','成長'],['憧れ','憧れ'],['関係','関係'],['そば','関係'],['遠く','遠く'],['譲れ','頑固'],['頑固','頑固']
+  ];
+  for(const [needle,tag] of rules)if(joined.includes(needle)&&!tags.includes(tag))tags.push(tag);
+  if(state.draft?.gender==='中性的'||state.draft?.gender==='性別を限定しない')tags.push('中性的');
+  return tags;
+}
+function nameReason(candidate){
+  const tags=collectNameTags();
+  const hits=(candidate.tags||[]).filter(t=>tags.includes(t)).slice(0,2);
+  if(hits.length)return`人物の「${hits.join('・')}」という印象を手がかりに選びました。`;
+  const routeLabel=ROUTES[state.route]?.label||'人物の輪郭';
+  return`${routeLabel}で見えてきた空気から、ひとつの候補として選びました。`;
+}
+function generateNameCandidate(render=true){
+  if(!state.draft)return null;
+  const requested=state.draft.requestedNameType||'auto';
+  const types=requested==='auto'?['kanji','hiragana','katakana','alphabet']:[requested];
+  let pool=types.flatMap(type=>(NAME_POOLS[type]||[]).map(c=>({...c,type})));
+  const existingExact=new Set((state.data.characters||[]).map(ch=>`${normalizeNameValue(ch.name)}|${normalizeReading(ch.furigana)}`));
+  const existingReadings=new Set((state.data.characters||[]).map(ch=>normalizeReading(ch.furigana)).filter(Boolean));
+  const existingNames=new Set((state.data.characters||[]).map(ch=>normalizeNameValue(ch.name)).filter(Boolean));
+  pool=pool.filter(c=>!existingExact.has(nameCandidateKey(c)));
+  let fresh=pool.filter(c=>!state.draft.seenNameKeys.includes(nameCandidateKey(c)));
+  if(!fresh.length){state.draft.seenNameKeys=[];fresh=pool.slice()}
+  const previousReading=normalizeReading(state.draft.currentNameCandidate?.reading);
+  const withoutSavedReading=fresh.filter(c=>!existingReadings.has(normalizeReading(c.reading)));
+  if(withoutSavedReading.length)fresh=withoutSavedReading;
+  const withoutPreviousReading=fresh.filter(c=>normalizeReading(c.reading)!==previousReading);
+  if(withoutPreviousReading.length)fresh=withoutPreviousReading;
+  if(!fresh.length){
+    state.draft.currentNameCandidate=null;
+    state.draft.nameAccepted=false;
+    if(render)renderNamingUI();
+    return null;
+  }
+  const tags=collectNameTags();
+  const scored=fresh.map(c=>{
+    let score=(c.tags||[]).reduce((sum,t)=>sum+(tags.includes(t)?4:0),0);
+    if(existingReadings.has(normalizeReading(c.reading)))score-=5;
+    if(existingNames.has(normalizeNameValue(c.name)))score-=2;
+    score+=Math.random()*2.5;
+    return{candidate:c,score};
+  }).sort((a,b)=>b.score-a.score);
+  const top=scored.slice(0,Math.min(7,scored.length));
+  const chosen=top[Math.floor(Math.random()*top.length)].candidate;
+  state.draft.currentNameCandidate=chosen;
+  state.draft.seenNameKeys.push(nameCandidateKey(chosen));
+  state.draft.nameAccepted=false;
+  state.draft.name='';
+  state.draft.furigana='';
+  state.draft.nameType='unknown';
+  state.draft.nameSource='workshop';
+  state.draft.nameProposalAcceptedAt=null;
+  if(render){renderNamingUI();refreshResultPresentation()}
+  return chosen;
+}
+function setNamingMode(mode){
+  if(!state.draft)return;
+  const previous=state.draft.namingMode||'workshop';
+  if(previous===mode){renderNamingUI();refreshResultPresentation();return}
+  state.draft.namingMode=mode;
+  state.draft.nameProposalAcceptedAt=null;
+  if(mode==='manual'){
+    state.draft.nameSource='author';state.draft.nameType='manual';state.draft.nameAccepted=Boolean(state.draft.name);
+    setTimeout(()=>document.getElementById('manualNameInput')?.focus(),30);
+  }else{
+    state.draft.name='';state.draft.furigana='';state.draft.nameSource='workshop';state.draft.nameType='unknown';state.draft.nameAccepted=false;
+    if(!state.draft.currentNameCandidate)generateNameCandidate(false);
+  }
+  renderNamingUI();refreshResultPresentation();
+}
+function setNameType(type){
+  if(!state.draft)return;
+  state.draft.requestedNameType=type;
+  state.draft.seenNameKeys=[];
+  generateNameCandidate(false);
+  renderNamingUI();refreshResultPresentation();
+}
+function acceptCurrentNameCandidate(){
+  const c=state.draft?.currentNameCandidate;
+  if(!c){showToast('候補を用意できませんでした');return}
+  state.draft.name=c.name;
+  state.draft.furigana=c.reading;
+  state.draft.nameType=c.type;
+  state.draft.nameSource='workshop';
+  state.draft.nameAccepted=true;
+  state.draft.nameProposalAcceptedAt=new Date().toISOString();
+  renderNamingUI();refreshResultPresentation();showToast('名前とフリガナを採用しました');
+}
+function updateManualName(){
+  if(!state.draft)return;
+  state.draft.name=document.getElementById('manualNameInput')?.value.trim()||'';
+  state.draft.furigana=document.getElementById('manualFuriganaInput')?.value.trim()||'';
+  state.draft.nameType='manual';state.draft.nameSource='author';state.draft.nameAccepted=Boolean(state.draft.name);
+  state.draft.nameProposalAcceptedAt=null;
+  refreshResultPresentation();renderNamingError();
+}
+function renderNamingError(message=''){
+  const el=document.getElementById('namingError');if(!el)return;
+  const autoMessage=state.draft?.namingMode==='workshop'&&!state.draft?.nameAccepted?'工房の候補から「この名前にする」を選んでください。':state.draft?.namingMode==='manual'&&!state.draft?.name?'名前を入力してください。':'';
+  const text=message||autoMessage;el.textContent=text;el.hidden=!text;
+}
+function renderNamingUI(){
+  if(!state.draft)return;
+  const mode=state.draft.namingMode||'workshop';
+  document.getElementById('modeManual')?.classList.toggle('selected',mode==='manual');
+  document.getElementById('modeWorkshop')?.classList.toggle('selected',mode==='workshop');
+  const workshop=document.getElementById('workshopNamingPanel'),manual=document.getElementById('manualNamingPanel');
+  if(workshop)workshop.hidden=mode!=='workshop';if(manual)manual.hidden=mode!=='manual';
+  const typeBox=document.getElementById('nameTypeChoices');
+  if(typeBox){typeBox.innerHTML=Object.entries(NAME_TYPE_LABELS).map(([key,label])=>`<button type="button" class="name-type-btn ${state.draft.requestedNameType===key?'selected':''}" onclick="setNameType('${key}')">${label}</button>`).join('')}
+  const area=document.getElementById('nameProposalArea');
+  if(area&&mode==='workshop'){
+    const c=state.draft.currentNameCandidate;
+    if(!c){area.innerHTML='<div class="notice">候補を用意できませんでした。表記を変えるか、自分で入力してください。</div>'}
+    else area.innerHTML=`<div class="name-proposal"><div class="proposal-name">${escapeHtml(c.name)}</div><div class="proposal-reading">${escapeHtml(c.reading)}</div><p class="proposal-reason">${escapeHtml(nameReason(c))}</p><div class="proposal-actions"><button type="button" class="btn small primary" onclick="acceptCurrentNameCandidate()">この名前にする</button><button type="button" class="btn small secondary" onclick="generateNameCandidate()">別の候補を見る</button><button type="button" class="btn small ghost" onclick="setNamingMode('manual')">自分で入力する</button></div>${state.draft.nameAccepted?'<div class="accepted-note">✓ 名前とフリガナを採用中です</div>':''}</div>`;
+  }
+  const manualName=document.getElementById('manualNameInput'),manualFuri=document.getElementById('manualFuriganaInput');
+  if(manualName){manualName.value=mode==='manual'?(state.draft.name||''):manualName.value;manualName.oninput=updateManualName}
+  if(manualFuri){manualFuri.value=mode==='manual'?(state.draft.furigana||''):manualFuri.value;manualFuri.oninput=updateManualName}
+  const count=document.getElementById('candidateCount');if(count)count.textContent=mode==='workshop'?`今回見た候補 ${state.draft.seenNameKeys.length}件`:'';
+  renderNamingError();
+}
+function rebuildCharacterPrompt(){
+  if(!state.draft)return'';
+  const name=state.draft.name||'名前未定';
+  const prompt=`以下のキャラクター設定をもとに、人物のビジュアル案を1枚生成してください。\n\n【重要】\nこの画像はキャラクターの正解ではなく、作者が選ぶための候補の一つです。未決定部分は断定せず、親しみやすい案として補ってください。\n\n【キャラクター】\n名前：${name}\n人物の核：${state.draft.summary}\n内面の矛盾：${state.draft.tension}\n作品の雰囲気：${getJoin('vibe','明るい・日常')}\n\n【作者が指定した外見】\n性別印象：${state.draft.gender}\n年代：${state.draft.age}\n補足：${state.draft.lookMemo||'指定なし'}\n\n【画像の基準】\n・人物は一人\n・上半身中心\n・淡い無地背景\n・親しみやすく、設定の空気が伝わる表情\n・過度な性的表現、極端な幼児化、不要な文字入れは避ける`;
+  state.draft.prompt=prompt;return prompt;
+}
+function refreshResultPresentation(){
+  if(!state.draft)return;
+  const name=state.draft.name||'名前を選んでください';
+  const reading=state.draft.furigana?`<span class="kana">${escapeHtml(state.draft.furigana)}</span>`:'';
+  const source=state.draft.nameSource==='author'?'作者入力':state.draft.nameAccepted?'工房提案から採用':'名前は未決定';
+  const box=document.getElementById('resultBox');
+  if(box)box.innerHTML=`<div class="result-layout"><div class="preview-img" id="previewImg">${state.draft.imageDataUrl?'<img src="'+state.draft.imageDataUrl+'" alt="持ち込み画像">':ROUTES[state.route].icon}</div><div><div class="${state.draft.name?'result-title':'name-preview-pending'}">${escapeHtml(name)}${reading}</div><p class="hint">${escapeHtml(state.draft.summary)}</p><div class="chips"><span class="chip pink">${escapeHtml(state.draft.visualDirection)}</span><span class="chip teal">${escapeHtml(ROUTES[state.route].label)}</span><span class="chip name-source-chip">${escapeHtml(source)}</span></div></div></div>`;
+  const prompt=rebuildCharacterPrompt();const promptBox=document.getElementById('promptBox');if(promptBox)promptBox.textContent=prompt;
+  const ready=Boolean(state.draft.name)&&(state.draft.namingMode==='manual'||state.draft.nameAccepted);
+  const btn=document.getElementById('saveCharacterBtn');if(btn){btn.disabled=!ready;btn.classList.toggle('pending',!ready)}
+}
+
+function relationCount(id){return(state.data.relations||[]).filter(r=>r.from===id||r.to===id).length}
+function displayName(ch){return`${escapeHtml(ch.name||'名前未定')}${ch.furigana?'<span class="kana">'+escapeHtml(ch.furigana)+'</span>':''}`}
+async function copyText(text){try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text||'');showToast('コピーしました');return true}throw new Error('clipboard unavailable')}catch(e){const ta=document.createElement('textarea');ta.value=text||'';ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();let ok=false;try{ok=document.execCommand('copy');showToast(ok?'コピーしました':'選択してコピーしてください')}catch(_){showToast('選択してコピーしてください')}document.body.removeChild(ta);return ok}}
+function copyPromptFromResult(){copyText(document.getElementById('promptBox')?.textContent||'')}
+function copyPromptById(id){const ch=state.data.characters.find(c=>c.id===id);copyText(ch?.prompt||'')}
+async function saveCharacter(){
+  if(!state.draft)return;
+  if(state.data.characters.length>=MAX_CHARACTERS){showToast(`棚は最大${MAX_CHARACTERS}人です。削除してから保存してください`);go('shelf');return}
+  if(state.draft.namingMode==='workshop'&&!state.draft.nameAccepted){renderNamingError();showToast('名前候補を採用してください');return}
+  if(state.draft.namingMode==='manual'&&!state.draft.name.trim()){renderNamingError();showToast('名前を入力してください');return}
+  const now=new Date().toISOString();
+  const ch={id:createId('char'),name:state.draft.name.trim(),furigana:(state.draft.furigana||'').trim(),nameType:state.draft.nameType||'unknown',nameSource:state.draft.nameSource||'author',nameProposalAcceptedAt:state.draft.nameSource==='workshop'?(state.draft.nameProposalAcceptedAt||now):null,core:state.draft.core,summary:state.draft.summary,tension:state.draft.tension,visualDirection:state.draft.visualDirection,imageDataUrl:state.draft.imageDataUrl||'',discoveryHistory:[state.draft.discovery],prompt:rebuildCharacterPrompt(),createdAt:now,updatedAt:now};
+  state.data.characters.push(ch);state.lastSavedId=ch.id;state.data.meta.lastOpenedCharacterId=ch.id;
+  const ok=await persist({silent:true});state.draft=null;
+  if(ok)go('saved');else{showToast('保存に失敗しました。管理画面を確認してください');go('shelf')}
+}
+function renderSaved(){const ch=state.data.characters.find(c=>c.id===state.lastSavedId)||state.data.characters[state.data.characters.length-1];if(!ch){go('shelf');return}document.getElementById('savedCard').innerHTML=`<div class="result-layout"><div class="preview-img">${ch.imageDataUrl?'<img src="'+ch.imageDataUrl+'" alt="">':'👤'}</div><div><div class="result-title">${displayName(ch)}</div><p class="hint">${escapeHtml(ch.summary)}</p><div class="chips"><span class="chip pink">${escapeHtml(ch.visualDirection)}</span><span class="chip teal">関係：${relationCount(ch.id)}件</span></div></div></div>`;const hasOther=state.data.characters.some(c=>c.id!==ch.id);document.getElementById('savedNext').innerHTML=`<button class="next-action" onclick="openSavedDetail()"><span>📝</span><div><b>この人物を見直す</b><small>設定や画像を編集できます</small></div></button><button class="next-action" onclick="openImageJourney('${ch.id}')"><span>🖼️</span><div><b>画像にしてみる</b><small>ChatGPTで作って、この人へ戻します</small></div></button><button class="next-action" onclick="${hasOther?`selectForRelation('${ch.id}')`:'startCreate()'}"><span>${hasOther?'💞':'✨'}</span><div><b>${hasOther?'誰かと出会わせる':'もうひとりを探す'}</b><small>${hasOther?'棚の人物と関係を結びます':'関係が生まれる相手を見つけます'}</small></div></button>`}
+function openSavedDetail(){const id=state.lastSavedId||state.data.characters[state.data.characters.length-1]?.id;if(id)openDetail(id);else go('shelf')}
+function renderShelf(){const box=document.getElementById('shelfList');box.innerHTML='';if(!state.data.characters.length){box.innerHTML='<div class="empty">まだ棚は空です。<br>まずはひとりを見つけて、あとから関係性へ広げましょう。</div>';return}state.data.characters.forEach(ch=>{const div=document.createElement('div');div.className='char-card';const rels=relationCount(ch.id);div.innerHTML=`<div class="thumb">${ch.imageDataUrl?'<img src="'+ch.imageDataUrl+'" alt="">':'👤'}</div><div><h3>${displayName(ch)}</h3><p>${escapeHtml(ch.summary)}</p><div class="chips"><span class="chip teal">関係：${rels}件</span></div><div class="card-actions"><button class="btn small secondary" onclick="openDetail('${ch.id}')">詳細</button><button class="btn small lav" onclick="openEdit('${ch.id}')">編集</button><button class="btn small teal" onclick="selectForRelation('${ch.id}')">関係</button><button class="btn small ghost" onclick="deleteChar('${ch.id}')">削除</button></div></div>`;box.appendChild(div)})}
+function openDetail(id){state.detailId=id;state.data.meta.lastOpenedCharacterId=id;const ch=state.data.characters.find(c=>c.id===id);if(!ch)return;const discoveries=(ch.discoveryHistory||[]).map(d=>`<p class="hint"><b>△ ${escapeHtml(ROUTES[d.route]?.label||'発見')}</b><br>${escapeHtml(d.title)}<br>${escapeHtml(d.text)}</p>`).join('')||'<p class="hint">発見履歴はまだありません。</p>';const rels=relationCount(ch.id);document.getElementById('detailContent').innerHTML=`<h2>${displayName(ch)}</h2><div class="info"><div class="result-layout"><div class="preview-img">${ch.imageDataUrl?'<img src="'+ch.imageDataUrl+'" alt="">':'👤'}</div><div><h3>人物の核</h3><p class="lead">${escapeHtml(ch.summary)}</p><div class="chips"><span class="chip pink">${escapeHtml(ch.visualDirection)}</span><span class="chip teal">関係：${rels}件</span><span class="chip name-source-chip">${escapeHtml(ch.nameSource==='workshop'?'工房提案から採用':ch.nameSource==='author'?'作者入力':'旧版データ')}</span></div><div class="actions"><button class="btn small primary" onclick="openImageJourney('${ch.id}')">画像にしてみる</button><button class="btn small lav" onclick="openEdit('${ch.id}')">編集する</button><button class="btn small secondary" onclick="openEditImageOnly('${ch.id}')">画像だけ差し替え</button></div></div></div></div><div class="info" style="margin-top:8px"><h3>発見履歴</h3>${discoveries}</div><div class="info" style="margin-top:8px"><h3>画像化文章</h3><div class="copy-row"><p class="hint">ChatGPTへ持っていく文章です。</p><button class="btn small secondary" onclick="copyPromptById('${ch.id}')">文章をコピー</button></div><div class="prompt-box">${escapeHtml(ch.prompt||'')}</div></div>`;go('detail')}
+
+function readPendingImageJob(){try{const raw=localStorage.getItem(PENDING_IMAGE_KEY);return raw?JSON.parse(raw):null}catch(_){return null}}
+function writePendingImageJob(job){try{localStorage.setItem(PENDING_IMAGE_KEY,JSON.stringify(job));return true}catch(_){showToast('画像づくりの続き情報を保存できませんでした');return false}}
+function clearPendingImageJob(){try{localStorage.removeItem(PENDING_IMAGE_KEY)}catch(_){}renderPendingImageCard()}
+function pendingImageCharacter(){const job=readPendingImageJob();if(!job?.characterId)return null;const ch=state.data.characters.find(c=>c.id===job.characterId);if(!ch){clearPendingImageJob();return null}return{job,ch}}
+function renderPendingImageCard(){const box=document.getElementById('pendingImageCard');if(!box)return;const found=pendingImageCharacter();if(!found){box.hidden=true;box.innerHTML='';return}const{job,ch}=found;box.hidden=false;box.innerHTML=`<div class="pending-eyebrow">画像づくりの続き</div><h3>${displayName(ch)}の画像を追加するところです</h3><p>ChatGPTで作った画像を、この人物へ戻せます。期限はありません。</p><div class="actions"><button class="btn small primary" type="button" onclick="resumePendingImageJourney()">続きをひらく</button><button class="btn small ghost" type="button" onclick="discardPendingImageJourney()">今回はやめる</button></div>`}
+function discardPendingImageJourney(){if(!confirm('画像づくりの続き情報を消しますか？\n\n人物や保存済み画像は削除されません。'))return;clearPendingImageJob();showToast('画像づくりの続き情報を消しました')}
+function resumePendingImageJourney(){const found=pendingImageCharacter();if(found)openImageJourney(found.ch.id,{returned:true})}
+function openImageJourney(id,options={}){const ch=state.data.characters.find(c=>c.id===id);if(!ch){showToast('人物が見つかりません');go('shelf');return}state.detailId=id;state.imageJourneyCharacterId=id;state.imageJourneyDataUrl='';state.imageJourneyReturned=Boolean(options.returned);renderImageJourney();go('imageJourney')}
+function renderImageJourney(){const ch=state.data.characters.find(c=>c.id===state.imageJourneyCharacterId);if(!ch){go('shelf');return}const title=document.getElementById('imageJourneyTitle'),avatar=document.getElementById('imageJourneyAvatar'),prompt=document.getElementById('imageJourneyPrompt'),preview=document.getElementById('imageJourneyPreview'),saveBtn=document.getElementById('saveJourneyImageBtn'),banner=document.getElementById('imageReturnBanner');if(title)title.textContent=`${ch.name||'この人物'}を画像にしてみる`;if(avatar)avatar.innerHTML=ch.imageDataUrl?`<img src="${ch.imageDataUrl}" alt="">`:'👤';if(prompt)prompt.textContent=ch.prompt||'';if(preview){preview.classList.toggle('has-image',Boolean(state.imageJourneyDataUrl));preview.innerHTML=state.imageJourneyDataUrl?`<img src="${state.imageJourneyDataUrl}" alt="画像候補のプレビュー">`:'画像を選ぶと、ここで確認できます'}if(saveBtn)saveBtn.disabled=!state.imageJourneyDataUrl;if(banner)banner.classList.toggle('show',state.imageJourneyReturned);const job=readPendingImageJob();const hasJob=job?.characterId===ch.id;document.getElementById('imageStep1')?.classList.toggle('done',hasJob);document.getElementById('imageStep2')?.classList.toggle('active',hasJob&&!state.imageJourneyDataUrl);document.getElementById('imageStep2')?.classList.toggle('done',Boolean(state.imageJourneyDataUrl));document.getElementById('imageStep3')?.classList.toggle('active',Boolean(state.imageJourneyDataUrl));const input=document.getElementById('imageJourneyInput');if(input&&!input.dataset.bound){input.dataset.bound='1';input.addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{state.imageJourneyDataUrl=await blobToDataUrl(file);state.imageJourneyReturned=true;renderImageJourney();showToast('画像を読み込みました')}catch(_){showToast('画像を読み込めませんでした')}finally{e.target.value=''}})}}
+async function startChatGPTImageJourney(){const ch=state.data.characters.find(c=>c.id===state.imageJourneyCharacterId);if(!ch)return;const now=new Date().toISOString();const previous=readPendingImageJob();const job={version:1,service:'ChatGPT',characterId:ch.id,characterName:ch.name||'名前未定',prompt:ch.prompt||'',startedAt:previous?.characterId===ch.id&&previous.startedAt?previous.startedAt:now,lastOpenedAt:now};writePendingImageJob(job);state.imageJourneyReturned=false;renderImageJourney();const copyPromise=copyText(ch.prompt||'');const opened=window.open('about:blank','_blank');if(opened){try{opened.opener=null;opened.location.replace(CHATGPT_URL)}catch(_){opened.location.href=CHATGPT_URL}}const copied=await copyPromise;if(opened){showToast(copied?'文章をコピーしました。ChatGPTで右上の「一時」を選べます':'ChatGPTを開きました。文章は下から再コピーできます')}else{showToast(copied?'文章をコピーしました。下のリンクからChatGPTを開いてください':'ChatGPTを開けませんでした。下のリンクを使ってください')}}
+function copyImageJourneyPrompt(){const ch=state.data.characters.find(c=>c.id===state.imageJourneyCharacterId);copyText(ch?.prompt||'')}
+function chooseImageJourneyFile(){document.getElementById('imageJourneyInput')?.click()}
+async function readClipboardImageDataUrl(){if(!navigator.clipboard?.read||!window.isSecureContext)throw new Error('unsupported');const items=await navigator.clipboard.read();for(const item of items){const type=item.types.find(t=>t.startsWith('image/'));if(type){const blob=await item.getType(type);return await blobToDataUrl(blob)}}throw new Error('no-image')}
+async function pasteImageFromClipboard(target){try{const dataUrl=await readClipboardImageDataUrl();applyImportedImage(target,dataUrl);showToast('クリップボードの画像を貼り付けました')}catch(error){showToast(error?.message==='no-image'?'クリップボードに画像が見つかりません':'貼り付けに対応していません。画像を保存して選んでください')}}
+function applyImportedImage(target,dataUrl){if(!dataUrl)return;if(target==='journey'){state.imageJourneyDataUrl=dataUrl;state.imageJourneyReturned=true;renderImageJourney();return}if(target==='draft'&&state.draft){state.draft.imageDataUrl=dataUrl;refreshResultPresentation();return}if(target==='edit'){state.editImageDataUrl=dataUrl;renderEditImagePreview()}}
+async function saveImageJourney(){const ch=state.data.characters.find(c=>c.id===state.imageJourneyCharacterId);if(!ch||!state.imageJourneyDataUrl){showToast('保存する画像を選んでください');return}ch.imageDataUrl=state.imageJourneyDataUrl;ch.updatedAt=new Date().toISOString();const ok=await persist({silent:true});if(!ok){showToast('画像を保存できませんでした');return}clearPendingImageJob();state.imageJourneyDataUrl='';state.imageJourneyReturned=false;showToast(`${ch.name||'人物'}に画像候補を保存しました`);openDetail(ch.id)}
+function cancelImageJourneyView(){const ch=state.data.characters.find(c=>c.id===state.imageJourneyCharacterId);if(ch)openDetail(ch.id);else go('shelf')}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')return;const job=readPendingImageJob();if(!job)return;if(state.currentScreen==='imageJourney'&&job.characterId===state.imageJourneyCharacterId){state.imageJourneyReturned=true;renderImageJourney();showToast('おかえりなさい。画像を追加できます')}else if(state.currentScreen==='home'){renderPendingImageCard()}});
+document.addEventListener('paste',async event=>{if(!['imageJourney','result','edit'].includes(state.currentScreen))return;const items=Array.from(event.clipboardData?.items||[]);const item=items.find(x=>x.type?.startsWith('image/'));if(!item)return;event.preventDefault();const file=item.getAsFile();if(!file)return;try{const dataUrl=await blobToDataUrl(file);const target=state.currentScreen==='imageJourney'?'journey':state.currentScreen==='result'?'draft':'edit';applyImportedImage(target,dataUrl);showToast('画像を貼り付けました')}catch(_){showToast('画像を貼り付けられませんでした')}});
+
+function openEdit(id){state.detailId=id;const ch=state.data.characters.find(c=>c.id===id);if(!ch)return;state.editImageDataUrl=ch.imageDataUrl||'';document.getElementById('editName').value=ch.name||'';document.getElementById('editFurigana').value=ch.furigana||'';document.getElementById('editCore').value=ch.core||'';document.getElementById('editSummary').value=ch.summary||'';document.getElementById('editTension').value=ch.tension||'';document.getElementById('editVisual').value=ch.visualDirection||'';document.getElementById('editPrompt').value=ch.prompt||'';renderEditImagePreview();const input=document.getElementById('editImageInput');input.value='';input.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.editImageDataUrl=r.result;renderEditImagePreview()};r.readAsDataURL(f)};go('edit')}
+function openEditImageOnly(id){openEdit(id);setTimeout(()=>document.getElementById('editImageInput')?.focus(),50)}
+function renderEditImagePreview(){const el=document.getElementById('editImagePreview');if(el)el.innerHTML=state.editImageDataUrl?'<img src="'+state.editImageDataUrl+'" alt="差し替え画像">':'👤'}
+function clearEditImage(){state.editImageDataUrl='';const input=document.getElementById('editImageInput');if(input)input.value='';renderEditImagePreview()}
+async function saveEditCharacter(){const ch=state.data.characters.find(c=>c.id===state.detailId);if(!ch){showToast('編集対象が見つかりません');go('shelf');return}const nextName=document.getElementById('editName').value.trim()||'名前未定';const nextFurigana=document.getElementById('editFurigana').value.trim()||'';if(nextName!==ch.name||nextFurigana!==ch.furigana){ch.nameSource='author';ch.nameType='manual';ch.nameProposalAcceptedAt=null}ch.name=nextName;ch.furigana=nextFurigana;ch.core=document.getElementById('editCore').value.trim()||'未定';ch.summary=document.getElementById('editSummary').value.trim()||'説明未定';ch.tension=document.getElementById('editTension').value.trim()||'未定';ch.visualDirection=document.getElementById('editVisual').value.trim()||'外見未定';ch.prompt=document.getElementById('editPrompt').value||'';ch.imageDataUrl=state.editImageDataUrl||'';ch.updatedAt=new Date().toISOString();const ok=await persist({silent:true});showToast(ok?'変更を保存しました':'保存できませんでした');openDetail(ch.id)}
+async function deleteChar(id){
+  const ch=state.data.characters.find(c=>c.id===id);if(!ch)return;
+  const linkedRelations=state.data.relations.filter(r=>r.from===id||r.to===id);
+  const linkedSeeds=state.data.storySeeds.filter(seed=>(seed.sourceCharacterIds||[]).includes(id));
+  let keepSeeds=true;
+  if(linkedSeeds.length){
+    const choice=prompt(`「${ch.name}」には関係性${linkedRelations.length}件と物語の芽${linkedSeeds.length}件が結びついています。\n\n1：人物と関係性を削除し、物語の芽は記録として残す\n2：人物・関係性・物語の芽をすべて削除する\n\n1 または 2 を入力してください。`,'1');
+    if(choice===null)return;if(choice!=='1'&&choice!=='2'){showToast('1か2を入力してください');return}keepSeeds=choice==='1';
+  }
+  if(!confirm(`「${ch.name}」を削除します。${linkedRelations.length?' 関係性も削除されます。':''}${linkedSeeds.length&&keepSeeds?' 物語の芽は名前の記録を残します。':linkedSeeds.length?' 物語の芽も削除されます。':''}\n\nよろしいですか？`))return;
+  const pending=readPendingImageJob();if(pending?.characterId===id)clearPendingImageJob();
+  state.data.characters=state.data.characters.filter(c=>c.id!==id);
+  state.data.relations=state.data.relations.filter(r=>r.from!==id&&r.to!==id);
+  if(!keepSeeds)state.data.storySeeds=state.data.storySeeds.filter(seed=>!(seed.sourceCharacterIds||[]).includes(id));
+  const ok=await persist({silent:true});renderShelf();showToast(ok?'削除しました':'削除後の保存に失敗しました');
+}
+function openRelationFromDetail(){if(state.detailId){state.relationSelect=[state.detailId];state.relationDraft={type:'',tension:''}}go('relation')}
+function selectForRelation(id){state.relationSelect=[id];state.relationDraft={type:'',tension:''};go('relation')}
+function renderRelation(){const cs=state.data.characters;const box=document.getElementById('relationContent');if(cs.length<2){box.innerHTML='<div class="empty">関係性メモには2人以上必要です。<br>もうひとりを見つけてから試せます。</div>';return}let selected=state.relationSelect||[];if(!selected.length)selected=[cs[0].id];const origin=cs.find(c=>c.id===selected[0])||cs[0];state.relationSelect=[origin.id,...selected.slice(1,2).filter(id=>id!==origin.id)];const targetId=state.relationSelect[1];const target=cs.find(c=>c.id===targetId);const cards=cs.filter(c=>c.id!==origin.id).map(c=>`<button class="select-card ${c.id===targetId?'selected':''}" onclick="toggleRel('${c.id}')"><div class="avatar">${c.imageDataUrl?'<img src="'+c.imageDataUrl+'" alt="">':'👤'}</div><b>${displayName(c)}</b></button>`).join('');const types=RELATION_TYPES.map(t=>`<button class="relation-type ${state.relationDraft.type===t.value?'selected':''}" onclick="selectRelationType('${escapeAttr(t.value)}')"><b>${t.icon} ${escapeHtml(t.label)}</b><small>${escapeHtml(t.sub)}</small></button>`).join('');
+  box.innerHTML=`<div class="notice"><b>${displayName(origin)}</b>を起点に、相手を選びます。</div><div class="relation-question">${escapeHtml(origin.name)}にとって、誰がどんな存在になりそう？</div><div class="rel-picker">${cards}</div><div class="form-row"><label class="label">感じる距離</label><div class="relation-type-grid">${types}</div></div><div class="form-row"><label class="label">なぜ、そう思った？（任意）</label><textarea class="field" id="relTension" placeholder="例：本音は言えないけど、そばにいると安心する">${escapeHtml(state.relationDraft.tension||'')}</textarea></div><div class="relation-flow" id="relPreview"></div><details class="saved-relations" ${state.data.relations.length?'open':''}><summary>保存済み関係（${state.data.relations.length}）</summary><div class="inside" id="relList"></div></details>`;const ta=document.getElementById('relTension');if(ta)ta.oninput=e=>{state.relationDraft.tension=e.target.value;renderRelationPreview()};renderRelationPreview();renderRelList()}
+function toggleRel(id){const origin=state.relationSelect?.[0];if(!origin){state.relationSelect=[id]}else if(id===origin){return}else{state.relationSelect=[origin,id]}renderRelation()}
+function selectRelationType(type){state.relationDraft.type=type;renderRelation();setTimeout(()=>document.querySelector('.relation-type.selected')?.classList.add('picked'),0)}
+function renderRelationPreview(){const p=document.getElementById('relPreview');if(!p)return;const [a,b]=(state.relationSelect||[]).map(id=>state.data.characters.find(c=>c.id===id));const type=state.relationDraft.type||'まだ分からない';const tension=state.relationDraft.tension||'理由は、まだ言葉になっていません。';if(a&&b){p.innerHTML=`<div class="flow-name">${escapeHtml(a.name)}</div><div class="flow-arrow">↓</div><div class="flow-type">${escapeHtml(type)}</div><div class="flow-arrow">↓</div><div class="flow-name">${escapeHtml(b.name)}</div><p class="hint" style="margin:8px 0 0">${escapeHtml(tension)}</p>`}else{p.innerHTML='<span class="hint">相手を選ぶと、関係の種がここに現れます。</span>'}}
+async function saveRelation(){const ids=state.relationSelect||[];if(ids.length<2){showToast('相手を選んでください');return}const type=state.relationDraft.type||'まだ決めない';const tension=state.relationDraft.tension.trim()||'まだ言葉になっていない';const now=new Date().toISOString();const r={id:createId('rel'),from:ids[0],to:ids[1],type,distance:type,tension,direction:'unknown',stability:'unknown',storySeed:buildStorySeed(ids[0],ids[1],type,tension),createdAt:now,updatedAt:now};state.data.relations.push(r);const ok=await persist({silent:true});showToast(ok?'関係を棚に保存しました':'関係を保存できませんでした');state.relationSelect=[ids[0]];state.relationDraft={type:'',tension:''};renderRelation()}
+function buildStorySeed(aid,bid,type,tension){const a=state.data.characters.find(c=>c.id===aid);const b=state.data.characters.find(c=>c.id===bid);const w=state.data.world;const world=w?`「${w.title}」の中で`:'';return`${world}${a?.name||'A'}と${b?.name||'B'}は、${type}関係にある。けれど、${tension}ことがきっかけで、互いの大切なものが少しずつ見えてくる。`}
+function relationSeedCount(relationId){return(state.data.storySeeds||[]).filter(seed=>seed.sourceRelationId===relationId&&seed.disposition!=='rejected').length}
+function renderRelList(){
+  const list=document.getElementById('relList');if(!list)return;
+  if(!state.data.relations.length){list.innerHTML='<p class="hint">まだ関係性メモはありません。</p>';return}
+  list.innerHTML=state.data.relations.map(r=>{
+    const a=state.data.characters.find(c=>c.id===r.from),b=state.data.characters.find(c=>c.id===r.to);const count=relationSeedCount(r.id);
+    return`<div class="story-card" style="margin:6px 0"><b>${escapeHtml(a?.name||'?')} × ${escapeHtml(b?.name||'?')}</b><br>${escapeHtml(r.storySeed)}<div class="relation-seed-row"><button class="btn small primary" type="button" onclick="startStoryFromRelation('${r.id}')">🌱 物語の芽を見つける</button><span class="relation-seed-count">保存した芽：${count}件</span></div></div>`
+  }).join('')
+}
+function getStoryPair(seedOrRelation){
+  const ids=seedOrRelation.sourceCharacterIds||[seedOrRelation.from,seedOrRelation.to];
+  return ids.map((id,index)=>{
+    const live=state.data.characters.find(c=>c.id===id);if(live)return{...live,deleted:false};
+    const snap=(seedOrRelation.sourceCharacterSnapshots||[]).find(x=>x.id===id)||{};
+    return{id,name:snap.name||'削除された人物',furigana:snap.furigana||'',imageDataUrl:'',core:snap.core||'',summary:snap.summary||'',tension:snap.tension||'',deleted:true,index};
+  });
+}
+function storyPersonName(person){return person?.deleted?`${escapeHtml(person.name||'削除された人物')}<span class="deleted-person">（削除済み）</span>`:displayName(person||{})}
+function startStoryFromRelation(relationId){
+  const relation=state.data.relations.find(r=>r.id===relationId);if(!relation){showToast('関係性が見つかりません');return}
+  const pair=getStoryPair(relation);if(pair.some(p=>!p||p.deleted)){showToast('二人の人物を確認できません');return}
+  state.storyFlow={relationId,step:0,answers:{stability:relation.stability||'unknown',scale:'scene',supportLevel:'candidates'},proposals:[],generation:0};go('story');
+}
+function storyRelation(){return state.data.relations.find(r=>r.id===state.storyFlow?.relationId)||null}
+function renderStoryPair(relation){
+  const [a,b]=getStoryPair(relation);return`<div class="story-pair"><div class="story-person"><div class="avatar">${a?.imageDataUrl?'<img src="'+a.imageDataUrl+'" alt="">':'👤'}</div><b>${storyPersonName(a)}</b></div><div class="story-link">×</div><div class="story-person"><div class="avatar">${b?.imageDataUrl?'<img src="'+b.imageDataUrl+'" alt="">':'👤'}</div><b>${storyPersonName(b)}</b></div></div>`;
+}
+function renderStoryFlow(){
+  const box=document.getElementById('storyContent'),nav=document.getElementById('storyNav');if(!box||!nav)return;
+  const flow=state.storyFlow,relation=storyRelation();if(!flow||!relation){box.innerHTML='<div class="empty">物語の芽を始める関係性が見つかりません。</div>';nav.innerHTML='<button class="btn secondary" onclick="go(\'relation\')">関係性へ</button>';return}
+  const [a,b]=getStoryPair(relation);const pair=renderStoryPair(relation);
+  if(flow.step===0){
+    box.innerHTML=`<div class="story-step"><span class="chip pink">物語の芽</span><span class="hint">二人の関係から始めます</span></div><h2>この二人から、続きを探す</h2>${pair}<div class="story-relation-summary"><b>${escapeHtml(relation.type||'まだ決めない')}</b><p>${escapeHtml(relation.tension||'まだ言葉になっていない')}</p></div><div class="story-intro-note"><b>工房がすること</b><ul><li>三つの質問から、異なる方向の候補を出します</li><li>候補は作者設定ではなく「工房からの提案」です</li><li>外部通信やAPIは使いません</li></ul></div><div class="notice">${escapeHtml(a?.name||'一人目')}と${escapeHtml(b?.name||'二人目')}の設定を答えにせず、考えるための仮説として扱います。</div>`;
+    nav.innerHTML='<button class="btn secondary" onclick="go(\'relation\')">戻る</button><button class="btn primary" onclick="nextStoryStep()">質問へ</button>';return;
+  }
+  if(flow.step>=1&&flow.step<=3){
+    const q=STORY_QUESTIONS[flow.step-1];const selected=flow.answers[q.id];
+    box.innerHTML=`<div class="story-step"><span class="chip">${flow.step}/3</span><span class="phase-name">物語の芽を整える</span></div><h2>${escapeHtml(q.title)}</h2><p class="hint">${escapeHtml(q.hint)}</p><div class="story-question-grid">${q.options.map(o=>`<button class="story-option ${selected===o.value?'selected':''}" type="button" onclick="chooseStoryAnswer('${q.id}','${o.value}')"><b>${escapeHtml(o.label)}</b><small>${escapeHtml(o.sub)}</small></button>`).join('')}</div><div class="story-relation-summary" style="margin-top:10px"><b>${escapeHtml(a?.name||'一人目')} × ${escapeHtml(b?.name||'二人目')}</b><p>${escapeHtml(relation.type)}／${escapeHtml(relation.tension)}</p></div>`;
+    nav.innerHTML=`<button class="btn secondary" onclick="prevStoryStep()">戻る</button><button class="btn primary" onclick="nextStoryStep()">${flow.step===3?'候補を見る':'次へ'}</button>`;return;
+  }
+  if(flow.step===4){
+    if(!flow.proposals.length)flow.proposals=generateStoryProposals(relation,flow.answers,flow.generation||0);
+    box.innerHTML=`<div class="story-step"><span class="chip teal">3つの候補</span><span class="hint">すべて工房からの提案です</span></div><h2>物語の芽が見つかりました</h2>${pair}<div class="story-relation-summary"><b>${escapeHtml(relation.type)}</b><p>${escapeHtml(relation.tension)}</p></div><div class="story-proposals">${flow.proposals.map((p,i)=>renderStoryProposal(p,i)).join('')}</div>`;
+    nav.innerHTML='<button class="btn secondary" onclick="prevStoryStep()">質問を直す</button><button class="btn primary" onclick="finishStoryFlow()">保存した芽を見る</button>';return;
+  }
+  const saved=state.data.storySeeds.filter(seed=>seed.sourceRelationId===relation.id&&seed.disposition!=='rejected');
+  box.innerHTML=`<div class="story-finish"><b>物語の芽を保存しました。</b><br>採用した案も、作者が確定するまでは「工房からの提案」です。</div><h2>この二人の保存済みの芽</h2>${pair}<div class="seed-library">${saved.length?saved.map(renderSeedLibraryCard).join(''):'<div class="seed-empty">採用または保留した芽はありません。</div>'}</div>`;
+  nav.innerHTML='<button class="btn secondary" onclick="go(\'relation\')">関係性へ</button><button class="btn primary" onclick="go(\'world\')">世界観で見る</button>';
+}
+function chooseStoryAnswer(id,value){if(!state.storyFlow)return;state.storyFlow.answers[id]=value;renderStoryFlow()}
+function nextStoryStep(){if(!state.storyFlow)return;if(state.storyFlow.step>=1&&state.storyFlow.step<=3){const q=STORY_QUESTIONS[state.storyFlow.step-1];if(!state.storyFlow.answers[q.id]){showToast('一つ選んでください');return}}state.storyFlow.step=Math.min(4,state.storyFlow.step+1);renderStoryFlow()}
+function prevStoryStep(){if(!state.storyFlow)return;state.storyFlow.step=Math.max(0,state.storyFlow.step-1);if(state.storyFlow.step<4)state.storyFlow.proposals=[];renderStoryFlow()}
+function finishStoryFlow(){if(!state.storyFlow)return;state.storyFlow.step=5;renderStoryFlow()}
+function textFragment(value,fallback='まだ言葉になっていない'){const t=String(value||'').trim();return t&&t!=='未定'?t:fallback}
+function scaleText(scale){return scale==='scene'?'小さな一場面':scale==='episode'?'一話分の出来事':'物語全体の入口'}
+function stabilityText(value){return value==='stable'?'安定している':value==='wavering'?'少し揺れている':value==='breaking'?'壊れかけている':'まだ分からない'}
+function generateStoryProposals(relation,answers,generation=0){
+  const [a,b]=getStoryPair(relation);const an=a?.name||'一人目',bn=b?.name||'二人目';const rel=textFragment(relation.type,'まだ決まっていない関係');const tension=textFragment(relation.tension);const acore=textFragment(a?.core||a?.summary,'大切にしているもの');const bcore=textFragment(b?.core||b?.summary,'大切にしているもの');const at=textFragment(a?.tension,'本人もまだ気づいていない揺らぎ');const bt=textFragment(b?.tension,'本人もまだ気づいていない揺らぎ');const world=state.data.world;const worldTitle=world?.title&&world.title!=='まだ名前のない世界'?world.title:'まだ名前のない場所';const worldProblem=textFragment(world?.problem,'二人の選び方が試される小さな変化');const scale=answers.scale||'scene';const support=answers.supportLevel||'candidates';const stability=answers.stability||'unknown';
+  const variants=[generation%3,(generation+1)%3,(generation+2)%3];
+  const dailyHooks=[`${an}と${bn}は、いつも同じ時間に同じ場所へ来る。しかし、その理由を互いに尋ねたことがない。`,`${an}だけが覚えている二人の小さな約束を、${bn}は日常の習慣として続けている。`,`${an}と${bn}は、用事がなくても会える口実を一つだけ共有している。`];
+  const shiftHooks=[`二人が守りたいものは近いのに、その守り方だけが正反対だと分かる。`,`「${tension}」ことをきっかけに、${an}が当然だと思っていた距離を${bn}が選び直す。`,`${an}の「${at}」と${bn}の「${bt}」が、同じ出来事に別の意味を与える。`];
+  const worldHooks=[`「${worldTitle}」で、二人に関する記録だけが失われる。`,`二人の関係である「${rel}」が、この場所では許されないか、特別な役割を持つと判明する。`,`「${worldProblem}」が起こり、${an}と${bn}は別々の理由で同じ場所へ向かう。`];
+  const make=(axis,hook,index)=>{
+    const labels={daily:'日常の芽',shift:'関係が揺れる芽',world:'世界へ広がる芽'};const templateId=`${axis}_${scale}_${stability}_${index}`;
+    const qs=axis==='daily'?[`二人が会い続ける本当の理由は？`,`この習慣を先にやめようとするのはどちら？`,`何も起きない一日だからこそ見える感情は？`]:axis==='shift'?[`二人は何を同じだと誤解していた？`,`関係を守ることと変えること、どちらを選ぶ？`,`相手に言わないまま決めたことは？`]:[`この場所は二人を守るのか、縛るのか？`,`二人の関係を知る第三者はいる？`,`世界の仕組みが変わると、二人の距離はどうなる？`];
+    let content={worldHypothesis:axis==='world'?`${worldTitle}では、${worldProblem}ことが人々の選択に影響している。`:world?`「${worldTitle}」の日常の一角で起きる可能性。`:'舞台の詳細はまだ決めず、二人が繰り返し会える場所だけがある。',storyEntry:hook,relationShift:axis==='daily'?`「${rel}」という関係の中に、まだ名前のない習慣が見つかる。`:axis==='shift'?`現在は「${stabilityText(stability)}」。${tension}ことへの向き合い方で距離が変わる。`:`世界の仕組みが「${rel}」という関係の意味を変える。`,openQuestions:qs};
+    if(support==='questions')content={worldHypothesis:'',storyEntry:'',relationShift:'',openQuestions:qs};
+    if(support==='candidates')content={worldHypothesis:'',storyEntry:hook,relationShift:'',openQuestions:[qs[0]]};
+    return{id:createId('proposal'),axis,label:labels[axis],templateId,content,basis:[`関係：${rel}`,`関係のひっかかり：${tension}`,`${an}の核：${acore}`,`${bn}の核：${bcore}`,`関係の現在地：${stabilityText(stability)}`,`出来事の大きさ：${scaleText(scale)}`],savedSeedId:null,disposition:'suggested'};
+  };
+  return[make('daily',dailyHooks[variants[0]],variants[0]),make('shift',shiftHooks[variants[1]],variants[1]),make('world',worldHooks[variants[2]],variants[2])];
+}
+function renderStoryProposal(p,index){
+  const c=p.content||{};const savedSeed=p.savedSeedId?state.data.storySeeds.find(seed=>seed.id===p.savedSeedId):null;const isAuthor=savedSeed?.authorship==='author';const status=isAuthor?'作者設定として確定済み':p.disposition==='adopted'?'採用済み':p.disposition==='held'?'保留中':p.disposition==='rejected'?'使わないとして記録':'未保存';
+  const body=(state.storyFlow?.answers?.supportLevel==='questions')?`<div class="seed-section"><b>考えるための問い</b><ul class="seed-questions">${(c.openQuestions||[]).map(q=>`<li>${escapeHtml(q)}</li>`).join('')}</ul></div>`:`${c.worldHypothesis?`<div class="seed-section"><b>世界の仮説</b><p>${escapeHtml(c.worldHypothesis)}</p></div>`:''}${c.storyEntry?`<div class="seed-section"><b>物語の入口</b><p>${escapeHtml(c.storyEntry)}</p></div>`:''}${c.relationShift?`<div class="seed-section"><b>関係の揺らぎ</b><p>${escapeHtml(c.relationShift)}</p></div>`:''}${(c.openQuestions||[]).length?`<div class="seed-section"><b>まだ決めていないこと</b><ul class="seed-questions">${c.openQuestions.map(q=>`<li>${escapeHtml(q)}</li>`).join('')}</ul></div>`:''}`;
+  return`<article class="seed-proposal axis-${p.axis}"><div class="seed-proposal-head"><h3>${escapeHtml(p.label)}</h3><span class="seed-axis">${STORY_AXIS[p.axis]?.icon||'🌱'} 候補${index+1}</span></div>${body}<details class="seed-basis"><summary>この提案のもと</summary>${p.basis.map(x=>`・${escapeHtml(x)}`).join('<br>')}</details><div class="seed-actions"><button class="btn small primary" onclick="saveStoryProposal(${index},'adopted')">採用する</button><button class="btn small secondary" onclick="saveStoryProposal(${index},'held')">保留する</button><button class="btn small ghost" onclick="saveStoryProposal(${index},'rejected')">使わない</button><button class="btn small lav" onclick="regenerateStoryProposal(${index})">別の候補</button></div>${p.disposition!=='suggested'?`<div class="seed-saved ${p.disposition}">${status}${p.disposition==='adopted'&&p.savedSeedId&&!isAuthor?`　<button class="btn small secondary" onclick="confirmSeedAuthorship('${p.savedSeedId}')">作者設定として確定する</button>`:''}</div>`:''}</article>`;
+}
+async function saveStoryProposal(index,disposition){
+  const flow=state.storyFlow,relation=storyRelation(),p=flow?.proposals?.[index];if(!flow||!relation||!p)return;
+  const now=new Date().toISOString();const pair=getStoryPair(relation);let seed=p.savedSeedId?state.data.storySeeds.find(x=>x.id===p.savedSeedId):null;
+  const payload={sourceCharacterIds:[relation.from,relation.to],sourceCharacterSnapshots:pair.map(ch=>({id:ch.id,name:ch.name||'名前未定',furigana:ch.furigana||'',core:ch.core||'',summary:ch.summary||'',tension:ch.tension||''})),sourceRelationId:relation.id,sourceRelationSnapshot:{id:relation.id,type:relation.type||'',tension:relation.tension||''},answers:{...flow.answers},scale:flow.answers.scale,supportLevel:flow.answers.supportLevel,axis:p.axis,content:disposition==='rejected'?null:{...p.content,openQuestions:[...(p.content?.openQuestions||[])]},basis:p.basis.map(label=>({type:'rule',label})),disposition,authorship:'workshop',templateId:p.templateId,confirmedAt:null,updatedAt:now};
+  if(seed)Object.assign(seed,payload);else{seed={id:createId('seed'),...payload,createdAt:now,confirmedAt:null};state.data.storySeeds.push(seed);p.savedSeedId=seed.id}
+  p.disposition=disposition;relation.stability=flow.answers.stability||relation.stability||'unknown';relation.updatedAt=now;const ok=await persist({silent:true});showToast(ok?(disposition==='adopted'?'物語の芽を採用しました':disposition==='held'?'物語の芽を保留しました':'使わない候補として記録しました'):'保存できませんでした');renderStoryFlow();
+}
+function regenerateStoryProposal(index){const flow=state.storyFlow,relation=storyRelation();if(!flow||!relation)return;flow.generation=(flow.generation||0)+1;const next=generateStoryProposals(relation,flow.answers,flow.generation)[index];flow.proposals[index]=next;renderStoryFlow()}
+async function confirmSeedAuthorship(seedId){
+  const seed=state.data.storySeeds.find(x=>x.id===seedId);if(!seed||seed.disposition!=='adopted')return;
+  if(!confirm('この内容を、工房からの提案ではなく、作者が決めた設定として扱いますか？'))return;
+  seed.authorship='author';seed.confirmedAt=new Date().toISOString();seed.updatedAt=seed.confirmedAt;const ok=await persist({silent:true});showToast(ok?'作者設定として確定しました':'確定を保存できませんでした');renderStoryFlow();renderWorld();
+}
+function seedPairLabel(seed){const pair=getStoryPair(seed);return pair.map(p=>p?.name||'削除された人物').join(' × ')}
+function dispositionLabel(v){return v==='adopted'?'採用':v==='held'?'保留':'不採用'}
+function renderSeedLibraryCard(seed){
+  const c=seed.content||{};const body=c.storyEntry||c.relationShift||c.worldHypothesis||(c.openQuestions||[])[0]||'内容は記録されていません。';
+  return`<article class="seed-library-card"><div class="seed-meta"><span class="chip ${seed.disposition==='adopted'?'pink':'teal'}">${dispositionLabel(seed.disposition)}</span><span class="seed-source-badge ${seed.authorship==='author'?'author':''}">${seed.authorship==='author'?'作者設定':'工房からの提案'}</span><span class="chip">${escapeHtml(STORY_AXIS[seed.axis]?.label||'物語の芽')}</span></div><h3>${escapeHtml(seedPairLabel(seed))}</h3><p>${escapeHtml(body)}</p>${seed.disposition==='adopted'&&seed.authorship!=='author'?`<button class="btn small secondary" onclick="confirmSeedAuthorship('${seed.id}')">作者設定として確定する</button>`:''}<div class="seed-status-line">${seed.confirmedAt?'確定：'+formatDate(seed.confirmedAt):'保存：'+formatDate(seed.updatedAt||seed.createdAt)}</div></article>`;
+}
+function renderWorldSeeds(){const box=document.getElementById('worldSeedList');if(!box)return;const seeds=(state.data.storySeeds||[]).filter(seed=>seed.disposition!=='rejected').sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')));box.innerHTML=seeds.length?seeds.map(renderSeedLibraryCard).join(''):'<div class="seed-empty">まだ物語の芽はありません。関係性メモから始められます。</div>'}
+async function saveWorld(){state.data.world={id:'world_001',title:document.getElementById('worldTitle').value||'まだ名前のない世界',genre:document.getElementById('worldGenre').value||'未定',values:document.getElementById('worldValues').value||'未定',problem:document.getElementById('worldProblem').value||'未定',updatedAt:new Date().toISOString()};const ok=await persist({silent:true});showToast(ok?'世界観を保存しました':'保存できませんでした');renderWorld()}
+function renderWorld(){const w=state.data.world;if(w){document.getElementById('worldTitle').value=w.title;document.getElementById('worldGenre').value=w.genre;document.getElementById('worldValues').value=w.values;document.getElementById('worldProblem').value=w.problem;document.getElementById('worldPreview').innerHTML=`🌍 <b>${escapeHtml(w.title)}</b><br>${escapeHtml(w.genre)}。大切にされるもの：${escapeHtml(w.values)}。起こりやすい問題：${escapeHtml(w.problem)}。`}else{document.getElementById('worldTitle').value='';document.getElementById('worldGenre').value='';document.getElementById('worldValues').value='';document.getElementById('worldProblem').value='';document.getElementById('worldPreview').textContent='🌍 世界観を保存しても、物語の芽から本文を自動上書きしません。'}renderWorldSeeds()}
+function formatDate(iso){if(!iso)return'未保存';try{return new Intl.DateTimeFormat('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(iso))}catch(_){return iso}}
+function formatBytes(n){if(!Number.isFinite(n))return'確認できません';if(n<1024)return n+' B';if(n<1024*1024)return(n/1024).toFixed(1)+' KB';return(n/1024/1024).toFixed(1)+' MB'}
+async function refreshStorageInfo(){
+  const mode=document.getElementById('storageMode');if(mode){mode.textContent=state.storageMode;mode.className=state.storageMode==='IndexedDB'?'status-ok':state.storageMode.includes('保存できません')?'status-warn':''}
+  const version=document.getElementById('dataVersion');if(version)version.textContent=`version ${state.data.version||'?'}`;
+  const report=state.data.meta?.integrityReport||{};
+  const lastMigration=state.data.meta?.lastMigrationReport||{};
+  const orphanCount=(state.data.orphanRelations||[]).length;
+  const issueCount=orphanCount;
+  const integrity=document.getElementById('integrityState');if(integrity){integrity.textContent=issueCount?`確認事項 ${issueCount}件`:'問題なし';integrity.className=issueCount?'status-warn':'status-ok'}
+  const note=document.getElementById('integrityNote');if(note){if(issueCount){const details=[`参照できない関係を隔離 ${orphanCount}件`];if(lastMigration.repairedCharacterIds)details.push(`移行時の人物ID修復 ${lastMigration.repairedCharacterIds}件`);if(lastMigration.repairedRelationIds)details.push(`移行時の関係ID修復 ${lastMigration.repairedRelationIds}件`);if(lastMigration.ambiguousDuplicateCharacterIds)details.push(`移行時の重複人物ID ${lastMigration.ambiguousDuplicateCharacterIds}件`);note.textContent=details.join('／')+'。隔離した元データはJSONバックアップ内に保持します。';note.className='integrity-note warn'}else{const repaired=(lastMigration.repairedCharacterIds||0)+(lastMigration.repairedRelationIds||0)+(lastMigration.ambiguousDuplicateCharacterIds||0);note.textContent=repaired?`移行時にIDを${repaired}件修復済みです。現在の人物と関係性は正常に結びついています。`:'人物と関係性は固有IDで正常に結びついています。';note.className='integrity-note ok'}}
+  const last=document.getElementById('lastSavedAt');if(last)last.textContent=formatDate(state.data.meta?.lastSavedAt);
+  const origin=document.getElementById('originBox');if(origin)origin.innerHTML=`<b>現在の保存先URL</b><br>${escapeHtml(location.origin||location.href)}`;
+  const persistent=document.getElementById('persistentState');if(persistent){try{persistent.textContent=navigator.storage?.persisted?((await navigator.storage.persisted())?'有効':'未指定'):'非対応'}catch(_){persistent.textContent='確認できません'}}
+  const usage=document.getElementById('storageUsage');if(usage){try{if(navigator.storage?.estimate){const e=await navigator.storage.estimate();usage.textContent=`${formatBytes(e.usage||0)} / ${formatBytes(e.quota||0)}`}else usage.textContent='非対応'}catch(_){usage.textContent='確認できません'}}
+}
+async function renderExport(){document.getElementById('exportStats').textContent=`キャラ ${state.data.characters.length}人／関係性 ${state.data.relations.length}件／隔離関係 ${(state.data.orphanRelations||[]).length}件／物語の芽 ${(state.data.storySeeds||[]).length}件／世界観 ${state.data.world?'1件':'未保存'}`;await refreshStorageInfo()}
+async function requestPersistentStorage(){if(!navigator.storage?.persist){showToast('このブラウザでは利用できません');return}try{const ok=await navigator.storage.persist();showToast(ok?'永続保存を有効にしました':'ブラウザの判断で未許可でした');refreshStorageInfo()}catch(_){showToast('設定できませんでした')}}
+function downloadJSON(){const payload={app:'好きからつくる。キャラクター工房',version:APP_VERSION,dataVersion:DATA_VERSION,exportedAt:new Date().toISOString(),data:state.data};download('sukikara_character_kobo_v0.8.6.2_backup.json',JSON.stringify(payload,null,2),'application/json')}
+function downloadTXT(){let s='好きからつくる。v0.8.6.2 「スマホ導線・画像おかえり候補」データ\n\n';state.data.characters.forEach(c=>{s+=`【${c.name}${c.furigana?'（'+c.furigana+'）':''}】\n${c.summary}\n外見：${c.visualDirection}\n\n`});state.data.relations.forEach(r=>{s+=`【関係性】\n${r.storySeed}\n\n`});state.data.storySeeds.filter(seed=>seed.disposition!=='rejected').forEach(seed=>{const c=seed.content||{};s+=`【物語の芽：${dispositionLabel(seed.disposition)}／${seed.authorship==='author'?'作者設定':'工房提案'}】\n${seedPairLabel(seed)}\n${c.worldHypothesis||''}\n${c.storyEntry||''}\n${c.relationShift||''}\n${(c.openQuestions||[]).map(q=>'・'+q).join('\n')}\n\n`});if(state.data.world)s+=`【世界観】\n${state.data.world.title}\n${state.data.world.genre}\n${state.data.world.values}\n${state.data.world.problem}\n`;download('sukikara_character_kobo_v0.8.6.2_data.txt',s,'text/plain')}
+function download(name,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),700)}
+async function importJSONFile(event){const file=event.target.files?.[0];if(!file)return;try{const text=await file.text();const parsed=JSON.parse(text);const data=parsed.data||parsed;if(!Array.isArray(data.characters)||!Array.isArray(data.relations))throw new Error('形式が違います');const counts={characters:data.characters.length,relations:data.relations.length,orphans:Array.isArray(data.orphanRelations)?data.orphanRelations.length:0,seeds:Array.isArray(data.storySeeds)?data.storySeeds.length:0,world:data.world?1:0};if(counts.characters>MAX_CHARACTERS)throw new Error(`キャラクターが上限${MAX_CHARACTERS}人を超えています`);const message=`読み込む内容を確認してください。\n\nキャラクター：${counts.characters}人\n関係性：${counts.relations}件\n隔離関係：${counts.orphans}件\n物語の芽：${counts.seeds}件\n世界観：${counts.world}件\n\n現在の棚を置き換えますか？`;if(!confirm(message))return;state.data=normalizeData(data);const ok=await persist({silent:true,migration:true});if(!ok)throw new Error('保存できませんでした');showToast('バックアップをデータ形式4で読み込みました');go('shelf')}catch(e){console.error(e);showToast('バックアップを読み込めませんでした')}finally{event.target.value=''}}
+async function clearAll(){if(!confirm('端末内データをすべて削除しますか？'))return;state.data=emptyData();clearPendingImageJob();try{if(state.db)await idbDelete(STATE_KEY)}catch(_){}try{localStorage.removeItem(FALLBACK_KEY);for(const key of LEGACY_KEYS)localStorage.removeItem(key)}catch(_){}updateCount();renderHome();refreshStorageInfo();setSaveStatus('idle','未保存');showToast('削除しました');go('home')}
+function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function escapeAttr(s){return String(s??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+load();
+</script>
+</body>
+</html>
