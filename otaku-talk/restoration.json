@@ -20,7 +20,7 @@
     {"episode":14,"status":"unresolved"},
     {"episode":15,"status":"title-confirmed","title":"SPY×FAMILY","note":"旧生成物の第15話見出しで確認"},
     {"episode":16,"status":"title-confirmed","title":"葬送のフリーレン","note":"会話ログの第16話見出しで確認"},
-    {"episode":17,"status":"title-confirmed","title":"The Last of Us","note":"旧生成物の第17話見出しで確認"},
+    {"episode":17,"status":"restored","title":"The Last of Us","path":"episodes/017-the-last-of-us/","note":"旧完成マンガの第17話見出しと本文を照合して復旧"},
     {"episode":18,"status":"title-confirmed","title":"宇宙よりも遠い場所","note":"会話ログの第18話見出しで確認"},
     {"episode":19,"status":"published","title":"リコリス・リコイル","path":"episodes/019-lycoris-recoil/"}
   ],
