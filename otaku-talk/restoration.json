@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "purpose": "三人のお茶会・旧回復旧用の内部台帳。推測で話数を確定しない。",
+  "working_branch": "work",
+  "production_branch": "queue",
+  "episodes": [
+    {"episode":1,"status":"unresolved"},
+    {"episode":2,"status":"unresolved"},
+    {"episode":3,"status":"unresolved"},
+    {"episode":4,"status":"unresolved"},
+    {"episode":5,"status":"unresolved"},
+    {"episode":6,"status":"unresolved"},
+    {"episode":7,"status":"unresolved"},
+    {"episode":8,"status":"conflict","candidates":["NieR:Automata","十三機兵防衛圏"],"note":"旧生成物に同じ第08話表記が複数あるため未確定"},
+    {"episode":9,"status":"title-confirmed","title":"少女終末旅行","note":"旧生成物の第09話見出しで確認"},
+    {"episode":10,"status":"unresolved"},
+    {"episode":11,"status":"unresolved"},
+    {"episode":12,"status":"unresolved"},
+    {"episode":13,"status":"unresolved"},
+    {"episode":14,"status":"unresolved"},
+    {"episode":15,"status":"title-confirmed","title":"SPY×FAMILY","note":"旧生成物の第15話見出しで確認"},
+    {"episode":16,"status":"title-confirmed","title":"葬送のフリーレン","note":"会話ログの第16話見出しで確認"},
+    {"episode":17,"status":"title-confirmed","title":"The Last of Us","note":"旧生成物の第17話見出しで確認"},
+    {"episode":18,"status":"title-confirmed","title":"宇宙よりも遠い場所","note":"会話ログの第18話見出しで確認"},
+    {"episode":19,"status":"published","title":"リコリス・リコイル","path":"episodes/019-lycoris-recoil/"}
+  ],
+  "legacy_conflicts": [
+    "旧生成物に第19話｜ぼっち・ざ・ろっく！表記があるが、work上の第19話リコリス・リコイルを正とする",
+    "旧会話に第19話｜NieR:Automata表記があるが、work上の第19話リコリス・リコイルを正とする"
+  ]
+}
