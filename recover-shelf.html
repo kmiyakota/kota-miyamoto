@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>キャラ棚の復旧｜キャラクター工房</title>
+<meta name="theme-color" content="#fff9f7">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>
+:root{--bg:#fff9f7;--paper:#fff;--ink:#332b30;--muted:#756a70;--line:#eadfd9;--pink:#cf6f8f;--green:#39734c;--greenbg:#eef8f1;--warn:#765b26;--warnbg:#fff7e7}*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif}main{width:min(680px,100%);margin:auto;padding:32px 18px 48px}h1{font-size:26px;line-height:1.35;margin:.25em 0 .5em}.eyebrow{color:var(--pink);font-weight:900;font-size:12px;letter-spacing:.08em}.lead{color:var(--muted);line-height:1.8}.card{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:18px;margin:14px 0}.status{font-weight:800;line-height:1.7}.status.ok{color:var(--green)}.status.warn{color:var(--warn)}.candidate{border-top:1px solid var(--line);padding:12px 0}.candidate:first-child{border-top:0}.candidate b{display:block}.candidate small{color:var(--muted);line-height:1.55;display:block;margin-top:3px}.btn{appearance:none;border:0;border-radius:999px;padding:13px 18px;font-weight:900;font-size:15px;background:var(--pink);color:#fff;width:100%;margin-top:10px}.btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}.btn:disabled{opacity:.45}.note{font-size:12px;line-height:1.7;color:var(--muted)}.good{background:var(--greenbg);border:1px solid #cfe5d5;border-radius:15px;padding:11px 12px;color:var(--green);font-size:13px;line-height:1.65}.warning{background:var(--warnbg);border:1px solid #efd7a8;border-radius:15px;padding:11px 12px;color:var(--warn);font-size:13px;line-height:1.65}code{font-size:11px;word-break:break-all}a{color:var(--pink);font-weight:800;text-decoration:none}
+</style>
+</head>
+<body>
+<main>
+<p class="eyebrow">好きからつくる。</p>
+<h1>キャラ棚の復旧</h1>
+<p class="lead">このiPhone内に残っている旧保存データを探し、現在のキャラクター工房の棚へ戻します。外部へ送信せず、このブラウザ内だけで処理します。</p>
+<div class="warning"><b>このページはデータを削除しません。</b><br>復旧前の現在データも自動でバックアップしてから処理します。</div>
+<div class="card">
+<div id="status" class="status">保存データを確認しています…</div>
+<div id="candidates"></div>
+<button id="recoverBtn" class="btn" disabled>キャラ棚を復旧する</button>
+<button id="rescanBtn" class="btn secondary">もう一度確認する</button>
+</div>
+<div id="result"></div>
+<p class="note">対象：現在のIndexedDB、旧localStorage保存、同一オリジン内で検出できる旧IndexedDB。復旧後は工房を開き直すと棚が読み込まれます。</p>
+<p><a href="./">← キャラクター工房へ戻る</a></p>
+</main>
+<script>
+const CURRENT_DB='sukikara_character_kobo';
+const CURRENT_STORE='app';
+const CURRENT_KEY='main';
+const KNOWN_KEYS=['sukikara_v0850_state','sukikara_v0843_state','sukikara_v084_state'];
+let found=[];
+const $=id=>document.getElementById(id);
+function safeParse(v){try{return typeof v==='string'?JSON.parse(v):v}catch{return null}}
+function charCount(v){const x=safeParse(v);return Array.isArray(x?.characters)?x.characters.length:0}
+function describeNames(v){const x=safeParse(v);const names=(x?.characters||[]).map(c=>c?.name||'名前未定').filter(Boolean);return names.slice(0,5).join('・')}
+function addCandidate(source,value,kind='unknown'){
+  const data=safeParse(value);if(!data||!Array.isArray(data.characters)||!data.characters.length)return;
+  const sig=JSON.stringify(data.characters.map(c=>[c?.id||'',c?.name||'',c?.furigana||'']));
+  if(found.some(x=>x.sig===sig))return;
+  found.push({source,data,kind,sig,count:data.characters.length});
+}
+function openDb(name){return new Promise((resolve,reject)=>{try{const r=indexedDB.open(name);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}catch(e){reject(e)}})}
+function getFromStore(db,store,key){return new Promise((resolve,reject)=>{try{const tx=db.transaction(store,'readonly');const r=tx.objectStore(store).get(key);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}catch(e){reject(e)}})}
+function getAllFromStore(db,store){return new Promise((resolve,reject)=>{try{const tx=db.transaction(store,'readonly');const os=tx.objectStore(store);if(os.getAll){const r=os.getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error)}else{const out=[];const r=os.openCursor();r.onsuccess=e=>{const c=e.target.result;if(c){out.push(c.value);c.continue()}else resolve(out)};r.onerror=()=>reject(r.error)}}catch(e){reject(e)}})}
+async function scanCurrentDb(){try{const db=await openDb(CURRENT_DB);if(db.objectStoreNames.contains(CURRENT_STORE)){const v=await getFromStore(db,CURRENT_STORE,CURRENT_KEY);addCandidate('現在のIndexedDB',v,'current-idb')}db.close()}catch(e){}}
+function scanLocalStorage(){for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(!k)continue;const v=localStorage.getItem(k);if(KNOWN_KEYS.includes(k)||k.startsWith('sukikara_'))addCandidate('localStorage: '+k,v,'local')}}
+async function scanOtherDbs(){if(typeof indexedDB.databases!=='function')return;let list=[];try{list=await indexedDB.databases()}catch{return}for(const info of list){const name=info?.name;if(!name||name===CURRENT_DB)continue;try{const db=await openDb(name);for(const store of Array.from(db.objectStoreNames)){try{const vals=await getAllFromStore(db,store);for(const v of vals)addCandidate('旧IndexedDB: '+name+' / '+store,v,'legacy-idb')}catch(e){}}db.close()}catch(e){}}}
+function render(){found.sort((a,b)=>b.count-a.count);const box=$('candidates');box.innerHTML='';if(!found.length){$('status').className='status warn';$('status').textContent='このURLの保存領域から、キャラクター入りの旧データをまだ見つけられていません。';$('recoverBtn').disabled=true;return}
+  $('status').className='status ok';$('status').textContent=`復旧候補を ${found.length} 件見つけました。最大 ${found[0].count} 人の棚があります。`;
+  found.forEach((c,i)=>{const d=document.createElement('div');d.className='candidate';d.innerHTML=`<b>${i===0?'★ ':''}${c.source} — ${c.count}人</b><small>${describeNames(c.data)||'名前情報なし'}</small>`;box.appendChild(d)});$('recoverBtn').disabled=false;
+}
+async function scan(){found=[];$('result').innerHTML='';$('status').className='status';$('status').textContent='保存データを確認しています…';$('recoverBtn').disabled=true;$('candidates').innerHTML='';await scanCurrentDb();scanLocalStorage();await scanOtherDbs();render()}
+function putCurrent(value){return new Promise((resolve,reject)=>{const r=indexedDB.open(CURRENT_DB,1);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains(CURRENT_STORE))db.createObjectStore(CURRENT_STORE)};r.onsuccess=()=>{const db=r.result;try{const tx=db.transaction(CURRENT_STORE,'readwrite');tx.objectStore(CURRENT_STORE).put(value,CURRENT_KEY);tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}}catch(e){db.close();reject(e)}};r.onerror=()=>reject(r.error)})}
+async function readCurrentRaw(){try{const db=await openDb(CURRENT_DB);if(!db.objectStoreNames.contains(CURRENT_STORE)){db.close();return null}const v=await getFromStore(db,CURRENT_STORE,CURRENT_KEY);db.close();return v}catch{return null}}
+function backupCurrent(raw){try{if(raw)localStorage.setItem('sukikara_recovery_backup_'+Date.now(),JSON.stringify(raw))}catch(e){}}
+async function recover(){if(!found.length)return;const best=found[0];$('recoverBtn').disabled=true;$('rescanBtn').disabled=true;$('result').innerHTML='<div class="card"><div class="status">復旧しています…</div></div>';
+  const current=await readCurrentRaw();backupCurrent(current);
+  const data=best.data;
+  let idbOk=false;try{await putCurrent(data);idbOk=true}catch(e){}
+  try{localStorage.setItem('sukikara_v0850_state',JSON.stringify(data));localStorage.setItem('sukikara_v0843_state',JSON.stringify(data))}catch(e){}
+  $('result').innerHTML=`<div class="card"><div class="good"><b>復旧処理が完了しました。</b><br>${data.characters.length}人の棚を現在の保存領域へ戻しました。${idbOk?'':' IndexedDBへ直接書けなかったため、旧保存経路にも復旧データを残しました。'}</div><button class="btn" onclick="location.href='./'">工房を開いて確認する</button></div>`;
+  $('rescanBtn').disabled=false;
+}
+$('recoverBtn').addEventListener('click',recover);$('rescanBtn').addEventListener('click',scan);scan();
+</script>
+</body>
+</html>
