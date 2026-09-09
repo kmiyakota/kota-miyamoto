@@ -12,7 +12,7 @@
     {"episode":6,"status":"unresolved"},
     {"episode":7,"status":"unresolved"},
     {"episode":8,"status":"conflict","candidates":["NieR:Automata","十三機兵防衛圏"],"note":"旧生成物に同じ第08話表記が複数あるため未確定"},
-    {"episode":9,"status":"title-confirmed","title":"少女終末旅行","note":"旧生成物の第09話見出しで確認"},
+    {"episode":9,"status":"restored","title":"少女終末旅行","path":"episodes/009-girls-last-tour/","note":"旧完成マンガの第09話見出し・会話・今回見えたことを確認し、現行Webフォーマットで復旧"},
     {"episode":10,"status":"unresolved"},
     {"episode":11,"status":"unresolved"},
     {"episode":12,"status":"unresolved"},
