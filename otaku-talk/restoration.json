@@ -18,14 +18,19 @@
     {"episode":12,"status":"unresolved"},
     {"episode":13,"status":"unresolved"},
     {"episode":14,"status":"unresolved"},
-    {"episode":15,"status":"recreated","title":"SPY×FAMILY","path":"episodes/015-spy-family/","note":"旧生成物で作品名を確認。旧完成マンガの衣都・灯・環の固定外見と会話の深度を参照し、現行Webフォーマットで再制作"},
-    {"episode":16,"status":"title-confirmed","title":"葬送のフリーレン","note":"会話ログの第16話見出しで確認"},
-    {"episode":17,"status":"restored","title":"The Last of Us","path":"episodes/017-the-last-of-us/","note":"旧完成マンガの第17話見出しと本文を照合して復旧"},
-    {"episode":18,"status":"title-confirmed","title":"宇宙よりも遠い場所","note":"会話ログの第18話見出しで確認"},
-    {"episode":19,"status":"published","title":"リコリス・リコイル","path":"episodes/019-lycoris-recoil/"}
+    {"episode":15,"status":"recreated","title":"SPY×FAMILY","path":"episodes/015-spy-family/"},
+    {"episode":16,"status":"title-confirmed","title":"葬送のフリーレン"},
+    {"episode":17,"status":"restored","title":"The Last of Us","path":"episodes/017-the-last-of-us/"},
+    {"episode":18,"status":"title-confirmed","title":"宇宙よりも遠い場所"},
+    {"episode":19,"status":"published","title":"リコリス・リコイル","path":"episodes/019-lycoris-recoil/"},
+    {"episode":20,"status":"adopted-staged","title":"あんさんぶるスターズ!!","path":"episodes/020-ensemble-stars/","manga":"adopted; binary transfer pending"},
+    {"episode":21,"status":"adopted-staged","title":"超かぐや姫！","path":"episodes/021-cho-kaguya-hime/","manga":"adopted; binary transfer pending"},
+    {"episode":22,"status":"adopted-staged","title":"装甲騎兵ボトムズ","path":"episodes/022-armored-trooper-votoms/","manga":"adopted; binary transfer pending"},
+    {"episode":23,"status":"adopted-staged","title":"DYNAMIC CHORD（アニメ）","path":"episodes/023-dynamic-chord/","manga":"adopted; binary transfer pending"},
+    {"episode":24,"status":"adopted-staged","title":"神の雫（アニメ）","path":"episodes/024-kami-no-shizuku/","manga":"adopted final revision; binary transfer pending"}
   ],
   "legacy_conflicts": [
-    "旧生成物に第19話｜ぼっち・ざ・ろっく！表記があるが、work上の第19話リコリス・リコイルを正とする",
-    "旧会話に第19話｜NieR:Automata表記があるが、work上の第19話リコリス・リコイルを正とする"
+    "旧生成物に第19話｜ぼっち・ざ・ろっく！表記があるが、第19話リコリス・リコイルを正とする",
+    "旧会話に第19話｜NieR:Automata表記があるが、第19話リコリス・リコイルを正とする"
   ]
 }
