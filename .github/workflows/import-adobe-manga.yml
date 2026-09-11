@@ -1,0 +1,42 @@
+name: Import Adobe manga asset
+
+on:
+  push:
+    branches: [work]
+    paths:
+      - '.image-staging/*.url'
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work
+          fetch-depth: 0
+      - name: Import episode 009 manga
+        if: hashFiles('.image-staging/009.url') != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="$(cat .image-staging/009.url)"
+          DEST="otaku-talk/episodes/009-girls-last-tour/manga.jpg"
+          mkdir -p "$(dirname "$DEST")"
+          curl -L --fail --retry 3 --retry-delay 2 "$URL" -o "$DEST"
+          test -s "$DEST"
+          file "$DEST" | grep -Eqi 'JPEG|image data'
+          sed -i 's#src="./manga.png"#src="./manga.jpg"#' otaku-talk/episodes/009-girls-last-tour/index.html
+          rm -f .image-staging/009.url
+      - name: Commit imported asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add otaku-talk/episodes/009-girls-last-tour/manga.jpg otaku-talk/episodes/009-girls-last-tour/index.html .image-staging
+          git diff --cached --quiet && exit 0
+          git commit -m 'Import repaired manga for episode 009'
+          git push origin HEAD:work
