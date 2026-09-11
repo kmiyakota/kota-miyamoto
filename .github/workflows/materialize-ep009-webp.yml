@@ -1,0 +1,46 @@
+name: Materialize episode 009 optimized WebP
+
+on:
+  push:
+    branches: [work]
+    paths:
+      - '.image-staging/ep009/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work
+      - name: Decode and install episode 009 manga
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p otaku-talk/episodes/009-girls-last-tour
+          cat .image-staging/ep009/part-* | tr -d '\r\n' | base64 -d > otaku-talk/episodes/009-girls-last-tour/manga.webp
+          test -s otaku-talk/episodes/009-girls-last-tour/manga.webp
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('otaku-talk/episodes/009-girls-last-tour/index.html')
+          s = p.read_text(encoding='utf-8')
+          if './manga.png' not in s and './manga.webp' not in s:
+              raise SystemExit('expected manga image reference not found')
+          s = s.replace('./manga.png', './manga.webp')
+          p.write_text(s, encoding='utf-8')
+          PY
+          rm -f otaku-talk/episodes/009-girls-last-tour/manga.png
+          rm -rf .image-staging/ep009
+          rm -f .github/workflows/materialize-ep009-webp.yml
+      - name: Commit optimized episode 009 asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Publish optimized manga for Otaku Talk episode 009'
+          git push origin HEAD:work
