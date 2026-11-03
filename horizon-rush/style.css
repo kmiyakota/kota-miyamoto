@@ -52,3 +52,6 @@ button{-webkit-tap-highlight-color:transparent}
  .title-dock>.title-row .menu-btn{min-height:24px;font-size:10px}
  .pause-control{width:42px;height:42px}
 }
+
+/* v2.3: remove the horizontal dark gradient across the title art. */
+.title-art-screen::before{content:none!important}
