@@ -143,7 +143,7 @@
         ending: 'assets/music/ending.m4a'
     };
     class AudioEngine {
-        constructor() { this.ac = null; this.master = null; this.musicBus = null; this.sfxBus = null; this.track = ''; this.enabled = true; this.noise = null; this.unlocked = false; this.pausedByGame = false; this.musicAudio = new Audio(); this.musicAudio.preload = 'none'; this.musicAudio.loop = true; this.musicAudio.addEventListener('error', () => { console.warn('BGM could not be loaded:', this.track); }); }
+        constructor() { this.ac = null; this.master = null; this.musicBus = null; this.sfxBus = null; this.track = ''; this.enabled = true; this.noise = null; this.unlocked = false; this.pausedByGame = false; this.musicAudio = new Audio(); this.musicAudio.preload = 'none'; this.musicAudio.loop = true; this.musicAudio.addEventListener('error', () => { const fallback = { title: 'assets/music/title.m4a', even: 'assets/music/main.m4a', boss: 'assets/music/boss.m4a' }[this.track]; if (fallback && !this.musicAudio.src.endsWith(fallback)) { this.musicAudio.src = fallback; if (this.unlocked && !this.pausedByGame) this.musicAudio.play().catch(() => {}); } else console.warn('BGM could not be loaded:', this.track); }); }
         unlock() {
             if (!this.ac) {
                 const AC = window.AudioContext || window.webkitAudioContext;
