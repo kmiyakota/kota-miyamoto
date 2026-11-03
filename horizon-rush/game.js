@@ -134,9 +134,10 @@
     /* Original fully-composed multi-instrument soundtrack (8 tracks) + procedural SFX.
        BGM is delivered as actual audio, never short step-by-step melody loops. */
     const MUSIC_TRACKS = {
-        title: 'assets/music/title.m4a',
+        title: 'assets/music/title.mp3',
         main: 'assets/music/main.m4a',
-        boss: 'assets/music/boss.m4a',
+        even: 'assets/music/even.mp3',
+        boss: 'assets/music/boss.mp3',
         final: 'assets/music/final.m4a',
         bonus: 'assets/music/bonus.m4a',
         ending: 'assets/music/ending.m4a'
@@ -867,7 +868,7 @@
     function seeded(seed) { let v = seed >>> 0; return () => { v ^= v << 13; v ^= v >>> 17; v ^= v << 5; return (v >>> 0) / 4294967296; }; }
     function makeGame(mode = 'arcade', startAt = 0) { const casual = mode === 'casual', practice = mode === 'practice'; return { mode, casual, practice, scoreAttack: mode === 'scoreAttack', score: 0, lives: casual ? 5 : 3, extends: 0, continues: 0, stageIndex: startAt, stage: STAGES[startAt], player: { x: W * .5, y: H * .65, vx: 0, vy: 0, invuln: 0, fireCd: 0, firing:false, pose:'hover',poseTimer:0,poseBlend:0,hitAnim:0,landingTime:0,lastGround:false }, enemies: [], obstacles: [], projectiles: [], boss: null, time: 0, stageTime: 0, distance: 0, phase: 'intro', intro: 2.4, clearTime: 0, spawnTime: 4, obstacleTime: 5, bonusCount: 0, gauntletIdx: 0, rng: seeded(startAt * 11987 + 2729), bossSpawned: false, shots: 0, hits: 0, kills: 0 }; }
     function begin(mode = 'arcade', stage = 0) { audio.unlock(); audio.play('ui'); game = makeGame(mode, stage); particles = []; state = 'PLAYING'; overlay.innerHTML = ''; hud.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); save.settings.difficulty = (mode === 'practice' || mode === 'scoreAttack') ? 'arcade' : mode; settings = save.settings; persist(); updateHud(); stageIntro(); canvas.focus({ preventScroll: true }); }
-    function stageIntro() { game.stage = STAGES[game.stageIndex]; backgroundStage = game.stage; game.phase = 'intro'; game.intro = 2.4; game.stageTime = 0; game.spawnTime = 3.6; game.obstacleTime = 5; game.enemies = []; game.obstacles = []; game.projectiles = []; game.boss = null; game.bossSpawned = false; game.gauntletIdx = 0; game.bonusCount = 0; game.rng = seeded(game.stageIndex * 11987 + 2729); game.player.invuln = 1.5; game.player.fireCd = .04; bossUi.classList.add('hidden'); audio.changeTrack(game.stage.bonus ? 'bonus' : 'main'); showNotice(`STAGE ${String(game.stageIndex + 1).padStart(2, '0')} · ${game.stage.name}`, 2.25); updateHud(); }
+    function stageIntro() { game.stage = STAGES[game.stageIndex]; backgroundStage = game.stage; game.phase = 'intro'; game.intro = 2.4; game.stageTime = 0; game.spawnTime = 3.6; game.obstacleTime = 5; game.enemies = []; game.obstacles = []; game.projectiles = []; game.boss = null; game.bossSpawned = false; game.gauntletIdx = 0; game.bonusCount = 0; game.rng = seeded(game.stageIndex * 11987 + 2729); game.player.invuln = 1.5; game.player.fireCd = .04; bossUi.classList.add('hidden'); audio.changeTrack(game.stageIndex % 2 === 0 ? 'main' : 'even'); showNotice(`STAGE ${String(game.stageIndex + 1).padStart(2, '0')} · ${game.stage.name}`, 2.25); updateHud(); }
     function showNotice(message, duration = 2) { notice.textContent = message; notice.classList.add('active'); noticeUntil = clock + duration; }
     function updateHud() { if (!game)
         return; hudScore.textContent = pad(game.score); hudHi.textContent = pad(Math.max(save.hi, save.casualHi, game.score)); hudStage.textContent = pad(game.stageIndex + 1, 2) + ' / 18'; hudLives.textContent = '× ' + pad(game.lives, 2); if (game.boss) {
