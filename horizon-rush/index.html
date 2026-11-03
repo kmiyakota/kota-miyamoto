@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0b0b25">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="preload" href="assets/ito.png" as="image">
+  <link rel="preload" href="assets/title_art.webp" as="image">
+  <meta name="description" content="ITOが異世界を駆け抜ける、全18ステージの高速疑似3Dブラウザシューティング。">
+  <title>HORIZON RUSH 2.2 — ITO × AKARI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ambient ambient-a" aria-hidden="true"></div><div class="ambient ambient-b" aria-hidden="true"></div>
+  <main class="arcade" id="arcade">
+    <div class="game-frame" id="game-frame">
+      <canvas id="game" width="960" height="720" aria-label="ITOが主人公の擬似3Dシューティングゲーム" tabindex="0"></canvas>
+      <div id="hud" class="hud hidden" aria-live="off">
+        <div class="hud-left"><span class="hud-caption">SCORE</span><strong id="score">00000000</strong></div>
+        <div class="hud-center"><span class="hud-caption">HI SCORE</span><strong id="highscore">00000000</strong></div>
+        <div class="hud-right"><span class="hud-caption">STAGE</span><strong id="stage">01 / 18</strong></div>
+        <div class="hud-bottom"><span class="life-icon">✦</span><span id="lives">× 03</span><span class="char-name">ITO · SKY GUARDIAN</span></div>
+        <div class="boss-health hidden" id="boss-ui"><div id="boss-name">GUARDIAN</div><div class="boss-track"><div id="boss-fill"></div></div></div>
+      </div>
+      <div class="notice" id="notice" role="status" aria-live="polite"></div>
+      <button type="button" id="pause-btn" class="pause-control hidden" title="ポーズ（P / Esc）" aria-label="ポーズ">Ⅱ</button>
+      <div id="overlay" class="overlay" aria-live="polite"></div>
+      <div class="loading-panel" id="loading"><span class="loading-spinner"></span>ITOの冒険を準備しています…</div>
+    </div>
+    <footer class="arcade-footer"><span class="brand">HORIZON RUSH <small>© Original browser game</small></span><span>KEYBOARD · MOUSE · GAMEPAD · TOUCH</span><button id="fullscreen" type="button" title="全画面モード">⛶ FULL SCREEN</button></footer>
+  </main>
+  <script>
+window.addEventListener('error', function(ev) {
+  var el=document.getElementById('loading');
+  if(el && !el.classList.contains('hidden')) {
+    el.textContent='読み込みエラーが発生しました。ChromeまたはEdgeで開いてください。 '+String(ev.message||'');
+  }
+});
+</script><script defer src="game.js"></script>
+</body>
+</html>
