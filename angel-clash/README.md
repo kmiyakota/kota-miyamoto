@@ -1,3 +1,13 @@
+# ANGEL CLASH v9.0 — 4-character HD combat animation
+
+**Playable-source implementation completed in queue.** All 4 fighters now use 12-action (48 total) transparent high-detail WebP combat atlases cropped from the creator-approved character model boards. New sprite sheets use 400px source cells (1600×1200 per character), retain the standard fitted miniskirt suit without stockings, and integrate directly with the live fighting animation state machine and subframe interpolation. NOX is now animated, not only a static pose. Code includes a resilient original-sprite fallback.
+
+Wix Media Manager reports all four new sprite sheets READY, totalling ~1.28 MB. 4 matchups × 10 attack types passed mock Canvas2D checks, 0 invalid image draw coordinates and 0 out-of-bounds source rectangles. The Cloudflare Pages live release and real iPhone Safari frame rate are **not independently verified**. See [HD_COMBAT_ANIMATION.md](HD_COMBAT_ANIMATION.md) for exact image URLs, pose mappings, debugging hooks and known illustration-resolution limitations.
+
+**Outfit scope:** The user explicitly requested the BASIC fitted miniskirt suit first. The stage-themed costume variants remain portrait-only until dedicated combat atlases are ready. Ornate/frilly alternatives remain safely archived at [ART_CONCEPT_ARCHIVE.md](ART_CONCEPT_ARCHIVE.md).
+
+---
+
 # ANGEL CLASH v8.4 — Optimized Costume Previews
 
 - All **5 stage-specific outfit concept portraits** now show in story, in-fight HUD and result screens using lazy-loaded stage artwork. Character identities, dark fitted miniskirt palettes and lack of stockings are preserved.
