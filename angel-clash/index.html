@@ -233,6 +233,7 @@ function isQCB(p,d){return command(p,d,[DOWN,BACKDIAG,BACK])}
 function isDP(p,d){return command(p,d,[FORWARD,DOWN,DIAG])}
 function isDoubleQCF(p,d){return command(p,d,[DOWN,DIAG,FORWARD,DOWN,DIAG,FORWARD])}
 /* v7: artwork-preserving secondary-motion rig. Never touches collisions. */
+const MOTION_BANDS=typeof window.matchMedia==='function'&&window.matchMedia('(pointer:coarse)').matches?12:16;
 function newVisualRig(x){return {prevX:x,prevY:FLOOR,prevAnim:0,walk:0,crouch:0,air:0,land:0,wasGrounded:true,speed:0,lean:0,poseFrom:1,poseTo:1,poseBlend:1};}
 function updateVisualRig(f){
  const v=f.visual;if(!v)return;
@@ -793,7 +794,7 @@ function drawFighter(f,ghost=false,offset=0){
  if(f.id==='nox'){drawNox(f);g.restore();return}
  const im=images[f.id];
  if(!im?.naturalWidth){portrait(f.id,f.x-75,f.y-290,150,284);g.restore();return}
- const hasCinematic=!ghost&&hasAttack(f)&&(f.id==='ito'&&['pulse','super'].includes(f.moveName)||f.id==='tamaki'&&['mk','hk','rush'].includes(f.moveName));
+ const hasCinematic=!ghost&&hasAttack(f)&&(f.id==='ito'&&images.itoAction?.naturalWidth&&['pulse','super'].includes(f.moveName)||f.id==='tamaki'&&images.tamakiAction?.naturalWidth&&['mk','hk','rush'].includes(f.moveName));
  let poseVisibility=0;
  if(hasCinematic){const m=f.move,n=m.startup+m.active+m.recovery;poseVisibility=clamp(Math.min(f.moveFrame/5,(n-f.moveFrame)/8),0,1);}
  const v=f.visual,frame=v?.poseTo??spriteFrame(f);
@@ -819,7 +820,7 @@ function drawFighter(f,ghost=false,offset=0){
   const sx=(k%atlasMeta.cols)*tw,sy=Math.floor(k/atlasMeta.cols)*th;
   g.globalAlpha=opacity*alpha;
   if(walk>.07&&!ghost){
-   const bands=16,band=th/bands;
+   const bands=MOTION_BANDS,band=th/bands;
    for(let i=0;i<bands;i++){
     const srcY=i*band,depth=(i+.5)/bands;
     const lower=clamp((depth-.42)/.58,0,1);
@@ -1183,7 +1184,8 @@ window.AngelClashDebug={
  options:()=>structuredClone(settings),
  setTouchMode:(mode)=>{settings.touchMode=mode;applyTouchMode()},
  move:(p,k)=>{const f=fighters[p];if(!f)return false;return startAttack(f,k)},
- tick:(n=1)=>{for(let i=0;i<n;i++)stepLogic();render()},
+ tick:(n=1)=>{for(let i=0;i<n;i++)stepLogic();renderAlpha=1;render()},
+ animationState:()=>fighters.map(f=>({id:f.id,walk:f.visual?.walk??0,crouch:f.visual?.crouch??0,air:f.visual?.air??0,land:f.visual?.land??0,lean:f.visual?.lean??0,pose:f.visual?.poseTo??0,blend:f.visual?.poseBlend??1})),
  chooseMode:(i=0)=>{menuIndex=i;chooseMenu()},
  setScene:(s)=>setScene(s)
 };
