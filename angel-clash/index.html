@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v5 — Graphics Edition</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v6 — Mobile & Graphics</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,calc(100dvh * 16 / 9));height:min(100dvh,calc(100vw * 9 / 16));max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -53,26 +53,32 @@ body.touch-classic #touch .assist-buttons{display:none}
 #touch .assist-buttons button[data-key=assist-h]{background:linear-gradient(145deg,#efc07b65,#ab6f876e)}
 #touch .assist-buttons button[data-key=assist-s]{background:linear-gradient(145deg,#a489f375,#583ca479)}
 #touch button{backdrop-filter:blur(1px)}
+/* v6 launch overlay and orientation helper */
+#boot{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;
+background:radial-gradient(circle at 50% 40%,#613078 0%,#211038 55%,#100720 100%);
+color:#fff0e7;font-family:Georgia,serif;text-align:center;pointer-events:none;transition:opacity .3s ease,visibility .3s ease}
+#boot.done{opacity:0;visibility:hidden}
+#boot .boot-title{font-size:clamp(26px,6vw,64px);letter-spacing:.09em;text-shadow:0 0 22px #ef75d9}
+#boot .boot-sub{font:600 clamp(10px,1.8vw,20px) Arial,sans-serif;letter-spacing:.23em;margin:14px 0 25px;color:#ffe5b1}
+#boot .boot-track{width:min(55vw,430px);height:7px;margin:auto;background:#ffffff36;border-radius:10px;overflow:hidden}
+#boot .boot-fill{height:100%;width:0;background:linear-gradient(90deg,#c774e8,#fff0ab);border-radius:10px;transition:width .2s ease}
+#boot .boot-percent{font:500 clamp(10px,1.5vw,16px) Arial,sans-serif;margin-top:14px;color:#eed8fc}
+#portrait-tip{display:none;position:fixed;left:8px;right:8px;top:max(14px,env(safe-area-inset-top));z-index:25;
+color:#ffe6bb;text-align:center;font:600 13px/1.6 -apple-system,BlinkMacSystemFont,Arial,sans-serif;pointer-events:none;
+text-shadow:0 2px 8px #000;background:#1a093bc9;border:1px solid #c991cb85;padding:7px;border-radius:8px}
+@media (orientation:portrait) and (pointer:coarse){#portrait-tip{display:block}}
+@media (prefers-reduced-motion:reduce){#boot{transition:none}#boot .boot-fill{transition:none}}
 </style></head><body>
+<div id="portrait-tip">スマートフォンは横向きにすると大きくプレイできます</div>
 <div id="shell"><canvas id="game" width="1280" height="720" aria-label="ANGEL CLASH 2D対戦格闘ゲーム"></canvas>
+<div id="boot" role="status" aria-live="polite"><div><div class="boot-title">ANGEL CLASH</div><div class="boot-sub">MOBILE GRAPHICS EDITION</div><div class="boot-track"><div class="boot-fill" id="boot-fill"></div></div><div class="boot-percent" id="boot-percent">LOADING 0%</div></div></div>
 <div id="touch" aria-label="タッチ操作">
  <div class="pad"><button data-key="up" aria-label="上">▲</button><button data-key="left" aria-label="左">◀</button><button data-key="down" aria-label="下">▼</button><button data-key="right" aria-label="右">▶</button></div>
  <div class="assist-buttons"><button data-key="assist-p" aria-label="弱パンチ">P</button><button data-key="assist-k" aria-label="弱キック">K</button><button data-key="assist-h" aria-label="強攻撃">H</button><button data-key="assist-s" aria-label="方向と組み合わせる必殺技">S</button></div><div class="buttons"><button data-key="lp">LP</button><button data-key="mp">MP</button><button data-key="hp">HP</button><button data-key="lk">LK</button><button data-key="mk">MK</button><button data-key="hk">HK</button><button data-key="special">SP</button><button data-key="sp">SUPER</button></div>
-</div><div id="touch-actions"><button id="touch-mode" type="button" aria-label="タッチ操作モードを切り替える">4 BUTTONS</button><button id="touch-pause" type="button" aria-label="一時停止">Ⅱ PAUSE</button></div><div id="notice">ENTERで決定 / ESCで戻る</div></div><script>window.ANGEL_CLASH_ASSETS={};</script>
-<script src="v5-assets/pack-01.js"></script>
-<script src="v5-assets/pack-02.js"></script>
-<script src="v5-assets/pack-03.js"></script>
-<script src="v5-assets/pack-04.js"></script>
-<script src="v5-assets/pack-05.js"></script>
-<script src="v5-assets/pack-06.js"></script>
-<script src="v5-assets/pack-07.js"></script>
-<script src="v5-assets/pack-08.js"></script>
-<script src="v5-assets/pack-09.js"></script>
-<script src="v5-assets/pack-10.js"></script>
-<script src="v5-assets/pack-11.js"></script>
-<script src="v5-assets/pack-12.js"></script>
-<script src="v5-assets/pack-13.js"></script>
-<script src="v5-assets/pack-14.js"></script>
+</div><div id="touch-actions"><button id="touch-mode" type="button" aria-label="タッチ操作モードを切り替える">4 BUTTONS</button><button id="touch-pause" type="button" aria-label="一時停止">Ⅱ PAUSE</button></div><div id="notice">ENTERで決定 / ESCで戻る</div></div><!-- v6: native WebP and JPEG, cacheable and correctly typed -->
+<link rel="preload" as="image" href="assets/logo/angel-clash-logo.webp">
+<link rel="preload" as="image" href="assets/original-characters.jpg">
+
 <script>/* ANGEL CLASH — original 2D arcade fighter, 2026
  * Art direction / characters supplied by project owner.
  * Pure browser Canvas2D + fixed 60Hz simulation. No runtime dependencies.
@@ -134,14 +140,30 @@ const inputNames=['left','right','up','down',...BUTTONS,'sp','special'];
 const KEYMAP=[{left:'KeyA',right:'KeyD',up:'KeyW',down:'KeyS',lp:'KeyJ',mp:'KeyK',hp:'KeyL',lk:'KeyU',mk:'KeyI',hk:'KeyO',sp:'Space',special:'ShiftLeft'},
  {left:'ArrowLeft',right:'ArrowRight',up:'ArrowUp',down:'ArrowDown',lp:'Numpad1',mp:'Numpad2',hp:'Numpad3',lk:'Numpad4',mk:'Numpad5',hk:'Numpad6',sp:'Numpad0',special:'NumpadEnter'}];
 const images={};
-function loadImage(name,path){const im=new Image();im.decoding='async';im.src=(window.ANGEL_CLASH_ASSETS&&window.ANGEL_CLASH_ASSETS[path])||path;images[name]=im;}
+const assetStatus={total:0,ready:0,failed:0,failures:[]};
+const boot=document.getElementById('boot'),bootFill=document.getElementById('boot-fill'),bootPercent=document.getElementById('boot-percent');
+function updateAssetStatus(){
+ const settled=assetStatus.ready+assetStatus.failed;
+ const percent=Math.round(settled/Math.max(1,assetStatus.total)*100);
+ if(bootFill)bootFill.style.width=percent+'%';
+ if(bootPercent)bootPercent.textContent=assetStatus.failed?('LOADING '+percent+'% · '+assetStatus.failed+' FALLBACK'):('LOADING '+percent+'%');
+ if(settled===assetStatus.total&&assetStatus.total>0){boot?.classList.add('done');
+  if(assetStatus.failed)console.warn('ANGEL CLASH: image fallback',assetStatus.failures);}
+}
+function loadImage(name,path){
+ const im=new Image();im.decoding='async';images[name]=im;assetStatus.total++;
+ im.onload=()=>{assetStatus.ready++;updateAssetStatus()};
+ im.onerror=()=>{assetStatus.failed++;assetStatus.failures.push(path);updateAssetStatus()};
+ im.src=path;
+}
+setTimeout(()=>{if(boot&&!boot.classList.contains('done')){console.warn('ANGEL CLASH: slow image load, displaying fallback');boot.classList.add('done')}},18000);
 loadImage('original','assets/original-characters.jpg');
 loadImage('arcadeLogo','assets/logo/angel-clash-logo.webp');
-loadImage('noxBoss','assets/sprites/nox-boss.png');
+loadImage('noxBoss','assets/sprites/nox-boss.webp');
 for(const id of IDS.slice(0,3))loadImage(id+'Portrait',`assets/portraits/${id}.webp`);
-for(const id of IDS.slice(0,3))loadImage(id,`assets/sprites/${id}-v5.png`);
-loadImage('itoAction','assets/sprites/ito-cinematic.png');
-loadImage('tamakiAction','assets/sprites/tamaki-cinematic.png');
+for(const id of IDS.slice(0,3))loadImage(id,`assets/sprites/${id}-v5.webp`);
+loadImage('itoAction','assets/sprites/ito-cinematic.webp');
+loadImage('tamakiAction','assets/sprites/tamaki-cinematic.webp');
 for(let i=0;i<5;i++){loadImage('stage'+i,`assets/stages/stage${i}-hd.webp`);images['stage'+i].onload=()=>{stageCacheKey=-1};}
 // A number of poses in the development-sheet atlas were CUT AT THE GRID BORDER.
 // Select the complete frames and synthesize secondary motion with transforms;
@@ -941,7 +963,28 @@ function drawSuperCutIn(){if(!cutIn)return;
  g.restore();
 }
 
-function drawFight(){g.save();if(shake>0)g.translate(rand(-shake,shake),rand(-shake,shake));drawStage();drawReflections();
+/* v6: additive attack aura; never scales or obscures the original character art. */
+function drawCombatAuras(){
+ for(const f of fighters){
+  if(!hasAttack(f)||!['pulse','riser','rush','super'].includes(f.moveName))continue;
+  const isSuper=f.moveName==='super',cx=f.x,cy=f.y-192;
+  const intensity=clamp((f.moveFrame+1)/9,0,1)*(isSuper?.52:.32);
+  g.save();g.globalCompositeOperation='screen';g.globalAlpha=intensity;
+  const radius=isSuper?240:172,gr=g.createRadialGradient(cx,cy,9,cx,cy,radius);
+  gr.addColorStop(0,f.c.light+'a8');gr.addColorStop(.4,f.c.color+'55');gr.addColorStop(1,'#00000000');
+  g.fillStyle=gr;g.fillRect(cx-radius,cy-radius,radius*2,radius*2);
+  const rays=isSuper?14:8;
+  for(let i=0;i<rays;i++){
+   const angle=i*TAU/rays+displayTick*.018*(f.face||1);
+   const r1=65+Math.sin(displayTick*.09+i*2)*7,r2=r1+39+(isSuper?53:0);
+   g.strokeStyle=i%3===0?'#fff5e9':f.c.light;g.lineWidth=i%3===0?2.6:1.5;
+   g.beginPath();g.moveTo(cx+Math.cos(angle)*r1,cy+Math.sin(angle)*r1);
+   g.lineTo(cx+Math.cos(angle)*r2,cy+Math.sin(angle)*r2);g.stroke();
+  }
+  g.restore();
+ }
+}
+function drawFight(){g.save();if(shake>0)g.translate(rand(-shake,shake),rand(-shake,shake));drawStage();drawReflections();drawCombatAuras();
  const order=[...fighters].sort((a,b)=>a.x-b.x);for(const f of order){if(f.dash>0||(hasAttack(f)&&['rush','riser'].includes(f.moveName))){drawFighter(f,true,-f.face*52);drawFighter(f,true,-f.face*27);}drawFighter(f);}
  for(const pr of projectiles)drawProjectile(pr);drawParticles();drawImpactRings();drawAtmosphericForeground();g.restore();
  drawHUD();drawSuperCutIn();if(announcerTick>0){const z=announcerTick;if(announcer==='K.O.')label(announcer,640,293,103,'#fff1a9');else label(announcer,640,299,z>47?77:59,'#fff1ba')}
@@ -1036,7 +1079,7 @@ function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6')
  label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v5','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v6','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
@@ -1057,6 +1100,7 @@ function loop(now){if(last===0)last=now;const dt=clamp(now-last,0,90);last=now;a
 requestAnimationFrame(loop);
 musicForScene();
 window.AngelClashDebug={
+ assetStatus:()=>({...assetStatus}),
  state:()=>({scene,modeKind,stageIndex,round,wins:[...wins],timer,score,freeze,paused,endDelay,roundFrames,maxCombo:[...maxCombo],cutIn:cutIn?{...cutIn}:null,fighters:fighters.map(f=>({id:f.id,hp:f.hp,meter:f.meter,guard:f.guard,parry:f.parry,dash:f.dash,aiPlan:f.aiPlan?.type,x:f.x,y:f.y,act:f.act,stun:f.stun,moveName:f.moveName})),projectiles:projectiles.length}),
  start:(a='ito',b='tamaki',mode='cpu')=>beginMatch(a,b,mode),
  menu:()=>setScene('menu'),pick:(a=0,b=2,mode='cpu')=>{pick=a;pickRival=b;modeKind=mode;setScene('select')},
