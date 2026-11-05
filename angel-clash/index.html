@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v8 — HD Character Key Art</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v8.1 — Clean Performance</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -142,10 +142,14 @@ const MOVE={
  super:{startup:9,active:1,recovery:36,damage:245,reach:0,stun:35,block:25,knock:55,level:'mid',gain:0},
  throw:{startup:5,active:2,recovery:24,damage:114,reach:88,stun:28,block:0,knock:63,level:'throw',gain:10}
 };
-const DEFAULT={difficulty:1,rounds:2,time:99,music:75,sfx:75,touch:100,hitboxes:false,trainingDummy:0,showInput:false,touchMode:0,reduceFlash:false,reduceShake:false,crispStages:true};
+const DEFAULT={difficulty:1,rounds:2,time:99,music:75,sfx:75,touch:100,hitboxes:false,trainingDummy:0,showInput:false,touchMode:0,reduceFlash:false,reduceShake:false,crispStages:true,fxMode:'clean'};
 let settings={...DEFAULT};
 try{settings={...settings,...JSON.parse(localStorage.getItem('angel-clash-settings')||'{}')}}catch{}
 function saveSettings(){try{localStorage.setItem('angel-clash-settings',JSON.stringify(settings))}catch{}}
+function minimalFX(){return settings.fxMode!=='classic';}
+// Earlier ornate character designs and all visual concepts are retained:
+// see ART_CONCEPT_ARCHIVE.md. This toggle affects *only* VFX and scenery.
+
 let scene='title', tick=0, displayTick=0, menuIndex=0, modeKind='arcade',pick=0,pickRival=2,stageIndex=0,arcadeStep=0;
 let round=1, wins=[0,0], timer=99, score=0, freeze=0,flash=0,shake=0,announcer='',announcerTick=0, endDelay=0;
 let fighters=[],particles=[],projectiles=[],floatingText=[],paused=false,helpPage=0,resultWinner=0,challengeMode='cpu',storyNext=null;
@@ -244,7 +248,7 @@ canvas.addEventListener('pointerdown',e=>{audioReady();const r=canvas.getBoundin
  if(scene==='result'){if(y>619){const i=Math.floor((x-317)/165);if(i>=0&&i<4)resultActionIndex=i;}runResultAction();return}
  if(scene==='story'||scene==='ending'){advanceStory();return}
  if(scene==='help'||scene==='credits'){setScene('menu');return}
- if(scene==='options'){if(y>220&&y<625){selectedOption=clamp(Math.floor((y-207)/41),0,9);changeOption(1)}return}
+ if(scene==='options'){if(y>194&&y<635){selectedOption=clamp(Math.round((y-215)/39),0,10);changeOption(1)}return}
  if(scene==='fight'&&paused){paused=false;return}
 });
 function just(...a){return a.some(k=>newKeys.has(k))}
@@ -329,7 +333,7 @@ function runResultAction(){
  if(resultActionIndex===2){pick=IDS.indexOf(fighters[0].id);pickRival=IDS.indexOf(fighters[1].id);setScene('select');return;}
  setScene('menu');
 }
-function optionValue(index){switch(index){case 0:return ['EASY','NORMAL','HARD'][settings.difficulty];case 1:return ['1','2','3'][settings.rounds-1];case 2:return settings.time===99?'99':settings.time===60?'60':'∞';case 3:return settings.music+'%';case 4:return settings.sfx+'%';case 5:return ['IDLE','GUARD','CPU'][settings.trainingDummy];case 6:return settings.showInput?'ON':'OFF';case 7:return settings.touchMode===0?'ASSIST':'CLASSIC';case 8:return settings.reduceShake?'OFF':'ON';case 9:return settings.reduceFlash?'OFF':'ON';default:return ''}}
+function optionValue(index){switch(index){case 0:return ['EASY','NORMAL','HARD'][settings.difficulty];case 1:return ['1','2','3'][settings.rounds-1];case 2:return settings.time===99?'99':settings.time===60?'60':'∞';case 3:return settings.music+'%';case 4:return settings.sfx+'%';case 5:return ['IDLE','GUARD','CPU'][settings.trainingDummy];case 6:return settings.showInput?'ON':'OFF';case 7:return settings.touchMode===0?'ASSIST':'CLASSIC';case 8:return settings.reduceShake?'OFF':'ON';case 9:return settings.reduceFlash?'OFF':'ON';case 10:return minimalFX()?'CLEAN':'CLASSIC';default:return ''}}
 function changeOption(n){const i=selectedOption;if(i===0)settings.difficulty=(settings.difficulty+3+n)%3;
  if(i===1)settings.rounds=1+(settings.rounds-1+3+n)%3;
  if(i===2)settings.time=([99,60,9999])[([99,60,9999].indexOf(settings.time)+3+n)%3];
@@ -340,6 +344,7 @@ function changeOption(n){const i=selectedOption;if(i===0)settings.difficulty=(se
  if(i===7){settings.touchMode=(settings.touchMode+1)%2;applyTouchMode();}
  if(i===8)settings.reduceShake=!settings.reduceShake;
  if(i===9)settings.reduceFlash=!settings.reduceFlash;
+ if(i===10)settings.fxMode=minimalFX()?'classic':'clean';
  sound('select');saveSettings();}
 function moveFor(f,name,button='mp'){
  const base=MOVE[name];if(!base)return null;
@@ -444,7 +449,7 @@ function resolveCommand(f,p,attack){const c=pads[p];if(c.lp&&c.lk&&Math.abs(f.x-
  if(f.id==='tamaki'&&f.charging>=42&&(f.face===1?c.right:c.left)&&attack.endsWith('p'))return 'pulse';
  return attack;
 }
-function effectBurst(x,y,color,count=18,force=1){for(let i=0;i<count;i++)particles.push({x,y,dx:rand(-8,8)*force,dy:rand(-9,5)*force,life:rand(18,37),full:37,r:rand(2,7),color,kind:i%5===0?'petal':'spark'});if(particles.length>250)particles.splice(0,particles.length-250);}
+function effectBurst(x,y,color,count=18,force=1){if(minimalFX())count=Math.max(3,Math.ceil(count*.38));for(let i=0;i<count;i++)particles.push({x,y,dx:rand(-8,8)*force,dy:rand(-9,5)*force,life:rand(18,37),full:37,r:rand(2,7),color,kind:i%5===0?'petal':'spark'});const cap=minimalFX()?72:250;if(particles.length>cap)particles.splice(0,particles.length-cap);}
 function popText(text,x,y,color){floatingText.push({text,x,y,life:65,color});}
 function defenderBlocks(a,b,move){const c=pads[b.side],back=(b.face===1?c.left:c.right);
  if(!b.onGround||b.stun>0||b.blockstun===0&&b.act==='attack'||!back||move.level==='throw')return false;
@@ -602,8 +607,8 @@ function stepLogic(){tick++;displayTick++;
   if(scene==='help'&&just('ArrowLeft','KeyA','ArrowRight','KeyD'))helpPage=(helpPage+1)%2;
   if(just('Enter','Space','KeyJ'))setScene('menu');
  }else if(scene==='options'){
-  if(just('ArrowUp','KeyW'))selectedOption=(selectedOption+9)%10;
-  if(just('ArrowDown','KeyS'))selectedOption=(selectedOption+1)%10;
+  if(just('ArrowUp','KeyW'))selectedOption=(selectedOption+10)%11;
+  if(just('ArrowDown','KeyS'))selectedOption=(selectedOption+1)%11;
   if(just('ArrowLeft','KeyA'))changeOption(-1);
   if(just('ArrowRight','KeyD','Enter','Space'))changeOption(1);
  }else if(scene==='result'){
@@ -755,21 +760,22 @@ function drawStage(){
    g.drawImage(art,0,0,art.naturalWidth,art.naturalHeight,0,88,W,490);
    g.restore();
  } else {if(!stageCache||stageCacheKey!==stageIndex)buildStage();g.drawImage(stageCache,0,0);}
+ if(minimalFX())rect(0,88,W,488,'#10132864');
  const s=STAGES[stageIndex];
  // Perspective floor finishes at screen bottom and stays anchored to the fighters.
  const floor=g.createLinearGradient(0,576,0,H);floor.addColorStop(0,s.floor);floor.addColorStop(.55,'#322344');floor.addColorStop(1,'#100a25');rect(0,576,W,144,floor);
- for(let i=0;i<13;i++){const y=576+Math.pow(i/12,1.7)*140;line(0,y,W,y,s.trim+'76',i%4===0?2:1)}
- for(let i=-10;i<=10;i++)line(640,576,640+i*155,720,s.trim+'6f',1.2);
+ for(let i=0;i<(minimalFX()?7:13);i++){const y=576+Math.pow(i/(minimalFX()?6:12),1.7)*140;line(0,y,W,y,s.trim+'52',i%3===0?1.5:1)}
+ for(let i=-(minimalFX()?5:10);i<=(minimalFX()?5:10);i++)line(640,576,640+i*155,720,s.trim+'44',1);
  line(0,575,W,575,s.trim,6);line(0,582,W,582,'#ffe8fc7a',1.5);
  // Interactive environmental FX; deterministic spatial layout for screenshots.
  if(s.kind==='sakura'||s.kind==='eclipse'){
   const col=s.kind==='sakura'?'#ffd2ee':'#dc86da';
-  for(let i=0;i<75;i++){const x=((i*157+displayTick*(1+i%4)*.25)%1360)-40,y=((i*93+displayTick*(1+i%3)*.13)%680)-20;
+  for(let i=0;i<(minimalFX()?9:75);i++){const x=((i*157+displayTick*(1+i%4)*.25)%1360)-40,y=((i*93+displayTick*(1+i%3)*.13)%680)-20;
    g.save();g.translate(x,y);g.rotate((displayTick+i*12)*.012);g.globalAlpha=.24+i%5*.11;ellipse(0,0,i%4+2,i%3+1.5,col);g.restore()}
  }else if(s.kind==='crystal'){
-  for(let i=0;i<19;i++)sparkle((i*219+displayTick*.15)%W,220+(i*71)%345,2.2+i%2,'#c0ffff',.6);
+  for(let i=0;i<(minimalFX()?4:19);i++)sparkle((i*219+displayTick*.15)%W,220+(i*71)%345,2.2+i%2,'#c0ffff',.6);
  } else if(s.kind==='city'){
-  for(let i=0;i<7;i++){const y=175+i*51,x=(i*241+displayTick*.45)%1320;line(x,y,x+47,y,'#e6afff',1.2,.4)}
+  for(let i=0;i<(minimalFX()?2:7);i++){const y=175+i*51,x=(i*241+displayTick*.45)%1320;line(x,y,x+47,y,'#e6afff',1.2,.4)}
  }
 }
 
@@ -777,20 +783,20 @@ function drawAtmosphericForeground(){
  const kind=STAGES[stageIndex].kind;
  g.save();
  if(kind==='sakura'||kind==='eclipse'){
-  for(let i=0;i<20;i++){
+  for(let i=0;i<(minimalFX()?3:20);i++){
    const x=((i*181.31+displayTick*(.85+i%4*.23))%(W+115))-55;
    const y=(i*121.9+displayTick*(.35+i%3*.19))%(H+35)-17;
    const sz=3+(i*7)%6,a=(i*13+displayTick)*.012;
    g.save();g.translate(x,y);g.rotate(a);g.globalAlpha=.38+.23*(i%3)/2;
-   g.shadowColor=kind==='sakura'?'#fef0ff':'#edbaff';g.shadowBlur=4;
+   if(!minimalFX()){g.shadowColor=kind==='sakura'?'#fef0ff':'#edbaff';g.shadowBlur=4;}
    ellipse(0,0,sz,sz*.48,kind==='sakura'?'#ffe2f6':'#caa4ed');g.restore();
   }
  }else if(kind==='sea'){
-  for(let i=0;i<13;i++){const x=(i*117+displayTick*(1.5+i%4*.4))%(W+180)-70;
+  for(let i=0;i<(minimalFX()?3:13);i++){const x=(i*117+displayTick*(1.5+i%4*.4))%(W+180)-70;
    const y=430+(i*37)%190;g.save();g.globalAlpha=.17+.16*(i%4)/3;
    ellipse(x,y,2+i%3,1.5,'#ceffff');g.restore();}
  }else if(kind==='crystal'){
-  for(let i=0;i<18;i++){
+  for(let i=0;i<(minimalFX()?3:18);i++){
    const x=(i*137+Math.sin(displayTick*.017+i)*27)%W,y=210+(i*31)%320;
    sparkle(x,y,1.5+i%4,'#dcffff',.29+.22*Math.sin(displayTick*.042+i));
   }
@@ -952,6 +958,7 @@ function drawFighterHighlights(f){
  g.restore();
 }
 function drawReflections(visualFighters){
+ if(minimalFX())return; // Per-frame blur filters are expensive on phones and HiDPI PCs.
  // Ground plane reflection. It never affects collision/physics or input.
  g.save();g.beginPath();g.roundRect(0,FLOOR+9,W,115,0);g.clip();
  for(const f of visualFighters){
@@ -987,6 +994,11 @@ function drawCinematicPose(f){
  g.restore();return visibility>.96;
 }
 function drawProjectile(p){
+ if(minimalFX()){
+  g.save();g.globalAlpha=.86;ellipse(p.x,p.y,p.r*1.12,p.r*.73,p.color);
+  ellipse(p.x,p.y,p.r*.69,p.r*.48,p.light);ellipse(p.x,p.y,p.r*.22,p.r*.20,'#fffaff');
+  g.restore();return;
+ }
  g.save();g.globalCompositeOperation='lighter';g.shadowBlur=31;g.shadowColor=p.color;
  for(let j=0;j<p.trail.length;j++){
   const q=p.trail[j],t=(j+1)/p.trail.length;g.globalAlpha=t*.37;
@@ -1062,6 +1074,7 @@ function drawHUD(){
 }
 
 function drawImpactRings(){
+ if(minimalFX()){for(const ring of impactRings){g.save();g.globalAlpha=clamp(ring.life/ring.max,0,1)*.72;g.strokeStyle=ring.color;g.lineWidth=2;g.beginPath();g.ellipse(ring.x,ring.y,ring.r,ring.r*.65,0,0,TAU);g.stroke();g.restore()}return;}
  for(const ring of impactRings){g.save();g.globalAlpha=clamp(ring.life/ring.max,0,1)*.85;g.strokeStyle=ring.color;g.lineWidth=4*ring.life/ring.max+1;g.shadowColor=ring.color;g.shadowBlur=17;g.beginPath();g.ellipse(ring.x,ring.y,ring.r*1.1,ring.r*.62,0,0,TAU);g.stroke();for(let i=0;i<8;i++){const a=i*TAU/8+displayTick*.03;line(ring.x+Math.cos(a)*ring.r,ring.y+Math.sin(a)*ring.r*.65,ring.x+Math.cos(a)*ring.r*1.32,ring.y+Math.sin(a)*ring.r*.86,ring.color,2);}g.restore();}
 }
 function drawSuperCutIn(){if(!cutIn)return;
@@ -1069,7 +1082,7 @@ function drawSuperCutIn(){if(!cutIn)return;
  const c=META[cutIn.id],fromLeft=cutIn.side===0;
  g.save();g.globalAlpha=opacity;
  const band=g.createLinearGradient(0,160,W,515);band.addColorStop(0,'#13062fe6');band.addColorStop(.5,'#331047ef');band.addColorStop(1,'#0b0528e5');rect(0,174,W,339,band);
- for(let i=0;i<49;i++){const y=174+i*7,x=((i*109+age*35)%1550)-160;line(x,y,x+450,y,c.color+(i%3===0?'b5':'63'),1+i%4);}
+ for(let i=0;i<(minimalFX()?8:49);i++){const y=174+i*(minimalFX()?38:7),x=((i*109+age*35)%1550)-160;line(x,y,x+450,y,c.color+(i%3===0?'b5':'63'),1+i%4);}
  const slide=(1-t)*(fromLeft?-330:330),x=fromLeft?65+slide:871+slide;
  // All portraits are cropped using drawImageCover, never scaled anisotropically.
  g.save();g.beginPath();
@@ -1082,7 +1095,7 @@ function drawSuperCutIn(){if(!cutIn)return;
  g.save();g.shadowColor=c.color;g.shadowBlur=28;label(c.name,tx,288,95,c.light,'center','Georgia');g.restore();
  label('✦   ANGEL SUPER   ✦',tx,374,32,'#ffebb0');label(SUPER_LINES[cutIn.id],tx,427,24,'#fff9fc','center','Arial');
  for(const yy of [173,514]){line(0,yy,W,yy,c.color,6);line(0,yy+5,W,yy+5,'#ffe7bf',2);}
- for(let i=0;i<12;i++){const bx=i*118+displayTick*3; // subtle sparkling confetti
+ for(let i=0;i<(minimalFX()?0:12);i++){const bx=i*118+displayTick*3; // subtle sparkling confetti
   if(bx<W)sparkle(bx,182+(i%4)*76,5,c.light,.38);
  }
  g.restore();
@@ -1090,6 +1103,7 @@ function drawSuperCutIn(){if(!cutIn)return;
 
 /* v6: additive attack aura; never scales or obscures the original character art. */
 function drawCombatAuras(visualFighters){
+ if(minimalFX())return; // Character art is the focus; gameplay hit flashes remain.
  for(const f of visualFighters){
   if(!hasAttack(f)||!['pulse','riser','rush','super'].includes(f.moveName))continue;
   const isSuper=f.moveName==='super',cx=f.x,cy=f.y-192;
@@ -1199,14 +1213,14 @@ function helpScreen(){drawAtmosphere(.82);label('HOW TO PLAY',640,92,67,'#ffe5a9
  rows.forEach((r,i)=>label(r,640,215+i*55,21,'#fff1f7','center','Arial'));
  }
  label('← → CHANGE PAGE           ENTER BACK',640,673,19,'#fff2af');}
-const OPTION_NAMES=['CPU DIFFICULTY','ROUNDS TO WIN','TIME LIMIT','MUSIC VOLUME','EFFECT VOLUME','TRAINING DUMMY','SHOW INPUT HISTORY','TOUCH MODE','SCREEN SHAKE','SCREEN FLASH'];
+const OPTION_NAMES=['CPU DIFFICULTY','ROUNDS TO WIN','TIME LIMIT','MUSIC VOLUME','EFFECT VOLUME','TRAINING DUMMY','SHOW INPUT HISTORY','TOUCH MODE','SCREEN SHAKE','SCREEN FLASH','VISUAL EFFECTS'];
 function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6');glassPanel(240,183,798,458,'#f3b7e7');OPTION_NAMES.forEach((name,i)=>{
- const y=215+i*41;if(i===selectedOption)roundRect(269,y-19,740,38,6,'#d45bad6a');
+ const y=215+i*39;if(i===selectedOption)roundRect(269,y-18,740,36,6,'#d45bad6a');
  label(name,300,y,23,i===selectedOption?'#ffefa9':'#f8d7f8','left','Arial');
  label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v8','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v8.1','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
@@ -1230,6 +1244,8 @@ window.AngelClashDebug={
  assetStatus:()=>({...assetStatus}),
  hdAssetStatus:()=>Object.fromEntries(Object.keys(HD_ART_URLS).map(id=>[id,images[id+'HD']?.naturalWidth>0])),
  renderResolution:()=>({pixelRatio,backingWidth:canvas.width,backingHeight:canvas.height}),
+ visualFX:()=>settings.fxMode,
+ setVisualFX:(v)=>{settings.fxMode=v==='classic'?'classic':'clean';saveSettings()},
  state:()=>({scene,modeKind,stageIndex,round,wins:[...wins],timer,score,freeze,paused,endDelay,roundFrames,maxCombo:[...maxCombo],cutIn:cutIn?{...cutIn}:null,fighters:fighters.map(f=>({id:f.id,hp:f.hp,meter:f.meter,guard:f.guard,parry:f.parry,dash:f.dash,aiPlan:f.aiPlan?.type,x:f.x,y:f.y,act:f.act,stun:f.stun,moveName:f.moveName})),projectiles:projectiles.length}),
  start:(a='ito',b='tamaki',mode='cpu')=>beginMatch(a,b,mode),
  menu:()=>setScene('menu'),pick:(a=0,b=2,mode='cpu')=>{pick=a;pickRival=b;modeKind=mode;setScene('select')},
