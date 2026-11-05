@@ -1,3 +1,11 @@
+# ANGEL CLASH v8.2 — Stage Wardrobe System
+
+Stage-specific outfit selection is now implemented at the **design/mapping and optional-asset loading level**. Five stage themes are registered; stage HUD/story screen shows the outfit theme; existing artwork is preserved until actual per-stage animated sprite atlases are completed. No claim of finished stage-specific battle art. See [STAGE_WARDROBE.md](STAGE_WARDROBE.md) for canonical character details, no-stockings, dark-tone fitted miniskirts, palette, atlas format, and testing requirements. Existing ornate versions are archived in [ART_CONCEPT_ARCHIVE.md](ART_CONCEPT_ARCHIVE.md).
+
+The v8.2 branch has passed JavaScript parse and mocked Canvas 2D QA for 20 stage/character combinations and attack sequences. **No phone/desktop browser visual performance or Cloudflare Pages deployment has been independently confirmed**.
+
+---
+
 # ANGEL CLASH v8.1 — Clean performance and protected costume archive
 
 ## Now implemented in the queue branch
