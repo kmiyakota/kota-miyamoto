@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v6 — Mobile & Graphics</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v7 — Fluid Animation</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -232,13 +232,48 @@ function isQCF(p,d){return command(p,d,[DOWN,DIAG,FORWARD])}
 function isQCB(p,d){return command(p,d,[DOWN,BACKDIAG,BACK])}
 function isDP(p,d){return command(p,d,[FORWARD,DOWN,DIAG])}
 function isDoubleQCF(p,d){return command(p,d,[DOWN,DIAG,FORWARD,DOWN,DIAG,FORWARD])}
-function newFighter(id,side,x){const d=META[id];return {id,side,c:d,x,y:FLOOR,dx:0,dy:0,face:side?-1:1,hp:d.hp,maxHp:d.hp,meter:0,guard:100,parry:0,dash:0,dashDir:0,dashCooldown:0,lastTap:{left:-100,right:-100},burstCool:0,act:'idle',move:null,moveName:'',moveFrame:0,hitTargets:new Set(),stun:0,blockstun:0,hitstop:0,inv:0,onGround:true,airUsed:false,combo:0,comboTime:0,anim:0,aiTick:0,aiPlan:{},charging:0,lastDamage:0,inputBuffer:[],kickTaps:[],maxCombo:0};}
+/* v7: artwork-preserving secondary-motion rig. Never touches collisions. */
+function newVisualRig(x){return {prevX:x,prevY:FLOOR,prevAnim:0,walk:0,crouch:0,air:0,land:0,wasGrounded:true,speed:0,lean:0,poseFrom:1,poseTo:1,poseBlend:1};}
+function updateVisualRig(f){
+ const v=f.visual;if(!v)return;
+ const walking=f.onGround&&f.act==='walk'&&f.stun===0&&!hasAttack(f);
+ const crouching=f.act==='crouch'||f.act==='guard';
+ v.walk+=(Number(walking)-v.walk)*.24;
+ v.crouch+=(Number(crouching)-v.crouch)*.28;
+ v.air+=(Number(!f.onGround)-v.air)*.30;
+ if(f.onGround&&!v.wasGrounded)v.land=1;
+ v.land*=.80;
+ v.wasGrounded=f.onGround;
+ const dx=f.x-v.prevX;
+ v.speed+=(dx-v.speed)*.36;
+ let lean=walking?clamp(dx*f.face,-13,13)*.005:0;
+ if(hasAttack(f)){
+  const m=f.move,t=f.moveFrame,windup=Math.max(1,m.startup);
+  if(t<windup)lean=-.055*Math.sin(Math.PI*.5*t/windup);
+  else if(t<windup+m.active)lean=.083*Math.sin(Math.PI*.5+(t-windup)/Math.max(1,m.active)*Math.PI*.2);
+  else lean=.058*(1-clamp((t-windup-m.active)/Math.max(1,m.recovery),0,1));
+  if(['riser','rush','super'].includes(f.moveName))lean*=1.3;
+ }
+ if(f.act==='hurt')lean=-.09;
+ v.lean+=(lean-v.lean)*.28;
+ const frame=spriteFrame(f);
+ if(frame!==v.poseTo){v.poseFrom=v.poseTo;v.poseTo=frame;v.poseBlend=0;}
+ v.poseBlend=Math.min(1,v.poseBlend+.45);
+}
+let renderAlpha=1;
+function visualFighter(f){
+ const v=f.visual;if(!v)return f;
+ const a=clamp(renderAlpha,0,1);
+ return {...f,x:v.prevX+(f.x-v.prevX)*a,y:v.prevY+(f.y-v.prevY)*a,
+   anim:v.prevAnim+(f.anim-v.prevAnim)*a};
+}
+function newFighter(id,side,x){const d=META[id];return {id,side,c:d,x,y:FLOOR,dx:0,dy:0,face:side?-1:1,hp:d.hp,maxHp:d.hp,meter:0,guard:100,parry:0,dash:0,dashDir:0,dashCooldown:0,lastTap:{left:-100,right:-100},burstCool:0,act:'idle',move:null,moveName:'',moveFrame:0,hitTargets:new Set(),stun:0,blockstun:0,hitstop:0,inv:0,onGround:true,airUsed:false,combo:0,comboTime:0,anim:0,aiTick:0,aiPlan:{},charging:0,lastDamage:0,inputBuffer:[],kickTaps:[],maxCombo:0,visual:newVisualRig(x)};}
 function beginMatch(a,b,kind=modeKind){modeKind=kind;challengeMode=kind;const ai=b==='nox';
  if(kind!=='arcade')score=0;
  stageIndex=ai?4:kind==='arcade'?arcadeStep%4:(IDS.indexOf(a)*2+IDS.indexOf(b)+arcadeStep)%4;
  fighters=[newFighter(a,0,340),newFighter(b,1,945)];round=1;wins=[0,0];timer=settings.time;freeze=100;announcer='ROUND 1';announcerTick=100;endDelay=0;projectiles=[];particles=[];floatingText=[];impactRings=[];cutIn=null;paused=false;roundFrames=0;drawRounds=0;maxCombo=[0,0];
  tick=0;for(let p=0;p<2;p++){history[p]=[];inputDisplays[p]=[]};setScene('fight');}
-function resetRound(){round++;for(let i=0;i<2;i++){const f=fighters[i];f.x=i===0?340:945;f.y=FLOOR;f.dx=f.dy=0;f.hp=f.maxHp;f.meter=clamp(f.meter*.65,0,100);f.face=i===0?1:-1;f.act='idle';f.move=null;f.moveName='';f.moveFrame=0;f.stun=f.blockstun=f.hitstop=f.inv=0;f.onGround=true;f.airUsed=false;f.combo=0;f.hitTargets.clear();f.inputBuffer=[];f.kickTaps=[];f.charging=0;f.guard=100;f.parry=0;f.dash=0;f.dashCooldown=0;f.burstCool=0;f.aiPlan={};}
+function resetRound(){round++;for(let i=0;i<2;i++){const f=fighters[i];f.x=i===0?340:945;f.y=FLOOR;f.dx=f.dy=0;f.hp=f.maxHp;f.meter=clamp(f.meter*.65,0,100);f.face=i===0?1:-1;f.act='idle';f.move=null;f.moveName='';f.moveFrame=0;f.stun=f.blockstun=f.hitstop=f.inv=0;f.onGround=true;f.airUsed=false;f.combo=0;f.hitTargets.clear();f.inputBuffer=[];f.kickTaps=[];f.charging=0;f.guard=100;f.parry=0;f.dash=0;f.dashCooldown=0;f.burstCool=0;f.aiPlan={};f.visual=newVisualRig(f.x);}
  cutIn=null;impactRings=[];timer=settings.time;roundFrames=0;freeze=100;announcer=`ROUND ${round}`;announcerTick=100;endDelay=0;projectiles=[];particles=[];}
 function chooseMenu(){sound('confirm');if(menuIndex<=3){modeKind=['arcade','cpu','local','training'][menuIndex];pick=0;pickRival=2;setScene('select')}
  else if(menuIndex===4){selectedOption=0;setScene('options')}
@@ -446,6 +481,7 @@ function processFighter(f,p){f.anim++;f.inv=max(0,f.inv-1);f.parry=max(0,f.parry
   if(f.y>=FLOOR){f.y=FLOOR;f.dy=f.dx=0;f.onGround=true;f.airUsed=false;if(!hasAttack(f))f.act='idle';effectBurst(f.x,FLOOR-2,'#fff0ff',6,.3);}
  }
  f.x=clamp(f.x,79,W-79);
+ updateVisualRig(f);
  if(f.id==='tamaki'){const c=pads[p];if((f.face===1?c.left:c.right)&&f.onGround)f.charging=min(90,f.charging+1);else if((f.face===1?c.right:c.left))f.charging=max(0,f.charging-2);else f.charging=0;}
 }
 function updateProjectiles(){for(const pr of projectiles){pr.trail.push({x:pr.x,y:pr.y});if(pr.trail.length>11)pr.trail.shift();pr.x+=pr.dx;pr.life--;
@@ -517,6 +553,7 @@ function finishRound(){endDelay=0;
  else resetRound();
 }
 function stepLogic(){tick++;displayTick++;
+ if(scene==='fight')for(const f of fighters){if(f.visual){f.visual.prevX=f.x;f.visual.prevY=f.y;f.visual.prevAnim=f.anim;}}
  readControls();
  if(scene==='title'){if(just('Enter','Space','KeyJ','Numpad1')){setScene('menu');menuIndex=0;sound('confirm')}}
  else if(scene==='menu'){
@@ -749,40 +786,66 @@ function drawNox(f){
  g.lineCap='round';g.strokeStyle='#301438';g.lineWidth=21;g.beginPath();g.moveTo(-41,-253);g.lineTo(-81,-198);g.moveTo(41,-252);g.lineTo(81,-209);g.stroke();
  for(const x of [-25,24]){line(x,-120,x+(x>0?7:-7),-11,'#261134',25);}
  if(hasAttack(f))circle(100,-216,28,'#e15bf2aa');g.restore();}
-function drawFighter(f,ghost=false,offset=0){g.save();if(!ghost){ellipse(f.x+5,FLOOR+5,81,13,'#130822b5');g.save();g.globalAlpha=.25+.08*Math.sin(displayTick*.04);g.strokeStyle=f.c.color;g.lineWidth=2;g.beginPath();g.ellipse(f.x,FLOOR+2,68,10,0,0,TAU);g.stroke();g.restore();}
+function drawFighter(f,ghost=false,offset=0){
+ g.save();
+ if(!ghost){ellipse(f.x+5,FLOOR+5,81,13,'#130822b5');g.save();g.globalAlpha=.25+.08*Math.sin(displayTick*.04);g.strokeStyle=f.c.color;g.lineWidth=2;g.beginPath();g.ellipse(f.x,FLOOR+2,68,10,0,0,TAU);g.stroke();g.restore();}
  if(f.hitstop>0)g.globalAlpha=.84;
  if(f.id==='nox'){drawNox(f);g.restore();return}
- const im=images[f.id];if(!im?.naturalWidth){portrait(f.id,f.x-75,f.y-290,150,284);g.restore();return}
- // Full-detail action paintings are projected only at selected key attacks;
- // regular motion still plays the original 23-frame sprite animation.
+ const im=images[f.id];
+ if(!im?.naturalWidth){portrait(f.id,f.x-75,f.y-290,150,284);g.restore();return}
  const hasCinematic=!ghost&&hasAttack(f)&&(f.id==='ito'&&['pulse','super'].includes(f.moveName)||f.id==='tamaki'&&['mk','hk','rush'].includes(f.moveName));
  let poseVisibility=0;
  if(hasCinematic){const m=f.move,n=m.startup+m.active+m.recovery;poseVisibility=clamp(Math.min(f.moveFrame/5,(n-f.moveFrame)/8),0,1);}
- const k=spriteFrame(f),sx=(k%atlasMeta.cols)*atlasMeta.tileWidth,sy=Math.floor(k/atlasMeta.cols)*atlasMeta.tileHeight;
- const sc=1.265,sw=atlasMeta.tileWidth*sc,sh=atlasMeta.tileHeight*sc;
- g.translate(f.x+offset,f.y);g.scale(f.face,1);g.imageSmoothingEnabled=true;
- if(ghost){g.globalAlpha=.18;g.shadowColor=f.c.color;g.shadowBlur=12;}else{g.shadowColor=f.c.color;g.shadowBlur=ghost?18:4;}
- const walking=f.act==='walk';
- // Animate intact source art using coherent lower-body / upper-body offsets,
- // rather than showing corrupted half-sprites from the original guide sheet.
- if(walking)g.rotate(Math.sin(f.anim*.26)*.012);
- if(f.act==='crouch'||f.act==='guard')g.scale(1,.73);
- else if(f.act==='idle')g.scale(1,1+Math.sin(f.anim*.07)*.008);
- const wobble=f.act==='idle'?Math.sin(f.anim*.07)*2:0;
- g.globalAlpha*=1-poseVisibility;
- if(g.globalAlpha>.015){
-  if(walking&&!ghost){
-   const part=260,swing=Math.sin(f.anim*.32)*6.5;
-   g.drawImage(im,sx,sy,atlasMeta.tileWidth,part,-sw/2+swing,-sh+5+wobble,sw,part*sc);
-   g.drawImage(im,sx,sy+part,atlasMeta.tileWidth,atlasMeta.tileHeight-part,-sw/2-swing,-sh+5+wobble+part*sc,sw,(atlasMeta.tileHeight-part)*sc);
-  }else g.drawImage(im,sx,sy,atlasMeta.tileWidth,atlasMeta.tileHeight,-sw/2,-sh+5+wobble,sw,sh);
+ const v=f.visual,frame=v?.poseTo??spriteFrame(f);
+ const sc=1.265,tw=atlasMeta.tileWidth,th=atlasMeta.tileHeight,sw=tw*sc,sh=th*sc;
+ const walk=clamp(v?.walk??Number(f.act==='walk'),0,1);
+ const crouch=clamp(v?.crouch??Number(f.act==='crouch'),0,1);
+ const air=clamp(v?.air??Number(!f.onGround),0,1);
+ const land=v?.land??0;
+ const cycle=f.anim*.32+f.side*.6;
+ const breath=Math.sin(f.anim*.073+f.side)*Math.max(0,1-walk-crouch-air);
+ // Feet stay anchored to the simulation floor. Lean, stretch and recoil are render-only.
+ const bob=-Math.abs(Math.sin(cycle))*walk*2.2-breath*1.6+land*2.5;
+ const lean=(v?.lean??0)+Math.sin(cycle)*walk*.012+air*clamp(f.dy/19,-.07,.07);
+ const stretch=(1-.205*crouch)*(1-.06*land)*(1+.009*breath)*(1+.028*air*clamp(-f.dy/18,0,1));
+ g.translate(f.x+offset,f.y+bob);g.scale(f.face,1);g.rotate(lean);g.scale(1,stretch);
+ g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+ if(ghost){g.globalAlpha=.18;g.shadowColor=f.c.color;g.shadowBlur=12;}
+ else{g.shadowColor=f.c.color;g.shadowBlur=4;}
+ const opacity=g.globalAlpha*(1-poseVisibility);
+ // Continuous piecewise deformation replaces the old hard two-piece walking cut.
+ // All strips originate in one intact pose: no missing/cropped animation cells.
+ function drawPose(k,alpha){
+  const sx=(k%atlasMeta.cols)*tw,sy=Math.floor(k/atlasMeta.cols)*th;
+  g.globalAlpha=opacity*alpha;
+  if(walk>.07&&!ghost){
+   const bands=16,band=th/bands;
+   for(let i=0;i<bands;i++){
+    const srcY=i*band,depth=(i+.5)/bands;
+    const lower=clamp((depth-.42)/.58,0,1);
+    const sway=(Math.sin(cycle)*1.5*(1-lower)+Math.sin(cycle+(depth-.45)*2.7)*5.6*lower)*walk;
+    const lift=Math.max(0,Math.sin(cycle+(depth-.55)*2.1))*lower*3.5*walk;
+    const overlap=.35;
+    g.drawImage(im,sx,sy+srcY,tw,band,
+      -sw/2+sway,-sh+5+srcY*sc-lift,sw,band*sc+overlap);
+   }
+  }else{
+   g.drawImage(im,sx,sy,tw,th,-sw/2,-sh+5,sw,sh);
+  }
  }
- g.imageSmoothingEnabled=true;g.shadowBlur=0;
+ const mix=ghost?1:clamp(v?.poseBlend??1,0,1);
+ const oldWeight=(v&&v.poseFrom!==frame)?(1-mix)*.20:0;
+ if(oldWeight>.005)drawPose(v.poseFrom,oldWeight);
+ drawPose(frame,1-oldWeight);
+ g.shadowBlur=0;
  if(!ghost&&f.stun>0){g.globalCompositeOperation='screen';g.globalAlpha=.24;roundRect(-80,-310,160,290,30,'#fff4ef');}
  g.restore();
  if(hasCinematic)drawCinematicPose(f);
  if(!ghost&&poseVisibility<.5)drawFighterHighlights(f);
- if(!ghost&&(debugHitbox||settings.hitboxes)){g.strokeStyle='#76ff92';g.lineWidth=2;g.strokeRect(f.x-47,f.y-299,94,298);if(hasAttack(f)){g.strokeStyle='#ff7676';g.strokeRect(f.x+f.face*30-(f.face<0?f.move.reach:0),f.y-265,f.move.reach,145)}}
+ if(!ghost&&(debugHitbox||settings.hitboxes)){
+  g.strokeStyle='#76ff92';g.lineWidth=2;g.strokeRect(f.x-47,f.y-299,94,298);
+  if(hasAttack(f)){g.strokeStyle='#ff7676';g.strokeRect(f.x+f.face*30-(f.face<0?f.move.reach:0),f.y-265,f.move.reach,145)}
+ }
 }
 function drawFighterHighlights(f){
  // Vector accents overlay the original animated silhouettes at true screen
@@ -820,10 +883,10 @@ function drawFighterHighlights(f){
  }
  g.restore();
 }
-function drawReflections(){
+function drawReflections(visualFighters){
  // Ground plane reflection. It never affects collision/physics or input.
  g.save();g.beginPath();g.roundRect(0,FLOOR+9,W,115,0);g.clip();
- for(const f of fighters){
+ for(const f of visualFighters){
   if(f.id==='nox')continue;
   const im=images[f.id];if(!im?.naturalWidth)continue;
   const k=spriteFrame(f),sx=k%atlasMeta.cols*atlasMeta.tileWidth,
@@ -964,8 +1027,8 @@ function drawSuperCutIn(){if(!cutIn)return;
 }
 
 /* v6: additive attack aura; never scales or obscures the original character art. */
-function drawCombatAuras(){
- for(const f of fighters){
+function drawCombatAuras(visualFighters){
+ for(const f of visualFighters){
   if(!hasAttack(f)||!['pulse','riser','rush','super'].includes(f.moveName))continue;
   const isSuper=f.moveName==='super',cx=f.x,cy=f.y-192;
   const intensity=clamp((f.moveFrame+1)/9,0,1)*(isSuper?.52:.32);
@@ -984,8 +1047,10 @@ function drawCombatAuras(){
   g.restore();
  }
 }
-function drawFight(){g.save();if(shake>0)g.translate(rand(-shake,shake),rand(-shake,shake));drawStage();drawReflections();drawCombatAuras();
- const order=[...fighters].sort((a,b)=>a.x-b.x);for(const f of order){if(f.dash>0||(hasAttack(f)&&['rush','riser'].includes(f.moveName))){drawFighter(f,true,-f.face*52);drawFighter(f,true,-f.face*27);}drawFighter(f);}
+function drawFight(){g.save();if(shake>0)g.translate(rand(-shake,shake),rand(-shake,shake));
+ const visibleFighters=fighters.map(visualFighter);
+ drawStage();drawReflections(visibleFighters);drawCombatAuras(visibleFighters);
+ const order=[...visibleFighters].sort((a,b)=>a.x-b.x);for(const f of order){if(f.dash>0||(hasAttack(f)&&['rush','riser'].includes(f.moveName))){drawFighter(f,true,-f.face*52);drawFighter(f,true,-f.face*27);}drawFighter(f);}
  for(const pr of projectiles)drawProjectile(pr);drawParticles();drawImpactRings();drawAtmosphericForeground();g.restore();
  drawHUD();drawSuperCutIn();if(announcerTick>0){const z=announcerTick;if(announcer==='K.O.')label(announcer,640,293,103,'#fff1a9');else label(announcer,640,299,z>47?77:59,'#fff1ba')}
  if(paused){rect(0,0,W,H,'#100722bd');glassPanel(390,240,500,210,'#ffe2b6');label('PAUSED',640,308,76,'#ffe7a5');label('ESC / P / TAP TO RESUME',640,387,22,'#fff4ed')}
@@ -1079,7 +1144,7 @@ function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6')
  label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v6','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v7','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
@@ -1096,7 +1161,7 @@ function render(){g.setTransform(pixelRatio,0,0,pixelRatio,0,0);g.clearRect(0,0,
 let last=0,acc=0;
 function loop(now){if(last===0)last=now;const dt=clamp(now-last,0,90);last=now;acc+=dt;let count=0;
  while(acc>=STEP&&count++<5){stepLogic();acc-=STEP}
- if(count===6)acc=0;render();requestAnimationFrame(loop)}
+ if(count===6)acc=0;renderAlpha=clamp(acc/STEP,0,1);render();requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 musicForScene();
 window.AngelClashDebug={
