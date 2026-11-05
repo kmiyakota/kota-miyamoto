@@ -164,7 +164,7 @@ for(const id of IDS.slice(0,3))loadImage(id+'Portrait',`assets/portraits/${id}.w
 for(const id of IDS.slice(0,3))loadImage(id,`assets/sprites/${id}-v5.webp`);
 loadImage('itoAction','assets/sprites/ito-cinematic.webp');
 loadImage('tamakiAction','assets/sprites/tamaki-cinematic.webp');
-for(let i=0;i<5;i++){loadImage('stage'+i,`assets/stages/stage${i}-hd.webp`);images['stage'+i].onload=()=>{stageCacheKey=-1};}
+for(let i=0;i<5;i++){loadImage('stage'+i,`assets/stages/stage${i}-hd.webp`);images['stage'+i].addEventListener('load',()=>{stageCacheKey=-1});}
 // A number of poses in the development-sheet atlas were CUT AT THE GRID BORDER.
 // Select the complete frames and synthesize secondary motion with transforms;
 // this is preferable to displaying half a character on every other step.
