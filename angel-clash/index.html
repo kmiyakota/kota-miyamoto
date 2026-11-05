@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v8.1 — Clean Performance</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v8.2 — Stage Wardrobe</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -129,6 +129,57 @@ const STAGES=[
  {name:'CRYSTAL SANCTUM',short:'結晶の聖域',top:'#0d2245',mid:'#4c6dc0',bottom:'#bbadff',floor:'#385588',trim:'#a7f6ff',accent:'#86eaff',kind:'crystal'},
  {name:'ECLIPSE CASTLE',short:'日蝕の城',top:'#10071d',mid:'#44104b',bottom:'#b64b6e',floor:'#271334',trim:'#e06ab7',accent:'#f48bd7',kind:'eclipse'}
 ];
+// Stage wardrobe manifest: visual-only; preserves physics, hitboxes, and the canonical face/hair.
+// Each stage has a distinct outfit design and color identity. New art is loaded only when a real
+// per-stage file URL is registered below. A missing asset falls back to existing approved artwork.
+const WARDROBE=Object.freeze([
+ {key:'sakura',jp:'桜庭園スタンダード',en:'SAKURA TAILORED',style:'fitted mini skirt, cropped jacket, clean white blouse; no stockings',archive:false},
+ {key:'harbor',jp:'スカイハーバー',en:'HARBOR LIGHT',style:'lightweight sporty jacket, narrow fitted mini skirt, short clean cuffs; no stockings',archive:false},
+ {key:'moonlit',jp:'月影シティスーツ',en:'MIDNIGHT SUIT',style:'sleek dark tailored blazer, fitted mini skirt, minimal silver trim; no stockings',archive:false},
+ {key:'crystal',jp:'クリスタルフォーマル',en:'CRYSTAL FORMAL',style:'minimal fitted mini skirt with subtle technical gemstone accents and structured jacket; no stockings',archive:false},
+ {key:'eclipse',jp:'日蝕の特別衣装',en:'ECLIPSE CEREMONY',style:'preserved ornate alternative with reduced battle effects; original costume archive retained',archive:true}
+]);
+const CHARACTER_DARK_SKIRTS=Object.freeze({
+ ito:'#76334d',akari:'#1c3359',tamaki:'#432952',nox:'#321a30'
+});
+// Future produced artwork: register *real* approved URLs only. Do not request nonexistent files.
+// Naming convention for production: costumes/{stage}/{id}-{sprite|portrait|special}.webp
+// "sprite" must match the game's 12-column, 396x336 tile atlas for animation consistency.
+const COSTUME_SOURCES=Object.freeze({});
+const costumeImageCache={};
+function wardrobeFor(id,stage=stageIndex){
+ const i=Math.max(0,Math.min(WARDROBE.length-1,Number.isFinite(stage)?Math.trunc(stage):0));
+ return {...WARDROBE[i],stage:i,id,skirt:CHARACTER_DARK_SKIRTS[id]||'#321a30'};
+}
+function costumeAssetName(id,stage,kind){return 'costume_'+stage+'_'+id+'_'+kind;}
+function ensureStageWardrobe(stage=stageIndex){
+ const outfit=WARDROBE[stage];if(!outfit)return;
+ for(const id of IDS){
+  const spec=COSTUME_SOURCES[outfit.key]?.[id];
+  if(!spec)continue;
+  for(const kind of ['sprite','portrait','special']){
+   const url=spec[kind];if(!url)continue;
+   const name=costumeAssetName(id,stage,kind);
+   if(costumeImageCache[name])continue;
+   const img=new Image();img.decoding='async';costumeImageCache[name]=img;
+   img.onerror=()=>console.warn('Wardrobe artwork unavailable; preserving fallback',name);
+   img.src=url;
+  }
+ }
+}
+function loadedCostumeArt(id,kind,stage=stageIndex){
+ const img=costumeImageCache[costumeAssetName(id,stage,kind)];
+ if(!img?.naturalWidth)return null;
+ if(kind==='sprite'){
+  // Reject mismatched atlases instead of cropping heads or stretching limbs.
+  if(img.naturalWidth!==atlasMeta.cols*atlasMeta.tileWidth||img.naturalHeight<atlasMeta.tileHeight*2)return null;
+ }
+ return img;
+}
+function fightingSprite(f){return loadedCostumeArt(f.id,'sprite')||images[f.id];}
+function artForCostume(id,kind,stage=stageIndex){
+ return loadedCostumeArt(id,kind,stage)||images[id+'HD']||null;
+}
 const MOVE={
  lp:{startup:4,active:3,recovery:9,damage:35,reach:88,stun:16,block:10,knock:6,level:'mid',gain:8},
  mp:{startup:6,active:4,recovery:13,damage:60,reach:107,stun:20,block:13,knock:14,level:'mid',gain:10},
@@ -308,6 +359,7 @@ function newFighter(id,side,x){const d=META[id];return {id,side,c:d,x,y:FLOOR,dx
 function beginMatch(a,b,kind=modeKind){modeKind=kind;challengeMode=kind;const ai=b==='nox';
  if(kind!=='arcade')score=0;
  stageIndex=ai?4:kind==='arcade'?arcadeStep%4:(IDS.indexOf(a)*2+IDS.indexOf(b)+arcadeStep)%4;
+ ensureStageWardrobe(stageIndex);
  fighters=[newFighter(a,0,340),newFighter(b,1,945)];round=1;wins=[0,0];timer=settings.time;freeze=100;announcer='ROUND 1';announcerTick=100;endDelay=0;projectiles=[];particles=[];floatingText=[];impactRings=[];cutIn=null;paused=false;roundFrames=0;drawRounds=0;maxCombo=[0,0];
  tick=0;for(let p=0;p<2;p++){history[p]=[];inputDisplays[p]=[]};setScene('fight');}
 function resetRound(){round++;for(let i=0;i<2;i++){const f=fighters[i];f.x=i===0?340:945;f.y=FLOOR;f.dx=f.dy=0;f.hp=f.maxHp;f.meter=clamp(f.meter*.65,0,100);f.face=i===0?1:-1;f.act='idle';f.move=null;f.moveName='';f.moveFrame=0;f.stun=f.blockstun=f.hitstop=f.inv=0;f.onGround=true;f.airUsed=false;f.combo=0;f.hitTargets.clear();f.inputBuffer=[];f.kickTaps=[];f.charging=0;f.guard=100;f.parry=0;f.dash=0;f.dashCooldown=0;f.burstCool=0;f.aiPlan={};f.visual=newVisualRig(f.x);}
@@ -679,7 +731,7 @@ const HD_FACE_REGIONS=Object.freeze({
  tamaki:[.13,0,.76,.67],nox:[.12,.05,.80,.68]
 });
 function drawHighDefinitionPortrait(id,x,y,w,h){
- const im=images[id+'HD'];
+ const im=artForCostume(id,'portrait',(['fight','story','result'].includes(scene)?stageIndex:0));
  if(!im?.naturalWidth)return false;
  const [rx,ry,rw,rh]=HD_FACE_REGIONS[id];
  drawImageCover(im,im.naturalWidth*rx,im.naturalHeight*ry,
@@ -824,7 +876,7 @@ function spriteFrame(f){let group='idle',idx=0;
  return atlasMeta.groups[group]?.[idx]??0;
 }
 function drawNox(f){
- const hd=images.noxHD;
+ const hd=artForCostume('nox','special');
  if(hd?.naturalWidth){
   g.save();g.translate(f.x,f.y);g.scale(f.face,1);
   const bob=Math.sin(f.anim*.095)*4.2+(hasAttack(f)?-7*Math.sin(f.moveFrame*.17):0);
@@ -852,8 +904,8 @@ function drawNox(f){
 function actionArtwork(f){
  if(!hasAttack(f))return null;
  const special=['pulse','riser','rush','super'].includes(f.moveName);
- if(special&&f.id!=='nox'&&images[f.id+'HD']?.naturalWidth)
-  return {im:images[f.id+'HD'],hd:true,mirror:1};
+ if(special&&f.id!=='nox'&&artForCostume(f.id,'special')?.naturalWidth)
+  return {im:artForCostume(f.id,'special'),hd:true,mirror:1};
  if(f.id==='ito'&&['pulse','super'].includes(f.moveName)&&images.itoAction?.naturalWidth)
   return {im:images.itoAction,hd:false,mirror:1,w:340,h:308,x:-171};
  if(f.id==='tamaki'&&['mk','hk','rush'].includes(f.moveName)&&images.tamakiAction?.naturalWidth)
@@ -865,7 +917,7 @@ function drawFighter(f,ghost=false,offset=0){
  if(!ghost){ellipse(f.x+5,FLOOR+5,81,13,'#130822b5');g.save();g.globalAlpha=.25+.08*Math.sin(displayTick*.04);g.strokeStyle=f.c.color;g.lineWidth=2;g.beginPath();g.ellipse(f.x,FLOOR+2,68,10,0,0,TAU);g.stroke();g.restore();}
  if(f.hitstop>0)g.globalAlpha=.84;
  if(f.id==='nox'){drawNox(f);g.restore();return}
- const im=images[f.id];
+ const im=fightingSprite(f);
  if(!im?.naturalWidth){portrait(f.id,f.x-75,f.y-290,150,284);g.restore();return}
  const hasCinematic=!ghost&&!!actionArtwork(f);
  let poseVisibility=0;
@@ -963,7 +1015,7 @@ function drawReflections(visualFighters){
  g.save();g.beginPath();g.roundRect(0,FLOOR+9,W,115,0);g.clip();
  for(const f of visualFighters){
   if(f.id==='nox')continue;
-  const im=images[f.id];if(!im?.naturalWidth)continue;
+  const im=fightingSprite(f);if(!im?.naturalWidth)continue;
   const k=spriteFrame(f),sx=k%atlasMeta.cols*atlasMeta.tileWidth,
         sy=Math.floor(k/atlasMeta.cols)*atlasMeta.tileHeight;
   const sc=1.265,sw=atlasMeta.tileWidth*sc,sh=atlasMeta.tileHeight*sc;
@@ -1067,6 +1119,8 @@ function drawHUD(){
  g.save();g.shadowColor='#ffd5a3';g.shadowBlur=12;label(String(timer===9999?'∞':max(0,timer)).padStart(timer===9999?1:2,'0'),640,83,59,'#fff4ba');g.restore();
  drawMeter(43,649,384,a.meter,a.c.color);drawMeter(853,649,384,b.meter,b.c.color,true);
  label('S U P E R',45,637,15,'#fff0c4','left');label('S U P E R',1235,637,15,'#fff0c4','right');
+ // Stage outfit metadata remains informative until the new multi-pose costume atlases are delivered.
+ label(WARDROBE[stageIndex].en,640,641,15,'#efe6f2','center','Arial');
  if(b.combo>=2)label(b.combo+' HIT COMBO',210,179,30,'#fff5b5');if(a.combo>=2)label(a.combo+' HIT COMBO',1060,179,30,'#fff5b5');
  if(a.parry>0)label('✦ PERFECT PARRY',260,215,20,'#e9f9ff');if(b.parry>0)label('✦ PERFECT PARRY',1020,215,20,'#e9f9ff');
  if(modeKind==='training')label('TRAINING  •  G DUMMY  /  R RESET  /  H HITBOX  /  T INPUT',640,613,17,'#fff4e1');
@@ -1180,6 +1234,9 @@ function storyScreen(){drawAtmosphere(.77);const a=storyNext?.a||IDS[pick],b=sto
  label(arcadeStep===3?'FINAL BATTLE':'RIVAL ENCOUNTER',640,263,42,'#fff3d9');
  label(META[a].name+'  VS  '+META[b].name,640,330,44,'#ffe7a5');
  label(META[b].intro,640,395,21,'#fff1fb','center','Arial');
+ const stage=storyNext?.b==='nox'?4:arcadeStep%4;
+ const outfit=WARDROBE[stage];
+ label('COSTUME  ·  '+outfit.en,640,437,19,'#eed6ff','center','Arial');
  label('PRESS ENTER / TAP TO FIGHT',640,465,20,'#fff0b9');
 }
 function resultScreen(){drawAtmosphere(.75);const win=fighters[resultWinner],playerWon=resultWinner===0;
@@ -1220,7 +1277,7 @@ function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6')
  label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v8.1','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v8.2','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
@@ -1244,6 +1301,13 @@ window.AngelClashDebug={
  assetStatus:()=>({...assetStatus}),
  hdAssetStatus:()=>Object.fromEntries(Object.keys(HD_ART_URLS).map(id=>[id,images[id+'HD']?.naturalWidth>0])),
  renderResolution:()=>({pixelRatio,backingWidth:canvas.width,backingHeight:canvas.height}),
+ wardrobe:()=>({stage:stageIndex,stageName:STAGES[stageIndex].name,
+  outfit:WARDROBE[stageIndex].en,
+  characters:Object.fromEntries(fighters.map(f=>[f.id,{...wardrobeFor(f.id),
+    spriteReady:!!loadedCostumeArt(f.id,'sprite'),
+    portraitReady:!!loadedCostumeArt(f.id,'portrait'),
+    specialReady:!!loadedCostumeArt(f.id,'special')}]))}),
+ wardrobeStage:(n=0)=>{stageIndex=clamp(Math.round(n),0,4);stageCacheKey=-1;ensureStageWardrobe(stageIndex);return WARDROBE[stageIndex].en},
  visualFX:()=>settings.fxMode,
  setVisualFX:(v)=>{settings.fxMode=v==='classic'?'classic':'clean';saveSettings()},
  state:()=>({scene,modeKind,stageIndex,round,wins:[...wins],timer,score,freeze,paused,endDelay,roundFrames,maxCombo:[...maxCombo],cutIn:cutIn?{...cutIn}:null,fighters:fighters.map(f=>({id:f.id,hp:f.hp,meter:f.meter,guard:f.guard,parry:f.parry,dash:f.dash,aiPlan:f.aiPlan?.type,x:f.x,y:f.y,act:f.act,stun:f.stun,moveName:f.moveName})),projectiles:projectiles.length}),
