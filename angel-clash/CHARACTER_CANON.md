@@ -10,7 +10,7 @@ Wix Blog post ID: `a3bb7fd8-09fc-4c10-84ff-643ed503cd25` (slug: `about-three-new
 - TAMAKI (環): `c3c31e_94c725ed0bf849b3a66f00e22fce0c0e~mv2.png` — original 1055 × 1491 px.
 - Group introduction image: `c3c31e_0ae3e69cbfa34a419f31709562cba9c6~mv2.png` — original 1122 × 1402 px.
 
-This is the authoritative source for the three characters' faces, hair, glasses if present, costume detail, wing shapes, body proportions, color schemes, and personalities. **Do not invent or change those features.** Work from the actual image files; do not treat written summaries or independent promotional concepts as equivalent references. For new poses, preserve silhouette and full-body appearance and review against each source before adoption.
+The original profiles are authoritative for faces, hairstyles, glasses, age presentation, body proportions, personalities and manner of speech. **Do not invent or change those character-defining features.** The creator explicitly approved **keeping the ANGEL CLASH battle costumes used before the profile correction** on 2026-11-05. These are fictional fighting-game costumes, distinct from the everyday outfits depicted in the Wix profiles, so do NOT replace the in-game costumes with profile streetwear. Preserve the established battle outfits, color identity, wings/accessories of the approved game versions unless the creator separately requests a costume redesign. In particular, costume approval is NOT permission to replace ITO's light-brown hair with blonde, change AKARI's dark-brown short bob, or remove TAMAKI's dark short hair and glasses. Work from the actual profile image files; do not treat unrelated promotional mockups as equivalent references. For new poses, preserve identity first and battle costume second; review each against the sources before adoption.
 
 ## Fourth character
 
@@ -29,5 +29,5 @@ This is the authoritative source for the three characters' faces, hair, glasses 
 
 1. Original Wix **３人について** article and its embedded images.
 2. Earlier creator-supplied original image references.
-3. Existing ANGEL CLASH game art *only when compatible* with 1–2.
+3. ANGEL CLASH **previously approved battle costume designs** remain valid for clothing even where they differ from the everyday clothing shown in the Wix profile; faces, hair, glasses and age must still match 1–2.
 4. NOX-approved exceptional design, limited to NOX.
