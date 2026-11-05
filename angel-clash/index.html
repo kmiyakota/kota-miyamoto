@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v7.1 — Original Cast HD</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v8 — HD Character Key Art</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -113,13 +113,13 @@ const rand=(a,b)=>a+Math.random()*(b-a);
 const rgb=(c,a=1)=>c;
 const BUTTONS=['lp','mp','hp','lk','mk','hk'];
 const META={
-  ito:{name:'ITO',sub:'ANGEL OF PASSION',title:'ROSE BALANCE',color:'#ff82c3',light:'#ffd6ed',dark:'#b43791',hair:'#f7bc44',hp:1050,speed:4.1,jump:17.4,quote:'この一瞬に、想いを込めて！',win:'想いは、きっと力になる！',moves:['ROSE PULSE','BLOSSOM RISER','RIBBON CYCLONE'],intro:'気持ちをひとつに。さあ、始めよう！'},
-  akari:{name:'AKARI',sub:'ANGEL OF CRESCENDO',title:'AZURE RUSH',color:'#62b9ff',light:'#d6f2ff',dark:'#3678d9',hair:'#553947',hp:990,speed:4.8,jump:18.4,quote:'さあ、全力でいっくよー！',win:'飛び上がる気持ちは止められない！',moves:['SKY BOLT','WING RISER','AZURE BREAK'],intro:'こっちのスピードについて来られる？'},
-  tamaki:{name:'TAMAKI',sub:'ANGEL OF NOCTURNE',title:'VIOLET GRACE',color:'#bb81ff',light:'#ecd8ff',dark:'#60318f',hair:'#38224f',hp:1010,speed:4.45,jump:17.8,quote:'月の静けさこそ、私の力なのだ！',win:'見事な勝負だったのだ。次も楽しみなのだ！',moves:['MOON ARC','NOCTURNE RISE','LUNAR WALTZ'],intro:'焦りは禁物なのだ。間合いを見極めるのだ。'},
+  ito:{name:'ITO',sub:'ANGEL OF PASSION',title:'ROSE BALANCE',color:'#ff82c3',light:'#ffd6ed',dark:'#b43791',hair:'#a97659',hp:1050,speed:4.1,jump:17.4,quote:'この一瞬に、想いを込めて！',win:'想いは、きっと力になる！',moves:['ROSE PULSE','BLOSSOM RISER','RIBBON CYCLONE'],intro:'気持ちをひとつに。さあ、始めよう！'},
+  akari:{name:'AKARI',sub:'ANGEL OF CRESCENDO',title:'AZURE RUSH',color:'#62b9ff',light:'#d6f2ff',dark:'#3678d9',hair:'#553947',hp:990,speed:4.8,jump:18.4,quote:'焦らず、相手をよく見ていこうね。',win:'いい勝負だったね。無理せず、また一緒に。',moves:['SKY BOLT','WING RISER','AZURE BREAK'],intro:'落ち着いて、相手を見ていこうね。'},
+  tamaki:{name:'TAMAKI',sub:'ANGEL OF NOCTURNE',title:'VIOLET GRACE',color:'#bb81ff',light:'#ecd8ff',dark:'#60318f',hair:'#302c3c',hp:1010,speed:4.45,jump:17.8,quote:'月の静けさこそ、私の力なのだ！',win:'見事な勝負だったのだ。次も楽しみなのだ！',moves:['MOON ARC','NOCTURNE RISE','LUNAR WALTZ'],intro:'焦りは禁物なのだ。間合いを見極めるのだ。'},
   nox:{name:'NOX',sub:'ECLIPSE WARDEN',title:'FINAL BOSS',color:'#ec5bfa',light:'#ffc8ff',dark:'#55075a',hair:'#1d1031',hp:1280,speed:3.95,jump:17.1,quote:'光の彼方に、影は在る。',win:'世界は、まだ眠りの中だ。',moves:['ECLIPSE FLARE','VOID RISER','NIGHT CRASH'],intro:'三つの翼よ。日蝕の門に挑むがいい。'}
 };
 const IDS=['ito','akari','tamaki','nox'];
-const SPECIAL_SHOUTS={ito:{pulse:'心をひとつに！',riser:'舞い上がれ！',rush:'いくよ！'},akari:{pulse:'飛んでけー！',riser:'上までいっくよー！',rush:'追いつけるかな！'},tamaki:{pulse:'月光を受けるのだ！',riser:'そこなのだ！',rush:'これが月の舞なのだ！'},nox:{pulse:'闇よ、貫け！',riser:'堕ちよ！',rush:'消え去れ！'}};
+const SPECIAL_SHOUTS={ito:{pulse:'心をひとつに！',riser:'舞い上がれ！',rush:'いくよ！'},akari:{pulse:'届けてみるね。',riser:'大丈夫、ここから。',rush:'少し速くいくね。'},tamaki:{pulse:'月光を受けるのだ！',riser:'そこなのだ！',rush:'これが月の舞なのだ！'},nox:{pulse:'闇よ、貫け！',riser:'堕ちよ！',rush:'消え去れ！'}};
 const SUPER_LINES={ito:'想いを込めて、咲き誇れ！',akari:'あたしのスピード、見せてあげる！',tamaki:'月光の一撃を見せるのだ！',nox:'日蝕に呑まれよ！'};
 const COMBO_CHAINS={lp:['mp','hp','lk'],lk:['mk','hk','mp'],mp:['hp'],mk:['hk']};
 const STAGES=[
@@ -157,6 +157,21 @@ const inputNames=['left','right','up','down',...BUTTONS,'sp','special'];
 const KEYMAP=[{left:'KeyA',right:'KeyD',up:'KeyW',down:'KeyS',lp:'KeyJ',mp:'KeyK',hp:'KeyL',lk:'KeyU',mk:'KeyI',hk:'KeyO',sp:'Space',special:'ShiftLeft'},
  {left:'ArrowLeft',right:'ArrowRight',up:'ArrowUp',down:'ArrowDown',lp:'Numpad1',mp:'Numpad2',hp:'Numpad3',lk:'Numpad4',mk:'Numpad5',hk:'Numpad6',sp:'Numpad0',special:'NumpadEnter'}];
 const images={};
+// Approved 2026-11-05 HD fighting-game character art, hosted in the creator's own Wix Media Manager.
+// These optional assets never block gameplay or replace the existing multi-frame combat atlas.
+const HD_ART_URLS=Object.freeze({
+ ito:'https://static.wixstatic.com/media/c3c31e_dcebe7f2ec744e9fb19386b784ed141f~mv2.png',
+ akari:'https://static.wixstatic.com/media/c3c31e_4a698c55a32d4dcb975688eb714d5a5b~mv2.png',
+ tamaki:'https://static.wixstatic.com/media/c3c31e_b13604155e09477e95ca15029ec177f9~mv2.png',
+ nox:'https://static.wixstatic.com/media/c3c31e_217a23f143e04b08803d81317f80f876~mv2.png'
+});
+function loadOptionalArt(name,url){
+ const im=new Image();im.decoding='async';images[name]=im;
+ im.onerror=()=>console.warn('ANGEL CLASH HD art unavailable, using original artwork:',name);
+ im.src=url;
+}
+for(const [id,url] of Object.entries(HD_ART_URLS))loadOptionalArt(id+'HD',url);
+
 const assetStatus={total:0,ready:0,failed:0,failures:[]};
 const boot=document.getElementById('boot'),bootFill=document.getElementById('boot-fill'),bootPercent=document.getElementById('boot-percent');
 function updateAssetStatus(){
@@ -654,6 +669,18 @@ function logo(x,y,scale=1){
  label('ANGEL',0,-13,93,'#fff0ac','center','Georgia');label('CLASH',0,66,100,'#ff8de4','center','Georgia');
  label('— 2D ARCADE FIGHTING GAME —',0,113,17,'#fff3da','center','Arial');g.restore()}
 const portSource={ito:[400,5,565,1090],akari:[0,6,570,1090],tamaki:[885,5,489,1090]};
+const HD_FACE_REGIONS=Object.freeze({
+ ito:[.10,.015,.80,.62],akari:[.14,.015,.77,.66],
+ tamaki:[.13,0,.76,.67],nox:[.12,.05,.80,.68]
+});
+function drawHighDefinitionPortrait(id,x,y,w,h){
+ const im=images[id+'HD'];
+ if(!im?.naturalWidth)return false;
+ const [rx,ry,rw,rh]=HD_FACE_REGIONS[id];
+ drawImageCover(im,im.naturalWidth*rx,im.naturalHeight*ry,
+  im.naturalWidth*rw,im.naturalHeight*rh,x,y,w,h,.50,.07);
+ return true;
+}
 /** Aspect-preserving crop, equivalent to object-fit:cover + object-position. */
 function drawImageCover(im,sx,sy,sw,sh,dx,dy,dw,dh,focusX=.5,focusY=.12){
  if(!im?.naturalWidth||!(sw>0&&sh>0&&dw>0&&dh>0))return;
@@ -668,15 +695,17 @@ function portrait(id,x,y,w,h){
  const colors={ito:['#512052','#ec6fa6'],akari:['#173464','#4c86d0'],tamaki:['#1f123c','#7546a8'],nox:['#12081f','#7e3278']};
  const [hi,lo]=colors[id]||colors.ito;
  const bg=g.createLinearGradient(x,y,x+w,y+h);bg.addColorStop(0,hi);bg.addColorStop(1,lo);rect(x,y,w,h,bg);
- if(id==='nox'){
-  const gx=x+w/2,gy=y+h*.55,r=Math.min(w,h)*.44;
-  g.save();g.shadowBlur=22;g.shadowColor='#b74af9';ellipse(gx,gy,r,r,'#311138');ellipse(gx,gy-r*.5,r*.6,r*.7,'#150c23');
-  for(const t of [-1,1]){ellipse(gx+t*r*.27,gy-r*.57,r*.095,r*.063,'#ff7be8');}
-  g.strokeStyle='#ff9dec';g.lineWidth=2;g.beginPath();g.arc(gx,gy,r*.85,-Math.PI*.89,Math.PI*.85);g.stroke();g.restore();
- } else {
-  const im=images[id+'Portrait'];
-  if(im?.naturalWidth){drawImageCover(im,0,0,im.naturalWidth,im.naturalHeight,x,y,w,h,.5,.02);}
-  else {const fallback=images.original;if(fallback?.naturalWidth){const [sx,sy,sw,sh]=portSource[id];drawImageCover(fallback,sx,sy,sw,sh,x,y,w,h,.5,.02);}}
+ if(!drawHighDefinitionPortrait(id,x,y,w,h)){
+  if(id==='nox'){
+   const gx=x+w/2,gy=y+h*.55,r=Math.min(w,h)*.44;
+   g.save();g.shadowBlur=22;g.shadowColor='#b74af9';ellipse(gx,gy,r,r,'#311138');ellipse(gx,gy-r*.5,r*.6,r*.7,'#150c23');
+   for(const t of [-1,1])ellipse(gx+t*r*.27,gy-r*.57,r*.095,r*.063,'#ff7be8');
+   g.strokeStyle='#ff9dec';g.lineWidth=2;g.beginPath();g.arc(gx,gy,r*.85,-Math.PI*.89,Math.PI*.85);g.stroke();g.restore();
+  }else{
+   const im=images[id+'Portrait'];
+   if(im?.naturalWidth)drawImageCover(im,0,0,im.naturalWidth,im.naturalHeight,x,y,w,h,.5,.02);
+   else{const fallback=images.original;if(fallback?.naturalWidth){const [sx,sy,sw,sh]=portSource[id];drawImageCover(fallback,sx,sy,sw,sh,x,y,w,h,.5,.02)}}
+  }
  }
  const shade=g.createLinearGradient(0,y,0,y+h);shade.addColorStop(0,'#17092908');shade.addColorStop(.73,'#12082200');shade.addColorStop(1,'#170c43a7');rect(x,y,w,h,shade);
  g.restore();
@@ -789,6 +818,16 @@ function spriteFrame(f){let group='idle',idx=0;
  return atlasMeta.groups[group]?.[idx]??0;
 }
 function drawNox(f){
+ const hd=images.noxHD;
+ if(hd?.naturalWidth){
+  g.save();g.translate(f.x,f.y);g.scale(f.face,1);
+  const bob=Math.sin(f.anim*.095)*4.2+(hasAttack(f)?-7*Math.sin(f.moveFrame*.17):0);
+  const sway=(hasAttack(f)?-.032:.016)*Math.sin(f.anim*.065);
+  g.rotate(sway);g.shadowColor='#c85bff';g.shadowBlur=8;
+  const height=488,width=height*hd.naturalWidth/hd.naturalHeight;
+  g.drawImage(hd,-width*.5,-height+bob,width,height);
+  g.restore();return;
+ }
  const art=images.noxBoss;
  if(art?.naturalWidth){g.save();g.translate(f.x,f.y);g.scale(f.face,1);
    const bob=Math.sin(f.anim*.09)*5+(hasAttack(f)?-10*Math.sin(f.moveFrame*.17):0);
@@ -804,6 +843,17 @@ function drawNox(f){
  g.lineCap='round';g.strokeStyle='#301438';g.lineWidth=21;g.beginPath();g.moveTo(-41,-253);g.lineTo(-81,-198);g.moveTo(41,-252);g.lineTo(81,-209);g.stroke();
  for(const x of [-25,24]){line(x,-120,x+(x>0?7:-7),-11,'#261134',25);}
  if(hasAttack(f))circle(100,-216,28,'#e15bf2aa');g.restore();}
+function actionArtwork(f){
+ if(!hasAttack(f))return null;
+ const special=['pulse','riser','rush','super'].includes(f.moveName);
+ if(special&&f.id!=='nox'&&images[f.id+'HD']?.naturalWidth)
+  return {im:images[f.id+'HD'],hd:true,mirror:1};
+ if(f.id==='ito'&&['pulse','super'].includes(f.moveName)&&images.itoAction?.naturalWidth)
+  return {im:images.itoAction,hd:false,mirror:1,w:340,h:308,x:-171};
+ if(f.id==='tamaki'&&['mk','hk','rush'].includes(f.moveName)&&images.tamakiAction?.naturalWidth)
+  return {im:images.tamakiAction,hd:false,mirror:-1,w:393,h:327,x:-253};
+ return null;
+}
 function drawFighter(f,ghost=false,offset=0){
  g.save();
  if(!ghost){ellipse(f.x+5,FLOOR+5,81,13,'#130822b5');g.save();g.globalAlpha=.25+.08*Math.sin(displayTick*.04);g.strokeStyle=f.c.color;g.lineWidth=2;g.beginPath();g.ellipse(f.x,FLOOR+2,68,10,0,0,TAU);g.stroke();g.restore();}
@@ -811,7 +861,7 @@ function drawFighter(f,ghost=false,offset=0){
  if(f.id==='nox'){drawNox(f);g.restore();return}
  const im=images[f.id];
  if(!im?.naturalWidth){portrait(f.id,f.x-75,f.y-290,150,284);g.restore();return}
- const hasCinematic=!ghost&&hasAttack(f)&&(f.id==='ito'&&images.itoAction?.naturalWidth&&['pulse','super'].includes(f.moveName)||f.id==='tamaki'&&images.tamakiAction?.naturalWidth&&['mk','hk','rush'].includes(f.moveName));
+ const hasCinematic=!ghost&&!!actionArtwork(f);
  let poseVisibility=0;
  if(hasCinematic){const m=f.move,n=m.startup+m.active+m.recovery;poseVisibility=clamp(Math.min(f.moveFrame/5,(n-f.moveFrame)/8),0,1);}
  const v=f.visual,frame=v?.poseTo??spriteFrame(f);
@@ -920,26 +970,20 @@ function drawReflections(visualFighters){
  rect(0,FLOOR+10,W,120,fade);g.restore();
 }
 function drawCinematicPose(f){
- // The source is a ~300px full-character rendering extracted from the
- // original ANGEL CLASH concept image; it is not a low-res thumbnail upscale.
- let art=null,mirror=1,sw=0,sh=0,px=0;
- if(f.id==='ito'&&['pulse','super'].includes(f.moveName)){
-  art=images.itoAction;mirror=1;sw=340;sh=308;px=-171;
- } else if(f.id==='tamaki'&&['hk','mk','rush'].includes(f.moveName)){
-  art=images.tamakiAction;mirror=-1;sw=393;sh=327;px=-253;
- }
- if(!art?.naturalWidth)return false;
+ const pose=actionArtwork(f);if(!pose?.im?.naturalWidth)return false;
  const move=f.move,frame=f.moveFrame,duration=move.startup+move.active+move.recovery;
- // Fade only at transition boundaries; no sudden cut between art sources.
  const visibility=clamp(Math.min(frame/5,(duration-frame)/8),0,1);
  if(visibility<=0)return false;
- g.save();g.translate(f.x,f.y);g.scale(f.face*mirror,1);
+ const art=pose.im;
+ g.save();g.translate(f.x,f.y);g.scale(f.face*pose.mirror,1);
  g.globalAlpha=visibility*(f.hitstop>0?.88:1);
- g.shadowColor=f.c.color;g.shadowBlur=9;
+ g.shadowColor=f.c.color;g.shadowBlur=pose.hd?7:9;
  const swell=1+Math.sin(Math.min(1,frame/Math.max(1,duration))*Math.PI)*.035;
- const dw=sw*swell,dh=sh*swell;
- g.drawImage(art,px*swell,-dh+5,dw,dh);
- // A thin aura follows the silhouette without obscuring facial detail.
+ // HD full-body art is rendered at its *native* aspect ratio, never stretched.
+ const dh=(pose.hd?440:pose.h)*swell;
+ const dw=pose.hd?dh*art.naturalWidth/art.naturalHeight:pose.w*swell;
+ const dx=pose.hd?-dw/2:pose.x*swell;
+ g.drawImage(art,dx,-dh+5,dw,dh);
  g.restore();return visibility>.96;
 }
 function drawProjectile(p){
@@ -1077,12 +1121,12 @@ function drawFight(){g.save();if(shake>0)g.translate(rand(-shake,shake),rand(-sh
 function drawAtmosphere(tint=.72){drawStage();rect(0,0,W,H,`rgba(15,5,35,${tint})`)}
 function titleScreen(){
  drawAtmosphere(.46);
- const im=images.original;
+ // Four approved detailed character portraits, with native-size source images.
  // Dramatic framed group art, cropped rather than stretched.
  const bg=g.createLinearGradient(0,172,0,630);bg.addColorStop(0,'#35144d');bg.addColorStop(1,'#120826');
  g.save();g.shadowBlur=27;g.shadowColor='#d678e7';roundRect(96,188,1088,411,21,bg);g.restore();
  g.save();g.beginPath();g.roundRect(106,200,1068,389,14);g.clip();
- if(im?.naturalWidth)drawImageCover(im,0,0,im.naturalWidth,im.naturalHeight,106,200,1068,389,.5,.20);
+ ['ito','akari','tamaki','nox'].forEach((id,i)=>portrait(id,106+i*267,200,267,389));
  const vign=g.createLinearGradient(0,330,0,620);vign.addColorStop(0,'#160b2600');vign.addColorStop(1,'#140827dc');rect(106,330,1068,260,vign);
  g.restore();strokeRect(97,187,1088,411,'#ffb4e7',3);strokeRect(105,195,1072,395,'#fff3d8',1);
  for(const xx of [105,1175])for(const yy of [195,590])sparkle(xx,yy,8,'#ffdda7');
@@ -1162,7 +1206,7 @@ function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6')
  label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v7.1','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v8','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
@@ -1184,6 +1228,7 @@ requestAnimationFrame(loop);
 musicForScene();
 window.AngelClashDebug={
  assetStatus:()=>({...assetStatus}),
+ hdAssetStatus:()=>Object.fromEntries(Object.keys(HD_ART_URLS).map(id=>[id,images[id+'HD']?.naturalWidth>0])),
  renderResolution:()=>({pixelRatio,backingWidth:canvas.width,backingHeight:canvas.height}),
  state:()=>({scene,modeKind,stageIndex,round,wins:[...wins],timer,score,freeze,paused,endDelay,roundFrames,maxCombo:[...maxCombo],cutIn:cutIn?{...cutIn}:null,fighters:fighters.map(f=>({id:f.id,hp:f.hp,meter:f.meter,guard:f.guard,parry:f.parry,dash:f.dash,aiPlan:f.aiPlan?.type,x:f.x,y:f.y,act:f.act,stun:f.stun,moveName:f.moveName})),projectiles:projectiles.length}),
  start:(a='ito',b='tamaki',mode='cpu')=>beginMatch(a,b,mode),
