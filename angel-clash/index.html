@@ -75,7 +75,7 @@ text-shadow:0 2px 8px #000;background:#1a093bc9;border:1px solid #c991cb85;paddi
 <div id="touch" aria-label="タッチ操作">
  <div class="pad"><button data-key="up" aria-label="上">▲</button><button data-key="left" aria-label="左">◀</button><button data-key="down" aria-label="下">▼</button><button data-key="right" aria-label="右">▶</button></div>
  <div class="assist-buttons"><button data-key="assist-p" aria-label="弱パンチ">P</button><button data-key="assist-k" aria-label="弱キック">K</button><button data-key="assist-h" aria-label="強攻撃">H</button><button data-key="assist-s" aria-label="方向と組み合わせる必殺技">S</button></div><div class="buttons"><button data-key="lp">LP</button><button data-key="mp">MP</button><button data-key="hp">HP</button><button data-key="lk">LK</button><button data-key="mk">MK</button><button data-key="hk">HK</button><button data-key="special">SP</button><button data-key="sp">SUPER</button></div>
-</div><div id="touch-actions"><button id="touch-mode" type="button" aria-label="タッチ操作モードを切り替える">4 BUTTONS</button><button id="touch-pause" type="button" aria-label="一時停止">Ⅱ PAUSE</button></div><div id="notice">ENTERで決定 / ESCで戻る</div></div><!-- v6: native WebP and JPEG, cacheable and correctly typed -->
+</div><div id="touch-actions"><button id="touch-stage" type="button" aria-label="トレーニングステージ変更" style="display:none">STAGE ↻</button><button id="touch-mode" type="button" aria-label="タッチ操作モードを切り替える">4 BUTTONS</button><button id="touch-pause" type="button" aria-label="一時停止">Ⅱ PAUSE</button></div><div id="notice">ENTERで決定 / ESCで戻る</div></div><!-- v6: native WebP and JPEG, cacheable and correctly typed -->
 <link rel="preload" as="image" href="assets/logo/angel-clash-logo.webp">
 <link rel="preload" as="image" href="assets/original-characters.jpg">
 
@@ -326,11 +326,17 @@ function setScene(next){scene=next;transition=18;if(next==='story')requestStageB
 function musicForScene(){if(scene==='fight')playMusic(STAGES[stageIndex].kind);else if(scene==='title'||scene==='menu')playMusic('title');else if(scene==='select')playMusic('select');else if(scene==='result')playMusic('result');else if(scene==='ending')playMusic('ending');}
 const touchRoot=document.getElementById('touch'),touchHint=document.getElementById('notice');
 let touchPausePressed=false;
-const touchActions=document.getElementById('touch-actions'),touchModeButton=document.getElementById('touch-mode'),touchPauseButton=document.getElementById('touch-pause');
+const touchActions=document.getElementById('touch-actions'),touchModeButton=document.getElementById('touch-mode'),touchPauseButton=document.getElementById('touch-pause'),touchStageButton=document.getElementById('touch-stage');
+function cycleTrainingStage(){
+ if(scene!=='fight'||modeKind!=='training')return;
+ stageIndex=(stageIndex+1)%5;stageCacheKey=-1;
+ ensureStageWardrobe(stageIndex);sound('select');
+}
 function applyTouchMode(){document.body.classList.toggle('touch-classic',settings.touchMode===1);if(touchModeButton)touchModeButton.textContent=settings.touchMode===0?'4 BUTTONS':'6 BUTTONS';}
 applyTouchMode();
 touchModeButton?.addEventListener('pointerdown',e=>{e.preventDefault();settings.touchMode=(settings.touchMode+1)%2;applyTouchMode();saveSettings();audioReady()});
 touchPauseButton?.addEventListener('pointerdown',e=>{e.preventDefault();touchPausePressed=true;audioReady()});
+touchStageButton?.addEventListener('pointerdown',e=>{e.preventDefault();cycleTrainingStage();audioReady()});
 document.addEventListener('contextmenu',e=>{if(e.target.closest('#shell'))e.preventDefault()});
 for(const b of document.querySelectorAll('#touch [data-key]')){
  const k=b.dataset.key;const inputKey=({'assist-p':'lp','assist-k':'lk','assist-h':'hp','assist-s':'special'})[k]||k;
@@ -719,7 +725,7 @@ function stepLogic(){tick++;displayTick++;
   if(touchPausePressed){paused=!paused;touchPausePressed=false;}
   if(just('KeyH'))debugHitbox=!debugHitbox;
   if(modeKind==='training'){
-   if(just('KeyC')){stageIndex=(stageIndex+1)%5;stageCacheKey=-1;ensureStageWardrobe(stageIndex);sound('select');}
+   if(just('KeyC'))cycleTrainingStage();
    if(just('KeyR')){fighters[0].hp=fighters[0].maxHp;fighters[1].hp=fighters[1].maxHp;fighters[0].meter=fighters[1].meter=100;fighters[0].x=370;fighters[1].x=912;projectiles=[];}
    if(just('KeyG')){settings.trainingDummy=(settings.trainingDummy+1)%3;saveSettings();}
    if(just('KeyT')){settings.showInput=!settings.showInput;saveSettings();}
@@ -1337,7 +1343,7 @@ function drawTransition(){if(transition>0){g.globalAlpha=transition/18*.28;rect(
 function render(){g.setTransform(pixelRatio,0,0,pixelRatio,0,0);g.clearRect(0,0,W,H);g.imageSmoothingEnabled=true;
  switch(scene){case'title':titleScreen();break;case'menu':menuScreen();break;case'select':selectScreen();break;case'story':storyScreen();break;case'fight':drawFight();break;case'result':resultScreen();break;case'ending':endingScreen();break;case'help':helpScreen();break;case'options':optionScreen();break;case'credits':creditsScreen();break;default:titleScreen()}
  ornamentFrame();drawTransition();
- touchRoot.classList.toggle('active',scene==='fight');touchActions?.classList.toggle('active',scene==='fight');touchHint.textContent=scene==='fight'?'A D MOVE / W JUMP / J K L PUNCH / U I O KICK / SPACE SUPER':'ENTER 決定 / ESC 戻る';
+ touchRoot.classList.toggle('active',scene==='fight');touchActions?.classList.toggle('active',scene==='fight');if(touchStageButton)touchStageButton.style.display=(scene==='fight'&&modeKind==='training')?'':'none';touchHint.textContent=scene==='fight'?'A D MOVE / W JUMP / J K L PUNCH / U I O KICK / SPACE SUPER':'ENTER 決定 / ESC 戻る';
 }
 let last=0,acc=0;
 function loop(now){if(last===0)last=now;const dt=clamp(now-last,0,90);last=now;acc+=dt;let count=0;
