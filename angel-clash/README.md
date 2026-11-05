@@ -1,3 +1,17 @@
+# ANGEL CLASH v8.1 — Clean performance and protected costume archive
+
+## Now implemented in the queue branch
+- **Clean VFX by default**; the options menu exposes **VISUAL EFFECTS: CLEAN / CLASSIC**.
+- CLEAN reduces animated background particles, attack particles, floor grid density, projectiles, aura glow, reflection blur, and cut-in speed lines. Keeps combat timing, character image resolution, and hitboxes unchanged.
+- The former high-detail, frilled-costume illustrations are preserved in the user's Wix Media Manager as 8 independent PNG assets; the reference URLs and an additional composite archive design board are listed in [ART_CONCEPT_ARCHIVE.md](ART_CONCEPT_ARCHIVE.md).
+- The original character profiles from [３人について](https://miyakota3.wixsite.com/my-site-1/post/about-three-new) remain authoritative for faces, hair, glasses, personalities, and ages.
+- **Production target (pending artwork):** fitted miniskirt costumes with minimal frills; retain pink/blue/purple color identity, approved NOX appearance, and existing animations until replacements are verified. The actual in-game costume art has **not yet been replaced** by the new slim designs.
+
+## Test note
+JavaScript parsing and a mocked Canvas2D smoke test passed for 4 matchups including NOX, 10 attack types and the CLEAN / CLASSIC mode switch. This is **not** proof of physical iPhone Safari performance or of the live Cloudflare deployment. Test on real devices before release.
+
+---
+
 # ANGEL CLASH v7 — Fluid Character Animation
 
 Playable entry: /angel-clash/index.html over HTTP(S). Pure Canvas2D; no runtime dependency or external CDN.
