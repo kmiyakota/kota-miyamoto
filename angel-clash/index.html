@@ -1009,6 +1009,8 @@ function actionArtwork(f){
   return {im:images.tamakiAction,hd:false,mirror:-1,w:393,h:327,x:-253};
  return null;
 }
+const HD_HEAD_WIDTH=Object.freeze({ito:86,akari:79,tamaki:82,nox:95});
+const TARGET_HEAD_WIDTH=84;
 function drawFighter(f,ghost=false,offset=0){
  g.save();
  if(!ghost){ellipse(f.x+5,FLOOR+5,81,13,'#130822b5');g.save();g.globalAlpha=.25+.08*Math.sin(displayTick*.04);g.strokeStyle=f.c.color;g.lineWidth=2;g.beginPath();g.ellipse(f.x,FLOOR+2,68,10,0,0,TAU);g.stroke();g.restore();}
@@ -1026,8 +1028,6 @@ function drawFighter(f,ghost=false,offset=0){
  // v9.1: Normalize HD pose sizes by the head silhouette, not the atlas canvas.
  // Reference widths are per-character estimated head spans in the 400px source cells.
  // One common on-screen target preserves each character's original head/body proportions.
- const HD_HEAD_WIDTH=Object.freeze({ito:86,akari:79,tamaki:82,nox:95});
- const TARGET_HEAD_WIDTH=84;
  const sc=modern?(0.91*TARGET_HEAD_WIDTH/(HD_HEAD_WIDTH[f.id]||84)):1.265;
  const sw=tw*sc,sh=th*sc;
  const walk=clamp(v?.walk??Number(f.act==='walk'),0,1);
