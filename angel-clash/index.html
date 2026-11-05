@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v8.3 — Stage Costume Portraits</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v8.4 — Optimized Stage Costumes</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -147,18 +147,18 @@ const CHARACTER_DARK_SKIRTS=Object.freeze({
 // "sprite" must match the game's 12-column, 396x336 tile atlas for animation consistency.
 const COSTUME_SOURCES=Object.freeze({});
 // Approved stage-specific costume concept boards are the temporary source for UI
-// portraits. These 1448x1086 boards contain all 4 characters. They are lazily loaded,
-// *one stage at a time*, instead of downloading 20 redundant image files on launch.
+// portraits. These 920x552 compressed strips contain all 4 characters.
+// 873 KB total versus 14+ MB for five original boards; load only the current stage.
 const STAGE_BOARD_URLS=Object.freeze([
- 'https://static.wixstatic.com/media/c3c31e_a3088cc5967e402880d9dc5b33c2f3a5~mv2.png',
- 'https://static.wixstatic.com/media/c3c31e_35831160ba9542d4b77fd3e130fd443e~mv2.png',
- 'https://static.wixstatic.com/media/c3c31e_a6de23dfb73e4f97a1d49fc2a54535e3~mv2.png',
- 'https://static.wixstatic.com/media/c3c31e_b63d1af3e82445b492179a558ec17313~mv2.png',
- 'https://static.wixstatic.com/media/c3c31e_9b87bf2cafe8456d976ea0c34f86a793~mv2.png'
+ 'https://static.wixstatic.com/media/c3c31e_97cc144b331546bb81f5ff482a64b457~mv2.jpg',
+ 'https://static.wixstatic.com/media/c3c31e_579ffacb11e94b9682e7ba4cefdf8ae0~mv2.jpg',
+ 'https://static.wixstatic.com/media/c3c31e_312212b0cb4e4096b1a08baf8978a04a~mv2.jpg',
+ 'https://static.wixstatic.com/media/c3c31e_92623cd205bc41e388693fb465fd1792~mv2.jpg',
+ 'https://static.wixstatic.com/media/c3c31e_e76e2130653e4b65be484a91fa3b8611~mv2.jpg'
 ]);
 const STAGE_BOARD_CROPS=Object.freeze({
- ito:[298,53,234,441], akari:[536,46,196,434],
- tamaki:[727,50,204,441], nox:[925,38,246,455]
+ ito:[38,15,234,441], akari:[276,8,196,434],
+ tamaki:[467,12,204,441], nox:[665,0,246,455]
 });
 const stageBoardCache=new Map(), stageBoardState=new Map();
 function requestStageBoard(stage=stageIndex){
@@ -184,7 +184,7 @@ function stageCostumePortrait(id,x,y,w,h,stage=activeWardrobeStage()){
  const art=stageBoardCache.get(stage);
  if(!art?.naturalWidth||stageBoardState.get(stage)!=='ready')return false;
  const crop=STAGE_BOARD_CROPS[id];if(!crop)return false;
- const kx=art.naturalWidth/1448,ky=art.naturalHeight/1086;
+ const kx=art.naturalWidth/920,ky=art.naturalHeight/552;
  drawImageCover(art,crop[0]*kx,crop[1]*ky,crop[2]*kx,crop[3]*ky,
   x,y,w,h,.48,.025);
  return true;
@@ -719,6 +719,7 @@ function stepLogic(){tick++;displayTick++;
   if(touchPausePressed){paused=!paused;touchPausePressed=false;}
   if(just('KeyH'))debugHitbox=!debugHitbox;
   if(modeKind==='training'){
+   if(just('KeyC')){stageIndex=(stageIndex+1)%5;stageCacheKey=-1;ensureStageWardrobe(stageIndex);sound('select');}
    if(just('KeyR')){fighters[0].hp=fighters[0].maxHp;fighters[1].hp=fighters[1].maxHp;fighters[0].meter=fighters[1].meter=100;fighters[0].x=370;fighters[1].x=912;projectiles=[];}
    if(just('KeyG')){settings.trainingDummy=(settings.trainingDummy+1)%3;saveSettings();}
    if(just('KeyT')){settings.showInput=!settings.showInput;saveSettings();}
@@ -1170,7 +1171,7 @@ function drawHUD(){
  label(WARDROBE[stageIndex].en,640,641,15,'#efe6f2','center','Arial');
  if(b.combo>=2)label(b.combo+' HIT COMBO',210,179,30,'#fff5b5');if(a.combo>=2)label(a.combo+' HIT COMBO',1060,179,30,'#fff5b5');
  if(a.parry>0)label('✦ PERFECT PARRY',260,215,20,'#e9f9ff');if(b.parry>0)label('✦ PERFECT PARRY',1020,215,20,'#e9f9ff');
- if(modeKind==='training')label('TRAINING  •  G DUMMY  /  R RESET  /  H HITBOX  /  T INPUT',640,613,17,'#fff4e1');
+ if(modeKind==='training')label('TRAINING  •  C STAGE  /  G DUMMY  /  R RESET  /  H HITBOX',640,613,17,'#fff4e1');
  if(settings.showInput)for(let p=0;p<2;p++)label(inputDisplays[p].slice(-9).map(q=>q.display).join(' '),p===0?95:1185,566,18,'#fff1dd',p===0?'left':'right','Arial');
 }
 
@@ -1324,7 +1325,7 @@ function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6')
  label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v8.3','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v8.4','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
