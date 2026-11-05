@@ -36,3 +36,8 @@ The previous frilled outfits above are **preserved alternatives**, not discarded
 - Earlier ornate battle costumes: approved for the game on 2026-11-05, then explicitly requested to be **kept** as alternative concepts.
 - Later main-design direction: fitted miniskirt silhouettes, minimal ruffles, lighter stage and VFX.
 - Existing combat atlases and the earlier concept images must remain preserved until verified replacement artwork and multi-frame animation are prepared.
+
+## Full original ornate costume sheet
+
+- Composite archive concept board: https://static.wixstatic.com/media/c3c31e_3568b659e7a54df4b7335df46b195ae2~mv2.png
+- This board depicts the previous costume route. It is NOT the simplified production costume.
