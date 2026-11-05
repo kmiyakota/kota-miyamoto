@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v8.4 — Optimized Stage Costumes</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.0 — High Definition Combat Animation</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -221,7 +221,7 @@ function loadedCostumeArt(id,kind,stage=stageIndex){
  }
  return img;
 }
-function fightingSprite(f){return loadedCostumeArt(f.id,'sprite')||images[f.id];}
+function fightingSprite(f){return loadedCostumeArt(f.id,'sprite')||fighterAtlas9(f)||images[f.id];}
 function artForCostume(id,kind,stage=stageIndex){
  return loadedCostumeArt(id,kind,stage)||images[id+'HD']||null;
 }
@@ -271,6 +271,42 @@ function loadOptionalArt(name,url){
  im.src=url;
 }
 for(const [id,url] of Object.entries(HD_ART_URLS))loadOptionalArt(id+'HD',url);
+
+// v9.0: genuine 12-pose animation atlases made from the approved original character
+// action sheets (ITO / AKARI / TAMAKI / NOX). Real transparency, no captions, 4x3,
+// 400x400 source pixels per pose. Original v5 atlases are retained as fallback.
+const FIGHT9_URLS=Object.freeze({
+ ito:'https://static.wixstatic.com/media/c3c31e_f84c2687cabd4c6e93fc0849d6d7e912~mv2.webp',
+ akari:'https://static.wixstatic.com/media/c3c31e_1b14461d63c84e919162bc2f9fa1e688~mv2.webp',
+ tamaki:'https://static.wixstatic.com/media/c3c31e_7325a9b9a4cf463c998b729f7ab9dbe1~mv2.webp',
+ nox:'https://static.wixstatic.com/media/c3c31e_7a96f82aa5634f8d9e1e2ffc768520d7~mv2.webp'
+});
+let useHDCombat=true;
+for(const [id,url] of Object.entries(FIGHT9_URLS))loadOptionalArt(id+'Fight9',url);
+function fighterAtlas9(f){
+ if(!useHDCombat)return null;
+ const image=images[f.id+'Fight9'];
+ return image?.naturalWidth===1600&&image?.naturalHeight===1200?image:null;
+}
+function spriteFrame9(f){
+ if(f.act==='hurt'||f.stun>0)return 10;
+ if(f.act==='victory')return 11;
+ if(f.act==='crouch'||f.act==='guard')return 3;
+ if(f.act==='jump'||!f.onGround)return 4;
+ if(hasAttack(f)){
+  const attack=f.moveName;
+  if(['lp','mp'].includes(attack))return f.moveFrame<f.move.startup?0:5;
+  if(['hp','throw'].includes(attack))return f.moveFrame<f.move.startup?5:6;
+  if(['lk','mk'].includes(attack))return f.moveFrame<f.move.startup?0:7;
+  if(attack==='hk')return f.moveFrame<f.move.startup?7:8;
+  if(attack==='riser')return f.moveFrame<f.move.startup?9:4;
+  if(attack==='rush')return f.moveFrame<f.move.startup?1:6;
+  return 9;
+ }
+ if(f.act==='walk')return 1+(Math.floor(f.anim/9)%2);
+ return 0;
+}
+
 
 const assetStatus={total:0,ready:0,failed:0,failures:[]};
 const boot=document.getElementById('boot'),bootFill=document.getElementById('boot-fill'),bootPercent=document.getElementById('boot-percent');
@@ -913,7 +949,7 @@ function drawAtmosphericForeground(){
  rect(0,126,W,H-126,vignette);
  g.restore();
 }
-function spriteFrame(f){let group='idle',idx=0;
+function spriteFrame(f){if(fighterAtlas9(f))return spriteFrame9(f);let group='idle',idx=0;
  if(f.act==='walk'){group='walk';idx=Math.floor(f.anim/7)%4}
  else if(f.act==='crouch'||f.act==='guard'){group='crouch';idx=f.act==='guard'?2:Math.floor(f.anim/11)%3}
  else if(f.act==='jump'){group='jump';idx=f.dy< -4?0:f.dy<4?1:2}
@@ -956,6 +992,7 @@ function drawNox(f){
  for(const x of [-25,24]){line(x,-120,x+(x>0?7:-7),-11,'#261134',25);}
  if(hasAttack(f))circle(100,-216,28,'#e15bf2aa');g.restore();}
 function actionArtwork(f){
+ if(fighterAtlas9(f))return null; // v9 animation poses replace static in-fight overlays.
  if(!hasAttack(f))return null;
  const special=['pulse','riser','rush','super'].includes(f.moveName);
  if(special&&f.id!=='nox'&&artForCostume(f.id,'special')?.naturalWidth)
@@ -970,14 +1007,18 @@ function drawFighter(f,ghost=false,offset=0){
  g.save();
  if(!ghost){ellipse(f.x+5,FLOOR+5,81,13,'#130822b5');g.save();g.globalAlpha=.25+.08*Math.sin(displayTick*.04);g.strokeStyle=f.c.color;g.lineWidth=2;g.beginPath();g.ellipse(f.x,FLOOR+2,68,10,0,0,TAU);g.stroke();g.restore();}
  if(f.hitstop>0)g.globalAlpha=.84;
- if(f.id==='nox'){drawNox(f);g.restore();return}
+ if(f.id==='nox'&&!fighterAtlas9(f)){drawNox(f);g.restore();return}
  const im=fightingSprite(f);
  if(!im?.naturalWidth){portrait(f.id,f.x-75,f.y-290,150,284);g.restore();return}
  const hasCinematic=!ghost&&!!actionArtwork(f);
  let poseVisibility=0;
  if(hasCinematic){const m=f.move,n=m.startup+m.active+m.recovery;poseVisibility=clamp(Math.min(f.moveFrame/5,(n-f.moveFrame)/8),0,1);}
  const v=f.visual,frame=v?.poseTo??spriteFrame(f);
- const sc=1.265,tw=atlasMeta.tileWidth,th=atlasMeta.tileHeight,sw=tw*sc,sh=th*sc;
+ const modern=!!fighterAtlas9(f);
+ const tw=modern?400:atlasMeta.tileWidth,th=modern?400:atlasMeta.tileHeight;
+ const columns=modern?4:atlasMeta.cols;
+ const sc=modern?(f.id==='nox'?1.04:.91):1.265;
+ const sw=tw*sc,sh=th*sc;
  const walk=clamp(v?.walk??Number(f.act==='walk'),0,1);
  const crouch=clamp(v?.crouch??Number(f.act==='crouch'),0,1);
  const air=clamp(v?.air??Number(!f.onGround),0,1);
@@ -996,9 +1037,10 @@ function drawFighter(f,ghost=false,offset=0){
  // Continuous piecewise deformation replaces the old hard two-piece walking cut.
  // All strips originate in one intact pose: no missing/cropped animation cells.
  function drawPose(k,alpha){
-  const sx=(k%atlasMeta.cols)*tw,sy=Math.floor(k/atlasMeta.cols)*th;
+  const safeK=modern?Math.max(0,Math.min(11,k)):k;
+  const sx=(safeK%columns)*tw,sy=Math.floor(safeK/columns)*th;
   g.globalAlpha=opacity*alpha;
-  if(walk>.07&&!ghost){
+  if(walk>.07&&!ghost&&!modern){
    const bands=MOTION_BANDS,band=th/bands;
    for(let i=0;i<bands;i++){
     const srcY=i*band,depth=(i+.5)/bands;
@@ -1021,7 +1063,7 @@ function drawFighter(f,ghost=false,offset=0){
  if(!ghost&&f.stun>0){g.globalCompositeOperation='screen';g.globalAlpha=.24;roundRect(-80,-310,160,290,30,'#fff4ef');}
  g.restore();
  if(hasCinematic)drawCinematicPose(f);
- if(!ghost&&poseVisibility<.5)drawFighterHighlights(f);
+ if(!ghost&&poseVisibility<.5&&!modern)drawFighterHighlights(f);
  if(!ghost&&(debugHitbox||settings.hitboxes)){
   g.strokeStyle='#76ff92';g.lineWidth=2;g.strokeRect(f.x-47,f.y-299,94,298);
   if(hasAttack(f)){g.strokeStyle='#ff7676';g.strokeRect(f.x+f.face*30-(f.face<0?f.move.reach:0),f.y-265,f.move.reach,145)}
@@ -1070,12 +1112,13 @@ function drawReflections(visualFighters){
  for(const f of visualFighters){
   if(f.id==='nox')continue;
   const im=fightingSprite(f);if(!im?.naturalWidth)continue;
-  const k=spriteFrame(f),sx=k%atlasMeta.cols*atlasMeta.tileWidth,
-        sy=Math.floor(k/atlasMeta.cols)*atlasMeta.tileHeight;
-  const sc=1.265,sw=atlasMeta.tileWidth*sc,sh=atlasMeta.tileHeight*sc;
+  const modern=!!fighterAtlas9(f),k=spriteFrame(f);
+  const tw=modern?400:atlasMeta.tileWidth,th=modern?400:atlasMeta.tileHeight;
+  const cols=modern?4:atlasMeta.cols,sx=(k%cols)*tw,sy=Math.floor(k/cols)*th;
+  const sc=modern?.91:1.265,sw=tw*sc,sh=th*sc;
   g.save();g.translate(f.x,FLOOR+13);g.scale(f.face,-.27);
   g.globalAlpha=(f.onGround?.19:.045);g.filter='blur(2.5px)';
-  g.drawImage(im,sx,sy,atlasMeta.tileWidth,atlasMeta.tileHeight,-sw/2,-sh,sw,sh);
+  g.drawImage(im,sx,sy,tw,th,-sw/2,-sh,sw,sh);
   g.restore();
  }
  const fade=g.createLinearGradient(0,FLOOR+8,0,FLOOR+133);
@@ -1331,7 +1374,7 @@ function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6')
  label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v8.4','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v9.0','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
@@ -1353,6 +1396,9 @@ requestAnimationFrame(loop);
 musicForScene();
 window.AngelClashDebug={
  assetStatus:()=>({...assetStatus}),
+ combatHD:()=>({enabled:useHDCombat,characters:Object.fromEntries(Object.keys(FIGHT9_URLS).map(id=>[id,!!images[id+'Fight9']?.naturalWidth&&images[id+'Fight9'].naturalWidth===1600]))}),
+ toggleCombatHD:(v)=>{useHDCombat=!!v;for(const fighter of fighters)if(fighter.visual){const k=spriteFrame(fighter);fighter.visual.poseFrom=k;fighter.visual.poseTo=k;fighter.visual.poseBlend=1;}},
+ poseIndex:(p=0)=>fighters[p]?spriteFrame(fighters[p]):-1,
  hdAssetStatus:()=>Object.fromEntries(Object.keys(HD_ART_URLS).map(id=>[id,images[id+'HD']?.naturalWidth>0])),
  renderResolution:()=>({pixelRatio,backingWidth:canvas.width,backingHeight:canvas.height}),
  wardrobe:()=>({stage:stageIndex,stageName:STAGES[stageIndex].name,
