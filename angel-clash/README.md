@@ -1,3 +1,14 @@
+# ANGEL CLASH v8.4 — Optimized Costume Previews
+
+- All **5 stage-specific outfit concept portraits** now show in story, in-fight HUD and result screens using lazy-loaded stage artwork. Character identities, dark fitted miniskirt palettes and lack of stockings are preserved.
+- Only one small image is downloaded per stage (~160–183 KB) instead of the original multi-megabyte concept board. Total 873 KB across all stages; images are loaded on demand and the image cache keeps two stage strips.
+- PC Training: **C** changes the stage; smartphone Training: **STAGE ↻** changes the stage.
+- **Live combat movement sprites remain unchanged** until matching multi-pose fitted-mini outfit sheets exist. See [STAGE_WARDROBE.md](STAGE_WARDROBE.md).
+- Original ornate costumes and source boards are retained in Wix; see [ART_CONCEPT_ARCHIVE.md](ART_CONCEPT_ARCHIVE.md).
+- JavaScript syntax and mock Canvas2D training/asset/keyboard/touch test passed; published deployment and device performance remain unverified.
+
+---
+
 # ANGEL CLASH v8.2 — Stage Wardrobe System
 
 Stage-specific outfit selection is now implemented at the **design/mapping and optional-asset loading level**. Five stage themes are registered; stage HUD/story screen shows the outfit theme; existing artwork is preserved until actual per-stage animated sprite atlases are completed. No claim of finished stage-specific battle art. See [STAGE_WARDROBE.md](STAGE_WARDROBE.md) for canonical character details, no-stockings, dark-tone fitted miniskirts, palette, atlas format, and testing requirements. Existing ornate versions are archived in [ART_CONCEPT_ARCHIVE.md](ART_CONCEPT_ARCHIVE.md).
