@@ -1,4 +1,23 @@
-# ANGEL CLASH — Stage Wardrobe Plan (v8.2)
+# ANGEL CLASH — Stage Wardrobe Plan (v8.4)
+
+## Implemented since v8.4: lightweight stage outfit portraits
+
+Five stage concept boards have now been archived in the creator's Wix Media Manager, and **cropped character costume strips** are separately hosted for actual in-game story, battle HUD, and victory portraits. The cropped 920×552 JPEG files are fetched **only on stage demand**, and at most two stage images are retained in the JavaScript cache. There are no extra initial-stage downloads on game startup.
+
+| Stage | Optimized costume strip | Image bytes |
+|---|---|---:|
+| Sakura Terrace | https://static.wixstatic.com/media/c3c31e_97cc144b331546bb81f5ff482a64b457~mv2.jpg | 158,955 |
+| Sky Harbor | https://static.wixstatic.com/media/c3c31e_579ffacb11e94b9682e7ba4cefdf8ae0~mv2.jpg | 178,840 |
+| Moonlit City | https://static.wixstatic.com/media/c3c31e_312212b0cb4e4096b1a08baf8978a04a~mv2.jpg | 183,265 |
+| Crystal Sanctum | https://static.wixstatic.com/media/c3c31e_92623cd205bc41e388693fb465fd1792~mv2.jpg | 175,931 |
+| Eclipse Castle | https://static.wixstatic.com/media/c3c31e_e76e2130653e4b65be484a91fa3b8611~mv2.jpg | 176,309 |
+
+Total JPEG payload = 873,300 bytes, versus approximately 14.34 MB for the five original full-size PNG boards (about **94% less**). The original boards are preserved at Wix as source references. These images are **upper-body concept portrait crops**, not full animation sprite atlases; animated characters still use the existing combat atlas until matching fitted-mini costumes and movement poses are finished.
+
+In Training Mode, press **C** on PC or tap **STAGE ↻** on a touch device to cycle stages and inspect costume changes. The 5-stage cycle and 10 combat moves passed mocked Canvas2D QA, including event-triggered PC/touch stage changes. This is not yet a real iPhone Safari field test.
+
+---
+
 
 ## Approved direction
 
