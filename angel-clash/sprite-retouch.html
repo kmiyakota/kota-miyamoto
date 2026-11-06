@@ -46,11 +46,13 @@ master.width=original.width=1600;master.height=original.height=1200;
 const mctx=master.getContext('2d',{willReadFrequently:true}),octx=original.getContext('2d',{willReadFrequently:true});
 let id='ito',frame=0,tool='inspect',zoom=1,loaded=false,canEdit=false,brush=4,opacity=.8,color='#523441',loadingSeq=0;
 let stroke=false,source=null,cloneDelta=null,lastPoint=null,undoStack=[],redoStack=[],modified=false;
-const MAX_HISTORY=18;
+const MAX_HISTORY=24; // Keep only 400×400 frame snapshots (0.64MB each).
 const frameRect=k=>({x:(k%4)*400,y:Math.floor(k/4)*400});
-function histPush(){undoStack.push(mctx.getImageData(0,0,1600,1200));if(undoStack.length>MAX_HISTORY)undoStack.shift();redoStack.length=0;updateButtons();}
+function captureFrame(k){const b=frameRect(k);return {frame:k,pixels:mctx.getImageData(b.x,b.y,400,400)};}
+function applySnapshot(snapshot){const b=frameRect(snapshot.frame);mctx.putImageData(snapshot.pixels,b.x,b.y);frame=snapshot.frame;}
+function histPush(){undoStack.push(captureFrame(frame));if(undoStack.length>MAX_HISTORY)undoStack.shift();redoStack.length=0;updateButtons();}
 function updateButtons(){ $('undo').disabled=!undoStack.length;$('redo').disabled=!redoStack.length;$('resetFrame').disabled=!canEdit;$('exportPNG').disabled=!canEdit;$('exportWEBP').disabled=!canEdit;}
-function restore(payload){mctx.putImageData(payload,0,0);modified=true;refresh();}
+function restore(payload){applySnapshot(payload);modified=true;refresh();}
 function makePoses(container){
  container.innerHTML='';poseNames.forEach((name,k)=>{
   const b=document.createElement('button'),c=document.createElement('canvas');c.width=c.height=150;
@@ -188,8 +190,8 @@ $('background').addEventListener('change',refresh);$('showCross').addEventListen
 $('radius').addEventListener('input',e=>{brush=+e.target.value;refresh()});$('opacity').addEventListener('input',e=>{opacity=e.target.value/100;refresh()});
 $('zoom').addEventListener('input',e=>{zoom=+e.target.value;refresh()});$('fit').addEventListener('click',()=>{zoom=1;$('zoom').value=1;refresh()});
 $('color').addEventListener('input',e=>color=e.target.value);
-$('undo').addEventListener('click',()=>{if(!undoStack.length)return;redoStack.push(mctx.getImageData(0,0,1600,1200));restore(undoStack.pop());updateButtons()});
-$('redo').addEventListener('click',()=>{if(!redoStack.length)return;undoStack.push(mctx.getImageData(0,0,1600,1200));restore(redoStack.pop());updateButtons()});
+$('undo').addEventListener('click',()=>{if(!undoStack.length)return;redoStack.push(captureFrame(undoStack[undoStack.length-1].frame));restore(undoStack.pop());updateButtons()});
+$('redo').addEventListener('click',()=>{if(!redoStack.length)return;undoStack.push(captureFrame(redoStack[redoStack.length-1].frame));restore(redoStack.pop());updateButtons()});
 $('resetFrame').addEventListener('click',()=>{if(!canEdit||!window.confirm('このポーズのみ元画像に戻しますか？'))return;histPush();const b=frameRect(frame);mctx.drawImage(original,b.x,b.y,400,400,b.x,b.y,400,400);modified=true;refresh()});
 $('exportPNG').addEventListener('click',()=>exportImage('image/png'));$('exportWEBP').addEventListener('click',()=>exportImage('image/webp'));
 window.addEventListener('beforeunload',e=>{if(modified){e.preventDefault();e.returnValue='';}});
