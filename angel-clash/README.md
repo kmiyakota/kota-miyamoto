@@ -1,3 +1,13 @@
+# ANGEL CLASH v9.2 — Original-aspect character rendering and HD cinematics
+
+**Changes committed in `queue` on 2026-11-06.** Original character artwork must not be stretched in any pose. The combat renderer draws an intact source animation cell at one uniform scale for both axes. Removed crouch/landing vertical compression and multi-band walking deformation; movement, lean rotation and crossfade remain without changing each source cell's proportions. The visible floor reflection is mirror-flipped and clipped rather than squashed; NOX's legacy image and static action overlays now derive display width from the original image ratio.
+
+Large **super cut-ins, story panels, victory/defeat and ending portraits** prefer the individually approved full-resolution `HD_ART_URLS` (or dedicated costume art if registered), instead of enlarging each cropped figure from the combined 920×552 stage-board JPEG. Small HUD portraits may retain stage-specific board previews; stage-board artwork is a fallback when HD sources have not loaded. `drawImageCover` crops images to fit without altering the original aspect. HD loading is optional and does not block combat.
+
+**QA:** JavaScript syntax validation passed, and source-level invariants verified: no `scale(1,stretch)`, no strip-based drawPose warping, uniform X/Y frame scaling, native-ratio action/cinematic fallback, and HD-first large-panel selection. This is *not* a physical PC/Safari visual test, and no Cloudflare Pages deployment status was independently verified. The approved sprite sheets contain 400×400 frames; resampling cannot add painting detail not present in the source. If a particular source animation pose itself has distorted proportions or unusually small head art, it must be corrected in the source atlas, not fixed by nonuniform display scaling.
+
+---
+
 # ANGEL CLASH v9.0 — 4-character HD combat animation
 
 **Playable-source implementation completed in queue.** All 4 fighters now use 12-action (48 total) transparent high-detail WebP combat atlases cropped from the creator-approved character model boards. New sprite sheets use 400px source cells (1600×1200 per character), retain the standard fitted miniskirt suit without stockings, and integrate directly with the live fighting animation state machine and subframe interpolation. NOX is now animated, not only a static pose. Code includes a resilient original-sprite fallback.
