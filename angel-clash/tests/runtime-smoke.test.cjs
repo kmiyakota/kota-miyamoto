@@ -13,7 +13,7 @@ new vm.Script(js);
 const IDS=['ito','akari','tamaki','nox'];
 const MOVES=['lp','hp','lk','hk','pulse','riser','rush','super'];
 function runMock(withHD){
- const stats={matchups:0,moves:0,quickKeys:0,qaToggles:0,drawCalls:0,atlasDrawCalls:0,invalid:0};
+ const stats={matchups:0,moves:0,quickKeys:0,qaToggles:0,drawCalls:0,atlasDrawCalls:0,irisPatchDrawCalls:0,invalid:0};
  const gradient={addColorStop(){}};
  const context=new Proxy({
   globalAlpha:1,measureText(t){return {width:String(t).length*12}},
@@ -26,6 +26,7 @@ function runMock(withHD){
    return (...a)=>{
     if(k!=='drawImage')return;
     stats.drawCalls++;
+    if(a[0]?.url?.includes('c3c31e_7a87a744b19f463d965e3e1681dbca51'))stats.irisPatchDrawCalls++;
     if(a.slice(1).some(x=>typeof x==='number'&&!Number.isFinite(x)))stats.invalid++;
     // 4×3 current sprite atlases: source frames must be 400px square.
     if(a.length===9&&a[3]===400&&a[4]===400){
@@ -63,7 +64,8 @@ function runMock(withHD){
    this.url=v;
    // Pretend only the known optional source files are decoded.
    if(withHD&&v.includes('~mv2.webp')){this.naturalWidth=1600;this.naturalHeight=1200;}
-   if(withHD&&v.includes('~mv2.png')){this.naturalWidth=1400;this.naturalHeight=1800;}
+   if(withHD&&v.includes('c3c31e_7a87a744b19f463d965e3e1681dbca51')){this.naturalWidth=400;this.naturalHeight=400;}
+   else if(withHD&&v.includes('~mv2.png')){this.naturalWidth=1400;this.naturalHeight=1800;}
   }
   get src(){return this.url}
   addEventListener(){}
@@ -112,10 +114,15 @@ function runMock(withHD){
  assert.equal(stats.invalid,0,'Invalid drawImage bounds, aspect or coordinates');
  assert.equal(stats.matchups,12);
  assert.equal(stats.moves,96);
- if(withHD)assert.ok(stats.atlasDrawCalls>0,'No HD atlas frames drawn');
+ if(withHD){
+  assert.ok(stats.atlasDrawCalls>0,'No HD atlas frames drawn');
+  assert.ok(stats.irisPatchDrawCalls>0,'AKARI eye correction was not drawn');
+  assert.equal(debug.akariIdleEyeRepair().complete,true);
+  assert.equal(debug.akariIdleEyeRepair().pixelChanges,6);
+ }else assert.equal(stats.irisPatchDrawCalls,0);
  return stats;
 }
 const fallback=runMock(false),hd=runMock(true);
 console.log('Fallback:',JSON.stringify(fallback));
 console.log('Mock-HD:',JSON.stringify(hd));
-console.log('PASS: 24 matchups, 192 requested moves, 16 keyboard macro checks, two F9 toggles, zero sprite rectangle/aspect violations');
+console.log('PASS: 24 matchups, 192 requested moves, 16 keyboard macro checks, two F9 toggles, AKARI idle iris repair, zero sprite rectangle/aspect violations');
