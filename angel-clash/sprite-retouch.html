@@ -63,7 +63,7 @@ function makePoses(container){
 }
 makePoses($('poses'));makePoses($('bigposes'));
 function setStatus(txt){$('message').textContent=txt;}
-function setChar(next){if(modified&&!window.confirm('編集中の画像を保存せずに切り替えますか？'))return;id=next;frame=0;loaded=false;canEdit=false;modified=false;source=null;undoStack=[];redoStack=[];cloneDelta=null;document.querySelectorAll('[data-id]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));refresh();updateButtons();}
+function setChar(next){if(modified&&!window.confirm('編集中の画像を保存せずに切り替えますか？'))return;++loadingSeq;id=next;frame=0;loaded=false;canEdit=false;modified=false;source=null;undoStack=[];redoStack=[];cloneDelta=null;document.querySelectorAll('[data-id]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));refresh();updateButtons();}
 function validateImage(im){
  if(im.naturalWidth!==1600||im.naturalHeight!==1200)throw Error('画像サイズが1600×1200ではありません。');
  const test=document.createElement('canvas');test.width=400;test.height=400;const t=test.getContext('2d',{willReadFrequently:true});
@@ -81,6 +81,7 @@ function installImage(im){
  setStatus(id.toUpperCase()+' の12コマの原画を読み込みました。元画像は保持しています。');
 }
 function loadRemote(){
+ if(modified&&!window.confirm('未書き出しの修正を破棄し、元WebPを読み込み直しますか？'))return;
  const token=++loadingSeq;setStatus('Wix元WebPを取得しています。');
  const im=new Image();im.crossOrigin='anonymous';im.decoding='async';
  im.onload=()=>{if(token!==loadingSeq)return;try{installImage(im)}catch(e){setStatus('読み込めませんでした：'+e.message+' 元WebPを保存してローカルから開いてください。')}};
@@ -89,6 +90,7 @@ function loadRemote(){
 }
 function loadFile(file){
  if(!file)return;
+ if(modified&&!window.confirm('未書き出しの修正を破棄して別の画像を読み込みますか？'))return;
  if(!['image/png','image/webp'].includes(file.type)){setStatus('PNGまたはWebPのみ読み込めます。');return;}
  const token=++loadingSeq,obj=URL.createObjectURL(file),im=new Image();im.decoding='async';
  im.onload=()=>{URL.revokeObjectURL(obj);if(token!==loadingSeq)return;try{installImage(im)}catch(e){setStatus(e.message)}};
@@ -220,7 +222,7 @@ $('zoom').addEventListener('input',e=>{zoom=+e.target.value;refresh()});$('fit')
 $('color').addEventListener('input',e=>color=e.target.value);
 $('undo').addEventListener('click',()=>{if(!undoStack.length)return;redoStack.push(captureFrame(undoStack[undoStack.length-1].frame));restore(undoStack.pop());updateButtons()});
 $('redo').addEventListener('click',()=>{if(!redoStack.length)return;undoStack.push(captureFrame(redoStack[redoStack.length-1].frame));restore(redoStack.pop());updateButtons()});
-$('resetFrame').addEventListener('click',()=>{if(!canEdit||!window.confirm('このポーズのみ元画像に戻しますか？'))return;histPush();const b=frameRect(frame);mctx.drawImage(original,b.x,b.y,400,400,b.x,b.y,400,400);modified=true;refresh()});
+$('resetFrame').addEventListener('click',()=>{if(!canEdit||!window.confirm('このポーズのみ元画像に戻しますか？'))return;histPush();const b=frameRect(frame);mctx.clearRect(b.x,b.y,400,400);mctx.drawImage(original,b.x,b.y,400,400,b.x,b.y,400,400);modified=true;refresh()});
 $('edgeCleanup').addEventListener('click',repairAlphaFringe);
 $('exportPNG').addEventListener('click',()=>exportImage('image/png'));$('exportWEBP').addEventListener('click',()=>exportImage('image/webp'));
 window.addEventListener('beforeunload',e=>{if(modified){e.preventDefault();e.returnValue='';}});
