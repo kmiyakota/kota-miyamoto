@@ -1395,7 +1395,7 @@ function drawFight(){g.save();if(shake>0)g.translate(rand(-shake,shake),rand(-sh
 }
 function drawAtmosphere(tint=.72){drawStage();rect(0,0,W,H,`rgba(15,5,35,${tint})`)}
 function titleScreen(){
- drawAtmosphere(.46);
+ drawAtmosphere(.46);label('v9.3',1219,33,16,'#ecd8fa','right','Arial');
  // Four approved detailed character portraits, with native-size source images.
  // Dramatic framed group art, cropped rather than stretched.
  const bg=g.createLinearGradient(0,172,0,630);bg.addColorStop(0,'#35144d');bg.addColorStop(1,'#120826');
@@ -1484,7 +1484,7 @@ function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6')
  label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v9.2','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v9.3','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
