@@ -13,7 +13,7 @@ new vm.Script(js);
 const IDS=['ito','akari','tamaki','nox'];
 const MOVES=['lp','hp','lk','hk','pulse','riser','rush','super'];
 function runMock(withHD){
- const stats={matchups:0,moves:0,quickKeys:0,drawCalls:0,atlasDrawCalls:0,invalid:0};
+ const stats={matchups:0,moves:0,quickKeys:0,qaToggles:0,drawCalls:0,atlasDrawCalls:0,invalid:0};
  const gradient={addColorStop(){}};
  const context=new Proxy({
   globalAlpha:1,measureText(t){return {width:String(t).length*12}},
@@ -86,17 +86,28 @@ function runMock(withHD){
   }
  }
  // Verify actual keyboard events after the initial 100-frame ROUND intro lock.
- const quickKeys=[['KeyQ','pulse'],['KeyE','riser'],['KeyF','rush'],['KeyT','super']];
- for(const [code,expected] of quickKeys){
-  debug.start('ito','akari','local');debug.setMeter(0,100);debug.tick(110);
+ const quickKeys=[
+  {side:0,code:'KeyQ',name:'pulse'},{side:0,code:'KeyE',name:'riser'},
+  {side:0,code:'KeyF',name:'rush'},{side:0,code:'KeyT',name:'super'},
+  {side:1,code:'Numpad7',name:'pulse'},{side:1,code:'Numpad8',name:'riser'},
+  {side:1,code:'Numpad9',name:'rush'},{side:1,code:'NumpadDivide',name:'super'}
+ ];
+ for(const {side,code,name} of quickKeys){
+  debug.start('ito','akari','local');debug.setMeter(side,100);debug.tick(110);
   for(const fn of listeners.keydown||[])fn({code,preventDefault(){}});
   debug.tick(2);
-  assert.equal(debug.state().fighters[0].moveName,expected,
+  assert.equal(debug.state().fighters[side].moveName,name,
    'Quick special did not trigger on '+code);
   stats.quickKeys++;
   for(const fn of listeners.keyup||[])fn({code,preventDefault(){}});
   debug.tick(2);
  }
+ const initial=debug.spriteCleanup().enabled;
+ for(const fn of listeners.keydown||[])fn({code:'F9',preventDefault(){}});
+ debug.tick(1);assert.equal(debug.spriteCleanup().enabled,!initial);
+ stats.qaToggles++;
+ for(const fn of listeners.keyup||[])fn({code:'F9',preventDefault(){}});
+ debug.tick(1);
  assert.equal(stats.invalid,0,'Invalid drawImage bounds, aspect or coordinates');
  assert.equal(stats.matchups,12);
  assert.equal(stats.moves,96);
@@ -106,4 +117,4 @@ function runMock(withHD){
 const fallback=runMock(false),hd=runMock(true);
 console.log('Fallback:',JSON.stringify(fallback));
 console.log('Mock-HD:',JSON.stringify(hd));
-console.log('PASS: 24 matchups, 192 requested moves, eight real keyboard macros, zero sprite rectangle/aspect violations');
+console.log('PASS: 24 matchups, 192 requested moves, 16 keyboard macro checks, two F9 toggles, zero sprite rectangle/aspect violations');
