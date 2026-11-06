@@ -1,3 +1,22 @@
+# 2026-11-06: identity-lock / rejected v10 poster
+
+A generated "ANGEL CLASH v10.0" promotional composition presented the wrong character identities and **must never be treated as an approved asset or as proof that a v10 game release exists**. The proportions and names were repeatedly mismatched. Those generated images are not listed in the runtime asset manifest.
+
+For every art or sprite production task, require the following ID ↔ identity mapping:
+
+| Internal key | Correct character | Appearance that must remain consistent | Explicitly reject |
+|---|---|---|---|
+| `ito` | 衣都 / ITO | Light-brown **long hair**, warm-toned face, character's pink identity | Short dark bob, blonde legacy promotional hair, another character's glasses |
+| `akari` | 灯 / AKARI | Dark-brown **short bob**, the same eyes in idle and all action poses, blue identity | Purple-haired glasses wearer; mismatched/blank-white iris |
+| `tamaki` | 環 / TAMAKI | Dark short/bob hair, **eyeglasses**, violet identity, "ぼく"/"のだ" voice | Silver-haired twin-tail character; missing glasses |
+| `nox` | NOX | Previously approved **silver-haired winged boss** design; dark eclipse costume | Blue/black-haired unrelated human fighter without the approved wings |
+
+Do not confuse the 2026-11-06 generated promotional posters with the original v8 art/reference montage, and do not use **`angel-clash/assets/portraits/ito.webp`** or `assets/original-characters.jpg` to regenerate ITO's face: those historical fallbacks still show a discontinued blond-haired depiction. The canon descriptions above take precedence. If source art is unavailable, display an identity-safe vector placeholder instead of inventing a face. The gameplay renderer follows this fallback policy in v9.5.
+
+The 12 original source frames remain source-locked, with **no per-pose X/Y scale changes or automatic head recentering**. Image repair and character redraw are separately tracked: cleanup of fringe/alpha noise is not evidence of corrected eye drawing, anatomy, hair design, or identity. A corrected master atlas must pass visual review of all 12 frames and transparency against both light and dark backgrounds before activation.
+
+---
+
 # ANGEL CLASH — Character canon (original cast)
 
 **Source of truth:** [３人について](https://miyakota3.wixsite.com/my-site-1/post/about-three-new) on the creator's Wix site.
