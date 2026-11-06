@@ -1,3 +1,29 @@
+# ANGEL CLASH v9.3 — Sprite integrity pass (2026-11-06)
+
+**Committed in `queue` — not yet confirmed deployed.** This is a **non-destructive rendering and transparency repair pass**, not a claim that all original illustrations have been manually repainted. The original four 1600×1200 sprite WebPs remain intact and are still used if processing fails.
+
+## Implementation
+- For each of **4 characters × 12 existing source frames**: builds an optional in-memory RGBA atlas from the original artwork when same-origin/CORS pixel readback is permitted.
+- Drops nearly transparent matte residue, removes tiny disconnected opacity islands, and neutralizes colored antialiasing halos against nearby opaque source colors. Does **not** fill genuine transparency gaps in hair.
+- Estimates head size and foot position per frame and applies **a single identical X/Y scaling factor** to align poses; never compresses crouching, attacks, or airborne sprites on one axis. Limits scale corrections to 0.86–1.14 to prevent unstable pose detection from warping silhouette.
+- Applies the same pose calibration to floor reflections without violating source aspect.
+- Original atlases are retained as fail-safe and are not overwritten. Debug: `AngelClashDebug.spriteIntegrity()` returns per-character measurements and cleanup counts after images have finished loading.
+
+## Limitations / next source artwork requirements
+- **AKARI idle eye**: White or malformed painted eye pixels cannot be reconstructed reliably through alpha-only cleanup. This still requires precise source-frame retouching with the original atlas open. It is not marked fixed.
+- If CDN CORS disallows readback, the original WebP still renders, but the in-memory cleanup does not run. The web image host response and live Chrome/Safari behavior have not been directly verified.
+- Generated draft art in this conversation is **not** used in the game; it has not been verified against character canon or animation consistency.
+- 400×400 source tiles limit true HD detail. To improve beyond source resolution, repaint consistent 12-pose source frames and then replace each approved atlas as a whole.
+
+## QA checkpoints
+1. Desktop Chrome: idle, walking, crouch, LP/HP, LK/HK, jumps, special, hurt and victory for all four fighters; check consistent face size and original X/Y aspect.
+2. On-screen transparent backgrounds: inspect hair gaps, hands, heels and suit edges against bright and dark stage colors.
+3. Compare AKARI idle pose eyes to walk A/B; ensure neither becomes opaque white or loses an iris before source artwork approval.
+4. Open the browser console to check `AngelClashDebug.spriteIntegrity()`. Empty output means no completed pixel processing — do not interpret this as a pass.
+5. Confirm mobile Safari frame pacing and original artwork fallback, plus PC cut-in and round/result high-resolution rendering.
+
+---
+
 # ANGEL CLASH v9.2 — Original-aspect character rendering and HD cinematics
 
 **Changes committed in `queue` on 2026-11-06.** Original character artwork must not be stretched in any pose. The combat renderer draws an intact source animation cell at one uniform scale for both axes. Removed crouch/landing vertical compression and multi-band walking deformation; movement, lean rotation and crossfade remain without changing each source cell's proportions. The visible floor reflection is mirror-flipped and clipped rather than squashed; NOX's legacy image and static action overlays now derive display width from the original image ratio.
