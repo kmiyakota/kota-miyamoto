@@ -11,6 +11,7 @@ const root=path.resolve(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const audit=fs.readFileSync(path.join(root,'sprite-audit.html'),'utf8');
 const canon=fs.readFileSync(path.join(root,'CHARACTER_CANON.md'),'utf8');
+const retouch=fs.readFileSync(path.join(root,'sprite-retouch.html'),'utf8');
 const extract=source=>[...source.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x=>x[1]);
 let total=0;
 const test=(description,fn)=>{
@@ -18,7 +19,7 @@ const test=(description,fn)=>{
  catch(e){console.error('FAIL '+description+'\n'+e.stack);process.exitCode=1}
 };
 test('game and QA scripts parse',()=>{
- for(const code of [...extract(html),...extract(audit)])new vm.Script(code);
+ for(const code of [...extract(html),...extract(audit),...extract(retouch)])new vm.Script(code);
  assert.ok(extract(html).length>=1&&extract(audit).length>=1);
 });
 test('four canonical identities remain mapped',()=>{
@@ -107,6 +108,19 @@ test('local-source inspection stays in the browser',()=>{
  assert.match(audit,/URL\.createObjectURL\(file\)/);
  assert.match(audit,/URL\.revokeObjectURL/);
  assert.doesNotMatch(audit,/fetch\([^\n]*method:\s*['"]POST/);
+});
+test('pixel retouch editor preserves original art dimensions and export transparency',()=>{
+ assert.match(retouch,/master\.width=original\.width=1600/);
+ assert.match(retouch,/master\.height=original\.height=1200/);
+ assert.match(retouch,/function validateImage\(im\)/);
+ assert.match(retouch,/if\(transparent<1000\)/);
+ assert.match(retouch,/function repairAlphaFringe\(\)/);
+ assert.match(retouch,/function applyPoint\(point\)/);
+ assert.match(retouch,/function captureFrame\(k\)/);
+ assert.match(retouch,/master\.toBlob\(blob=>/);
+ assert.match(retouch,/type==='image\/png'/);
+ assert.match(retouch,/tool==='clone'/);
+ assert.doesNotMatch(retouch,/fetch\(/);
 });
 console.log('Completed '+total+' integrity checks. Runtime and visual master QA are separate.');
 if(process.exitCode)process.exit(process.exitCode);
