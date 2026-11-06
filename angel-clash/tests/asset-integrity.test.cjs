@@ -83,6 +83,20 @@ test('audit supports candidate versus original same-pose comparison',()=>{
  assert.match(audit,/paint\(reference,before\?selected:0,1/);
  assert.match(audit,/URL\.revokeObjectURL/);
 });
+test('four original-source alpha drafts are audit-only and never loaded in the game',()=>{
+ for(const id of [
+  'c3c31e_18335341248043bd941a1e1b02809367',
+  'c3c31e_d6996052e8b9463ebc9436ea4f7be442',
+  'c3c31e_27b7ee6750954f1bbc5d4440664d4461',
+  'c3c31e_cd46dafed2a84a81bce45ed53a997d0c'
+ ]){
+  assert.ok(audit.includes(id),'Audit candidate link absent: '+id);
+  assert.ok(!html.includes(id),'Game must never use unapproved candidate: '+id);
+ }
+ assert.match(audit,/id="loadAlphaDraft"/);
+ assert.match(audit,/id="loadEyeDraft"/);
+ assert.ok(!html.includes('c3c31e_b5039ed0b76a41578307da8f56fce88a'));
+});
 test('12 pose indices and fixed-size atlases',()=>{
  assert.match(html,/for\(let k=0;k<12;k\+\+\)/);
  assert.match(html,/naturalWidth===1600&&image\?\.naturalHeight===1200/);
