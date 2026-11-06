@@ -275,9 +275,12 @@ function loadOptionalArt(name,url){
    // the original art path even when the CDN refuses pixel access.
    const cors=new Image();cors.crossOrigin='anonymous';cors.decoding='async';
    cors.onload=()=>setTimeout(()=>{
-    try{prepareCombatAtlas(name.slice(0,-6),cors)}
-    catch(err){console.warn('Using untouched original sprite sheet',name,err)}
+    prepareCombatAtlas(name.slice(0,-6),cors).catch(err=>{
+     console.warn('Using untouched original sprite sheet',name,err);
+     combatAtlasStats[name.slice(0,-6)]={status:'processing_failed',reason:String(err)};
+    });
    },0);
+   cors.onerror=()=>{combatAtlasStats[name.slice(0,-6)]={status:'cors_unavailable',frames:0};};
    cors.src=url;
   };
  }
@@ -305,7 +308,7 @@ function fighterAtlas9(f){
 /* v9.3 — Recalibrate and clean all 48 pose cells without redrawing the
  * approved characters. Derived RGBA atlases remain in browser memory only. */
 const combatAtlasFix=Object.create(null),combatAtlasStats=Object.create(null);
-function prepareCombatAtlas(id,img){
+async function prepareCombatAtlas(id,img){
  if(!IDS.includes(id)||img.naturalWidth!==1600||img.naturalHeight!==1200)return;
  const canvas=document.createElement('canvas');canvas.width=1600;canvas.height=1200;
  const ctx=canvas.getContext('2d',{willReadFrequently:true});
@@ -367,6 +370,8 @@ function prepareCombatAtlas(id,img){
   sum=0;for(let x=0;x<size;x++){sum+=hist[x];if(sum>=total*.88){hi=x;break;}}
   frames.push({headWidth:Math.max(20,hi-lo),headCenter:(lo+hi)/2,footY:bottom,scale:1,found});
   ctx.putImageData(obj,startX,startY);
+  // Yield between frame cells: keep mobile Safari responsive during cleanup.
+  if(k<11)await new Promise(resolve=>setTimeout(resolve,0));
  }
  const median=frames.slice(0,3).map(f=>f.headWidth).sort((a,b)=>a-b)[1]||85;
  for(const frame of frames){
