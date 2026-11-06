@@ -60,6 +60,7 @@ dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13px}dt{co
 <label><input id="head" type="checkbox"> 頭部を拡大して確認</label>
 <label><input id="compareOriginal" type="checkbox"> 右側：元WebPの同ポーズ</label>
 <label>ローカル元画像 <input id="localFile" type="file" accept="image/png,image/webp" aria-label="選択キャラクターの1600×1200の画像を読み込む"></label>
+<button type="button" id="loadAkariDraft">灯：透過修復候補を比較（未採用）</button>
 <button type="button" id="resetSource">元のWebPに戻す</button>
 </div>
 <div class="status" role="status" id="status">画像を読み込み中...</div>
@@ -97,6 +98,10 @@ akari:'https://static.wixstatic.com/media/c3c31e_64bd4c4c4ac14ef69cd41c70e6eab44
 tamaki:'https://static.wixstatic.com/media/c3c31e_94c725ed0bf849b3a66f00e22fce0c0e~mv2.png',
 nox:'https://static.wixstatic.com/media/c3c31e_217a23f143e04b08803d81317f80f876~mv2.png'};
 const localSources=Object.create(null);
+const remoteDrafts=Object.freeze({
+ akari:'https://static.wixstatic.com/media/c3c31e_a47b22f4bdaa43a1b2aeef84ed3591be~mv2.png'
+});
+const selectedDrafts=Object.create(null);
 const POSES=['待機','歩行1','歩行2','しゃがみ・ガード','ジャンプ','弱パンチ','強パンチ','弱キック','強キック','必殺技','ダメージ','勝利'];
 let char='ito',selected=0,img=null,readable=false,zoom=1,loadedToken=0;
 const originalBaselines=Object.create(null);
@@ -150,10 +155,22 @@ function fetchOriginalBaseline(id){
 function load(id){
  char=id;selected=0;img=null;readable=false;const token=++loadedToken;
  fetchOriginalBaseline(id);
+ $('loadAkariDraft').disabled=id!=='akari';
  $('status').textContent=id.toUpperCase()+' の原画を読み込み中...';$('identity').textContent='元画像をロード中';
  $('canonRef').src=CHARACTER_PROFILE_REFS[id];
  $('canonRef').alt=id.toUpperCase()+' 旧プロフィールの参考画像';
  $('localFile').value='';
+ if(selectedDrafts[id]){
+  const candidate=new Image();candidate.crossOrigin='anonymous';candidate.decoding='async';
+  candidate.onload=()=>{if(token!==loadedToken)return;img=candidate;readable=true;finish()};
+  candidate.onerror=()=>{
+   const fallback=new Image();fallback.decoding='async';
+   fallback.onload=()=>{if(token!==loadedToken)return;img=fallback;readable=false;finish()};
+   fallback.onerror=()=>{if(token!==loadedToken)return;$('status').textContent='修復候補はまだ読み込めません。元WebPに戻してください。'};
+   fallback.src=remoteDrafts[id];
+  };
+  candidate.src=remoteDrafts[id];return;
+ }
  if(localSources[id]){
   const localImg=new Image();localImg.decoding='async';
   localImg.onload=()=>{if(token!==loadedToken)return;img=localImg;readable=true;finish()};
@@ -167,7 +184,9 @@ function load(id){
   const ok=img.naturalWidth===1600&&img.naturalHeight===1200;
   $('status').textContent=ok?'読み込み完了：元の12コマを表示中。縦横比の変更なし。':'画像サイズが想定と異なります（4列×3行・1600×1200が必要）。';
   $('identity').textContent='設定：'+({ito:'明茶色の長髪',akari:'濃茶色の短いボブ・待機の両目を要検査',tamaki:'暗色の短髪・眼鏡',nox:'銀髪・翼'}[id])+' / 画像の作画一致は未承認';
-  $('imgSize').textContent=img.naturalWidth+'×'+img.naturalHeight+(localSources[id]?' / ローカル元画像':' / Wix元画像')+(readable?' / アルファ計測可':' / 表示のみ');
+  $('imgSize').textContent=img.naturalWidth+'×'+img.naturalHeight+
+   (selectedDrafts[id]?' / 透過修復候補・未採用':localSources[id]?' / ローカル元画像':' / Wix元画像')+
+   (readable?' / アルファ計測可':' / 表示のみ');
   $('note').textContent=readable?'透過の可視範囲を表示しています。頭部の描き間違いは人間による原画検証が必要です。':'元画像表示は可能ですが、画像サーバーのCORS設定により透過ピクセルの読み取りはできません。';
   render();
  }
@@ -178,14 +197,22 @@ $('head').addEventListener('change',render);
 $('compareOriginal').addEventListener('change',render);
 $('zoom').addEventListener('input',e=>{zoom=Number(e.target.value);render()});
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();selected=(selected+(e.key==='ArrowRight'?1:11))%12;render()}});
+$('loadAkariDraft').addEventListener('click',()=>{
+ if(char!=='akari')return;
+ selectedDrafts[char]=true;
+ $('compareOriginal').checked=true;
+ load(char);
+});
 $('localFile').addEventListener('change',e=>{
  const file=e.target.files?.[0];if(!file)return;
  if(!['image/png','image/webp'].includes(file.type)){$('status').textContent='PNGかWebPのみ受け付けます。';return;}
  if(localSources[char])URL.revokeObjectURL(localSources[char]);
  localSources[char]=URL.createObjectURL(file);
+ delete selectedDrafts[char];
  load(char);
 });
 $('resetSource').addEventListener('click',()=>{
+ delete selectedDrafts[char];
  if(localSources[char]){URL.revokeObjectURL(localSources[char]);delete localSources[char];}
  load(char);
 });
