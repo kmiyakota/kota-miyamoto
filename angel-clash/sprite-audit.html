@@ -52,12 +52,13 @@ dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13px}dt{co
 <h2>ポーズ比較：ソース画像は非変形</h2>
 <div class="compare">
 <figure><div id="wrapSelected" class="canvaswrap checker"><canvas id="selected" width="800" height="800"></canvas></div><figcaption id="captionSelected">選択中：0 待機</figcaption></figure>
-<figure><div id="wrapReference" class="canvaswrap checker"><canvas id="reference" width="800" height="800"></canvas></div><figcaption>基準：0 待機（同じキャラクター）</figcaption></figure>
+<figure><div id="wrapReference" class="canvaswrap checker"><canvas id="reference" width="800" height="800"></canvas></div><figcaption>基準：0 待機（または元WebPの同ポーズ）</figcaption></figure>
 </div>
 <div class="row">
 <label>背景 <select id="background"><option value="checker">市松</option><option value="dark">暗色</option><option value="light">明色</option><option value="purple">紫</option></select></label>
 <label>倍率 <input id="zoom" type="range" min="1" max="5" step="0.25" value="1"><output id="zoomText">1.00×</output></label>
 <label><input id="head" type="checkbox"> 頭部を拡大して確認</label>
+<label><input id="compareOriginal" type="checkbox"> 右側：元WebPの同ポーズ</label>
 <label>ローカル元画像 <input id="localFile" type="file" accept="image/png,image/webp" aria-label="選択キャラクターの1600×1200の画像を読み込む"></label>
 <button type="button" id="resetSource">元のWebPに戻す</button>
 </div>
@@ -98,6 +99,7 @@ nox:'https://static.wixstatic.com/media/c3c31e_217a23f143e04b08803d81317f80f876~
 const localSources=Object.create(null);
 const POSES=['待機','歩行1','歩行2','しゃがみ・ガード','ジャンプ','弱パンチ','強パンチ','弱キック','強キック','必殺技','ダメージ','勝利'];
 let char='ito',selected=0,img=null,readable=false,zoom=1,loadedToken=0;
+const originalBaselines=Object.create(null);
 const $=id=>document.getElementById(id),cell=(index)=>[(index%4)*400,Math.floor(index/4)*400];
 const thumbs=$('poses'),selectedCanvas=$('selected'),reference=$('reference');
 function makeThumbs(){thumbs.innerHTML='';POSES.forEach((name,i)=>{
@@ -105,15 +107,15 @@ function makeThumbs(){thumbs.innerHTML='';POSES.forEach((name,i)=>{
  const c=document.createElement('canvas');c.width=c.height=200;
  const span=document.createElement('span');span.textContent=(i+1)+'. '+name;
  b.append(c,span);b.addEventListener('click',()=>{selected=i;render();});thumbs.append(b);});}
-function paint(canvas,index,mag=1){
+function paint(canvas,index,mag=1,source=img){
  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
- if(!img||!img.naturalWidth)return;
+ if(!source||!source.naturalWidth)return;
  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
  const coords=cell(index),crop=$('head').checked;
  let sx=coords[0],sy=coords[1],sw=400,sh=400;
  if(crop){sx+=110;sy+=(index===3?110:index===4?10:0);sw=180;sh=180;}
  const scale=zoom*mag,size=canvas.width*scale,x=canvas.width/2-size/2,y=canvas.height/2-size/2;
- ctx.drawImage(img,sx,sy,sw,sh,x,y,size,size);
+ ctx.drawImage(source,sx,sy,sw,sh,x,y,size,size);
 }
 function measure(){
  if(!img||!readable){$('bbox').textContent='画像表示のみ（CORS制限）';$('alpha').textContent='計測不可';return;}
@@ -130,13 +132,24 @@ function measure(){
 function render(){
  document.querySelectorAll('[data-char]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.char===char)));
  document.querySelectorAll('.pose').forEach((b,i)=>{b.setAttribute('aria-pressed',String(i===selected));paint(b.querySelector('canvas'),i,1);});
- paint(selectedCanvas,selected,1);paint(reference,0,1);
+ paint(selectedCanvas,selected,1);
+ const before=$('compareOriginal').checked;
+ paint(reference,before?selected:0,1,before?originalBaselines[char]:img);
  $('frameName').textContent=(selected+1)+' / '+POSES[selected];
  $('captionSelected').textContent='選択中：'+(selected+1)+' '+POSES[selected];
  $('zoomText').textContent=zoom.toFixed(2)+'×';measure();
 }
+function fetchOriginalBaseline(id){
+ if(originalBaselines[id])return;
+ const original=new Image();original.decoding='async';
+ original.onload=()=>{originalBaselines[id]=original;if(id===char)render()};
+ original.onerror=()=>{if(id===char&&$('compareOriginal').checked)
+  $('status').textContent='元WebPを取得できません。修正候補は引き続き表示できます。'};
+ original.src=ASSETS[id];
+}
 function load(id){
  char=id;selected=0;img=null;readable=false;const token=++loadedToken;
+ fetchOriginalBaseline(id);
  $('status').textContent=id.toUpperCase()+' の原画を読み込み中...';$('identity').textContent='元画像をロード中';
  $('canonRef').src=CHARACTER_PROFILE_REFS[id];
  $('canonRef').alt=id.toUpperCase()+' 旧プロフィールの参考画像';
@@ -162,6 +175,7 @@ function load(id){
 document.querySelectorAll('[data-char]').forEach(b=>b.addEventListener('click',()=>load(b.dataset.char)));
 $('background').addEventListener('change',e=>document.querySelectorAll('.canvaswrap').forEach(w=>{w.className='canvaswrap '+e.target.value}));
 $('head').addEventListener('change',render);
+$('compareOriginal').addEventListener('change',render);
 $('zoom').addEventListener('input',e=>{zoom=Number(e.target.value);render()});
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();selected=(selected+(e.key==='ArrowRight'?1:11))%12;render()}});
 $('localFile').addEventListener('change',e=>{
