@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.1 — Unified Character Scale & Quick Specials</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.2 — Native Aspect Ratio & HD Cinematics</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -824,15 +824,26 @@ const HD_FACE_REGIONS=Object.freeze({
  ito:[.10,.015,.80,.62],akari:[.14,.015,.77,.66],
  tamaki:[.13,0,.76,.67],nox:[.12,.05,.80,.68]
 });
-function drawHighDefinitionPortrait(id,x,y,w,h){
- if(['fight','story','result'].includes(scene)&&stageCostumePortrait(id,x,y,w,h))
+function drawHighDefinitionPortrait(id,x,y,w,h,detail='auto'){
+ // Prioritize high-resolution ORIGINAL solo artworks for cut-ins, round/results
+ // and story scenes. The optional stage boards contain four characters in just
+ // 920x552 pixels; they are suitable only for tiny HUD icons and fallback.
+ if(w<=120&&h<=120&&['fight','story','result'].includes(scene)&&stageCostumePortrait(id,x,y,w,h))
   return true;
  const im=artForCostume(id,'portrait',(['fight','story','result'].includes(scene)?activeWardrobeStage():0));
- if(!im?.naturalWidth)return false;
- const [rx,ry,rw,rh]=HD_FACE_REGIONS[id];
- drawImageCover(im,im.naturalWidth*rx,im.naturalHeight*ry,
-  im.naturalWidth*rw,im.naturalHeight*rh,x,y,w,h,.50,.07);
- return true;
+ if(im?.naturalWidth){
+  g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+  if(detail==='cinematic'||(detail==='auto'&&w>=300&&h>=300)){
+   // Fill by cropping, NEVER stretching. Use all available native pixels.
+   drawImageCover(im,0,0,im.naturalWidth,im.naturalHeight,x,y,w,h,.5,.10);
+  }else{
+   const [rx,ry,rw,rh]=HD_FACE_REGIONS[id];
+   drawImageCover(im,im.naturalWidth*rx,im.naturalHeight*ry,
+    im.naturalWidth*rw,im.naturalHeight*rh,x,y,w,h,.50,.07);
+  }
+  return true;
+ }
+ return ['fight','story','result'].includes(scene)&&stageCostumePortrait(id,x,y,w,h);
 }
 /** Aspect-preserving crop, equivalent to object-fit:cover + object-position. */
 function drawImageCover(im,sx,sy,sw,sh,dx,dy,dw,dh,focusX=.5,focusY=.12){
@@ -843,12 +854,12 @@ function drawImageCover(im,sx,sy,sw,sh,dx,dy,dw,dh,focusX=.5,focusY=.12){
  // Exact dimensions follow source aspect, preventing stretch in cut-ins/menus.
  g.drawImage(im,sx,sy,sw,sh,dx,dy,dw,dh);
 }
-function portrait(id,x,y,w,h){
+function portrait(id,x,y,w,h,detail='auto'){
  g.save();g.beginPath();g.roundRect(x,y,w,h,Math.max(5,Math.min(15,w*.04)));g.clip();
  const colors={ito:['#512052','#ec6fa6'],akari:['#173464','#4c86d0'],tamaki:['#1f123c','#7546a8'],nox:['#12081f','#7e3278']};
  const [hi,lo]=colors[id]||colors.ito;
  const bg=g.createLinearGradient(x,y,x+w,y+h);bg.addColorStop(0,hi);bg.addColorStop(1,lo);rect(x,y,w,h,bg);
- if(!drawHighDefinitionPortrait(id,x,y,w,h)){
+ if(!drawHighDefinitionPortrait(id,x,y,w,h,detail)){
   if(id==='nox'){
    const gx=x+w/2,gy=y+h*.55,r=Math.min(w,h)*.44;
    g.save();g.shadowBlur=22;g.shadowColor='#b74af9';ellipse(gx,gy,r,r,'#311138');ellipse(gx,gy-r*.5,r*.6,r*.7,'#150c23');
@@ -985,7 +996,7 @@ function drawNox(f){
  const art=images.noxBoss;
  if(art?.naturalWidth){g.save();g.translate(f.x,f.y);g.scale(f.face,1);
    const bob=Math.sin(f.anim*.09)*5+(hasAttack(f)?-10*Math.sin(f.moveFrame*.17):0);
-   g.shadowColor='#f05bff';g.shadowBlur=16;g.drawImage(art,-184,-471+bob,368,471);g.restore();return;}
+   g.shadowColor='#f05bff';g.shadowBlur=16;const hh=471,ww=hh*art.naturalWidth/art.naturalHeight;g.drawImage(art,-ww/2,-hh+bob,ww,hh);g.restore();return;}
  g.save();g.translate(f.x,f.y);g.scale(f.face,1);
  const jump=hasAttack(f)?-12*Math.sin(f.moveFrame/12):0,bob=Math.sin(f.anim*.09)*5;
  g.translate(0,bob+jump);g.shadowColor='#f84df9';g.shadowBlur=35;
@@ -1039,32 +1050,19 @@ function drawFighter(f,ghost=false,offset=0){
  // Feet stay anchored to the simulation floor. Lean, stretch and recoil are render-only.
  const bob=-Math.abs(Math.sin(cycle))*walk*2.2-breath*1.6+land*2.5;
  const lean=(v?.lean??0)+Math.sin(cycle)*walk*.012+air*clamp(f.dy/19,-.07,.07);
- const stretch=(1-.205*crouch)*(1-.06*land)*(1+.009*breath)*(1+.028*air*clamp(-f.dy/18,0,1));
- g.translate(f.x+offset,f.y+bob);g.scale(f.face,1);g.rotate(lean);g.scale(1,stretch);
+ // Rigid movement only: no pose-specific independent horizontal/vertical scaling.
+ g.translate(f.x+offset,f.y+bob);g.scale(f.face,1);g.rotate(lean);
  g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
  if(ghost){g.globalAlpha=.18;g.shadowColor=f.c.color;g.shadowBlur=12;}
  else{g.shadowColor=f.c.color;g.shadowBlur=4;}
  const opacity=g.globalAlpha*(1-poseVisibility);
- // Continuous piecewise deformation replaces the old hard two-piece walking cut.
- // All strips originate in one intact pose: no missing/cropped animation cells.
+ // Draw each intact cell with the SAME X/Y scale (native source ratio).
+ // Movement smoothness comes from animation/crossfade, never strip warping.
  function drawPose(k,alpha){
   const safeK=modern?Math.max(0,Math.min(11,k)):k;
   const sx=(safeK%columns)*tw,sy=Math.floor(safeK/columns)*th;
   g.globalAlpha=opacity*alpha;
-  if(walk>.07&&!ghost&&!modern){
-   const bands=MOTION_BANDS,band=th/bands;
-   for(let i=0;i<bands;i++){
-    const srcY=i*band,depth=(i+.5)/bands;
-    const lower=clamp((depth-.42)/.58,0,1);
-    const sway=(Math.sin(cycle)*1.5*(1-lower)+Math.sin(cycle+(depth-.45)*2.7)*5.6*lower)*walk;
-    const lift=Math.max(0,Math.sin(cycle+(depth-.55)*2.1))*lower*3.5*walk;
-    const overlap=.35;
-    g.drawImage(im,sx,sy+srcY,tw,band,
-      -sw/2+sway,-sh+5+srcY*sc-lift,sw,band*sc+overlap);
-   }
-  }else{
-   g.drawImage(im,sx,sy,tw,th,-sw/2,-sh+5,sw,sh);
-  }
+  g.drawImage(im,sx,sy,tw,th,-sw/2,-sh+5,sw,sh);
  }
  const mix=ghost?1:clamp(v?.poseBlend??1,0,1);
  const oldWeight=(v&&v.poseFrom!==frame)?(1-mix)*.20:0;
@@ -1126,10 +1124,11 @@ function drawReflections(visualFighters){
   const modern=!!fighterAtlas9(f),k=spriteFrame(f);
   const tw=modern?400:atlasMeta.tileWidth,th=modern?400:atlasMeta.tileHeight;
   const cols=modern?4:atlasMeta.cols,sx=(k%cols)*tw,sy=Math.floor(k/cols)*th;
-  const sc=modern?.91:1.265,sw=tw*sc,sh=th*sc;
-  g.save();g.translate(f.x,FLOOR+13);g.scale(f.face,-.27);
+  const sc=modern?(0.91*TARGET_HEAD_WIDTH/(HD_HEAD_WIDTH[f.id]||84)):1.265,sw=tw*sc,sh=th*sc;
+  // Vertical reflection is mirrored at 1:1 aspect and cropped by floor mask.
+  g.save();g.translate(f.x,FLOOR+13);g.scale(f.face,-1);
   g.globalAlpha=(f.onGround?.19:.045);g.filter='blur(2.5px)';
-  g.drawImage(im,sx,sy,tw,th,-sw/2,-sh,sw,sh);
+  g.drawImage(im,sx,sy,tw,th,-sw/2,-sh+5,sw,sh);
   g.restore();
  }
  const fade=g.createLinearGradient(0,FLOOR+8,0,FLOOR+133);
@@ -1148,8 +1147,8 @@ function drawCinematicPose(f){
  const swell=1+Math.sin(Math.min(1,frame/Math.max(1,duration))*Math.PI)*.035;
  // HD full-body art is rendered at its *native* aspect ratio, never stretched.
  const dh=(pose.hd?440:pose.h)*swell;
- const dw=pose.hd?dh*art.naturalWidth/art.naturalHeight:pose.w*swell;
- const dx=pose.hd?-dw/2:pose.x*swell;
+ const dw=dh*art.naturalWidth/art.naturalHeight;
+ const dx=pose.hd?-dw/2:(pose.x+pose.w/2)*swell-dw/2;
  g.drawImage(art,dx,-dh+5,dw,dh);
  g.restore();return visibility>.96;
 }
@@ -1250,7 +1249,7 @@ function drawSuperCutIn(){if(!cutIn)return;
  g.save();g.beginPath();
  if(fromLeft){g.moveTo(x,180);g.lineTo(x+416,180);g.lineTo(x+333,503);g.lineTo(x-30,503);}
  else{g.moveTo(x-60,180);g.lineTo(x+325,180);g.lineTo(x+395,503);g.lineTo(x+15,503);}
- g.closePath();g.clip();portrait(cutIn.id,x,174,350,335);g.restore();
+ g.closePath();g.clip();portrait(cutIn.id,x,174,350,335,'cinematic');g.restore();
  g.strokeStyle=c.light;g.lineWidth=7;
  g.beginPath();if(fromLeft){g.moveTo(x+413,180);g.lineTo(x+331,503)}else{g.moveTo(x-60,180);g.lineTo(x+16,503)}g.stroke();
  const tx=fromLeft?825:430;
@@ -1348,7 +1347,7 @@ function storyScreen(){drawAtmosphere(.77);const a=storyNext?.a||IDS[pick],b=sto
  label('PRESS ENTER / TAP TO FIGHT',640,465,20,'#fff0b9');
 }
 function resultScreen(){drawAtmosphere(.75);const win=fighters[resultWinner],playerWon=resultWinner===0;
- portrait(win.id,426,140,428,415);
+ portrait(win.id,426,140,428,415,'cinematic');
  label(playerWon?'VICTORY!':'DEFEAT',640,103,83,playerWon?'#ffeda7':'#ffb7d3');
  glassPanel(302,519,676,157,'#eac3fc','#25133de8');
  label(win.c.name+' WINS!',640,555,32,'#fff0ba');label(win.c.win,640,601,22,'#fff0fa','center','Arial');
@@ -1385,7 +1384,7 @@ function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6')
  label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v9.0','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v9.2','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
@@ -1394,7 +1393,7 @@ function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2
  'Original game • No Street Fighter assets used',
  'Press ENTER / tap to return'];lines.forEach((t,i)=>label(t,640,234+i*40,i===0?38:i===1?24:18,i<2?'#ffe5b6':'#fff0f8','center','Arial'));}
 function drawTransition(){if(transition>0){g.globalAlpha=transition/18*.28;rect(0,0,W,H,'#110723');g.globalAlpha=1;transition--}}
-function render(){g.setTransform(pixelRatio,0,0,pixelRatio,0,0);g.clearRect(0,0,W,H);g.imageSmoothingEnabled=true;
+function render(){g.setTransform(pixelRatio,0,0,pixelRatio,0,0);g.clearRect(0,0,W,H);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
  switch(scene){case'title':titleScreen();break;case'menu':menuScreen();break;case'select':selectScreen();break;case'story':storyScreen();break;case'fight':drawFight();break;case'result':resultScreen();break;case'ending':endingScreen();break;case'help':helpScreen();break;case'options':optionScreen();break;case'credits':creditsScreen();break;default:titleScreen()}
  ornamentFrame();drawTransition();
  touchRoot.classList.toggle('active',scene==='fight');touchActions?.classList.toggle('active',scene==='fight');if(touchStageButton)touchStageButton.style.display=(scene==='fight'&&modeKind==='training')?'':'none';touchHint.textContent=scene==='fight'?'A D MOVE / W JUMP / J K L PUNCH / U I O KICK / SPACE SUPER':'ENTER 決定 / ESC 戻る';
