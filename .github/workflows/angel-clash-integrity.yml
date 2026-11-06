@@ -1,0 +1,30 @@
+name: ANGEL CLASH Integrity
+on:
+  push:
+    branches: [queue, work]
+    paths:
+      - 'angel-clash/**'
+      - '.github/workflows/angel-clash-integrity.yml'
+  pull_request:
+    paths:
+      - 'angel-clash/**'
+      - '.github/workflows/angel-clash-integrity.yml'
+  workflow_dispatch:
+jobs:
+  source-and-runtime:
+    name: Source and Canvas2D smoke tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Install Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Verify character identity and sprite scale invariants
+        run: node angel-clash/tests/asset-integrity.test.cjs
+      - name: Verify 4-character combat, quick special input, and F9 comparison
+        run: node angel-clash/tests/runtime-smoke.test.cjs
