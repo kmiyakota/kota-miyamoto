@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.2 — Native Aspect Ratio & HD Cinematics</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.3 — Alpha Cleanup & Pose Calibration</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -269,6 +269,18 @@ const HD_ART_URLS=Object.freeze({
 function loadOptionalArt(name,url){
  const im=new Image();im.decoding='async';images[name]=im;
  im.onerror=()=>console.warn('ANGEL CLASH HD art unavailable, using original artwork:',name);
+ if(name.endsWith('Fight9')){
+  im.onload=()=>{
+   // Use a separate CORS-authorized image for pixel analysis; preserve
+   // the original art path even when the CDN refuses pixel access.
+   const cors=new Image();cors.crossOrigin='anonymous';cors.decoding='async';
+   cors.onload=()=>setTimeout(()=>{
+    try{prepareCombatAtlas(name.slice(0,-6),cors)}
+    catch(err){console.warn('Using untouched original sprite sheet',name,err)}
+   },0);
+   cors.src=url;
+  };
+ }
  im.src=url;
 }
 for(const [id,url] of Object.entries(HD_ART_URLS))loadOptionalArt(id+'HD',url);
@@ -288,6 +300,81 @@ function fighterAtlas9(f){
  if(!useHDCombat)return null;
  const image=images[f.id+'Fight9'];
  return image?.naturalWidth===1600&&image?.naturalHeight===1200?image:null;
+}
+
+/* v9.3 — Recalibrate and clean all 48 pose cells without redrawing the
+ * approved characters. Derived RGBA atlases remain in browser memory only. */
+const combatAtlasFix=Object.create(null),combatAtlasStats=Object.create(null);
+function prepareCombatAtlas(id,img){
+ if(!IDS.includes(id)||img.naturalWidth!==1600||img.naturalHeight!==1200)return;
+ const canvas=document.createElement('canvas');canvas.width=1600;canvas.height=1200;
+ const ctx=canvas.getContext('2d',{willReadFrequently:true});
+ if(!ctx)return;ctx.drawImage(img,0,0);
+ const size=400,frames=[];let specks=0,edges=0;
+ for(let k=0;k<12;k++){
+  const startX=(k%4)*size,startY=Math.floor(k/4)*size;
+  const obj=ctx.getImageData(startX,startY,size,size),a=obj.data;
+  const isSolid=new Uint8Array(size*size),visited=new Uint8Array(size*size);
+  for(let p=0;p<size*size;p++){
+   const t=p*4,alpha=a[t+3];
+   if(alpha<24){a[t+3]=0;continue;}
+   if(alpha>=45)isSolid[p]=1;
+  }
+  // Remove disconnected small specks while retaining connected hair strands.
+  const work=new Int32Array(size*size);
+  for(let p=0;p<size*size;p++){
+   if(!isSolid[p]||visited[p])continue;
+   let count=0,end=1;work[0]=p;visited[p]=1;
+   while(count<end){
+    const q=work[count++],x=q%size,y=Math.floor(q/size);
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+     const nx=x+dx,ny=y+dy;if((!dx&&!dy)||nx<0||nx>=size||ny<0||ny>=size)continue;
+     const ni=ny*size+nx;if(isSolid[ni]&&!visited[ni]){visited[ni]=1;work[end++]=ni;}
+    }
+   }
+   if(end<=14){specks+=end;for(let j=0;j<end;j++)a[work[j]*4+3]=0;}
+  }
+  // Preserve empty alpha holes, but remove colored halos at translucent edges.
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+   const p=(y*size+x)*4,alpha=a[p+3];if(alpha<24){a[p+3]=0;continue;}
+   if(alpha>226)continue;
+   let q=-1,quality=0;
+   for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+    const xx=x+dx,yy=y+dy;if(xx<0||xx>=size||yy<0||yy>=size)continue;
+    const j=(yy*size+xx)*4,aa=a[j+3],score=aa/(1+Math.abs(dx)+Math.abs(dy));
+    if(aa>=215&&score>quality){quality=score;q=j;}
+   }
+   if(q>=0){
+    const t=.7*(1-alpha/255);
+    for(let c=0;c<3;c++)a[p+c]=Math.round(a[p+c]*(1-t)+a[q+c]*t);
+    edges++;
+   }
+  }
+  let left=400,right=0,top=400,bottom=0,found=0;
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+   if(a[(y*size+x)*4+3]<90)continue;
+   left=Math.min(left,x);right=Math.max(right,x);
+   top=Math.min(top,y);bottom=Math.max(bottom,y);found++;
+  }
+  if(!found){frames.push({headWidth:85,headCenter:200,footY:399,scale:1});ctx.putImageData(obj,startX,startY);continue;}
+  const height=bottom-top+1,limit=Math.min(size,top+Math.max(26,Math.min(84,Math.round(height*.25))));
+  let total=0;const hist=new Uint32Array(size);
+  for(let y=top;y<limit;y++)for(let x=0;x<size;x++){
+   if(a[(y*size+x)*4+3]>=115){hist[x]++;total++;}
+  }
+  let lo=left,hi=right,sum=0;
+  for(let x=0;x<size;x++){sum+=hist[x];if(sum>=total*.12){lo=x;break;}}
+  sum=0;for(let x=0;x<size;x++){sum+=hist[x];if(sum>=total*.88){hi=x;break;}}
+  frames.push({headWidth:Math.max(20,hi-lo),headCenter:(lo+hi)/2,footY:bottom,scale:1,found});
+  ctx.putImageData(obj,startX,startY);
+ }
+ const median=frames.slice(0,3).map(f=>f.headWidth).sort((a,b)=>a-b)[1]||85;
+ for(const frame of frames){
+  frame.scale=Math.round(clamp(median/frame.headWidth,.86,1.14)*1000)/1000;
+ }
+ combatAtlasFix[id]={canvas,frames};
+ combatAtlasStats[id]={frames:12,referenceHead:median,removedSpeckPixels:specks,cleanedEdgePixels:edges,
+  poseScales:frames.map(f=>f.scale)};
 }
 function spriteFrame9(f){
  if(f.act==='hurt'||f.stun>0)return 10;
@@ -1062,7 +1149,11 @@ function drawFighter(f,ghost=false,offset=0){
   const safeK=modern?Math.max(0,Math.min(11,k)):k;
   const sx=(safeK%columns)*tw,sy=Math.floor(safeK/columns)*th;
   g.globalAlpha=opacity*alpha;
-  g.drawImage(im,sx,sy,tw,th,-sw/2,-sh+5,sw,sh);
+  const fix=modern?combatAtlasFix[f.id]:null,meta=fix?.frames[safeK];
+  if(meta){
+   const u=sc*meta.scale;
+   g.drawImage(fix.canvas,sx,sy,tw,th,-meta.headCenter*u,-meta.footY*u+5,tw*u,th*u);
+  }else g.drawImage(im,sx,sy,tw,th,-sw/2,-sh+5,sw,sh);
  }
  const mix=ghost?1:clamp(v?.poseBlend??1,0,1);
  const oldWeight=(v&&v.poseFrom!==frame)?(1-mix)*.20:0;
@@ -1128,7 +1219,11 @@ function drawReflections(visualFighters){
   // Vertical reflection is mirrored at 1:1 aspect and cropped by floor mask.
   g.save();g.translate(f.x,FLOOR+13);g.scale(f.face,-1);
   g.globalAlpha=(f.onGround?.19:.045);g.filter='blur(2.5px)';
-  g.drawImage(im,sx,sy,tw,th,-sw/2,-sh+5,sw,sh);
+  const fix=modern?combatAtlasFix[f.id]:null,meta=fix?.frames[k];
+  if(meta){
+   const u=sc*meta.scale;
+   g.drawImage(fix.canvas,sx,sy,tw,th,-meta.headCenter*u,-meta.footY*u+5,tw*u,th*u);
+  }else g.drawImage(im,sx,sy,tw,th,-sw/2,-sh+5,sw,sh);
   g.restore();
  }
  const fade=g.createLinearGradient(0,FLOOR+8,0,FLOOR+133);
@@ -1439,6 +1534,7 @@ window.AngelClashDebug={
  setTouchMode:(mode)=>{settings.touchMode=mode;applyTouchMode()},
  move:(p,k)=>{const f=fighters[p];if(!f)return false;return startAttack(f,k)},
  tick:(n=1)=>{for(let i=0;i<n;i++)stepLogic();renderAlpha=1;render()},
+ spriteIntegrity:()=>structuredClone(combatAtlasStats),
  animationState:()=>fighters.map(f=>({id:f.id,walk:f.visual?.walk??0,crouch:f.visual?.crouch??0,air:f.visual?.air??0,land:f.visual?.land??0,lean:f.visual?.lean??0,pose:f.visual?.poseTo??0,blend:f.visual?.poseBlend??1})),
  chooseMode:(i=0)=>{menuIndex=i;chooseMenu()},
  setScene:(s)=>setScene(s)
