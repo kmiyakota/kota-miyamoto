@@ -46,12 +46,20 @@ test('retired blonde or low-resolution source does not re-enter the UI',()=>{
  assert.doesNotMatch(html,/loadImage\('original'/);
  assert.doesNotMatch(html,/loadImage\(id\+'Portrait'/);
  assert.doesNotMatch(html,/const fallback=images\.original/);
- assert.match(html,/const im=artForCostume\(id,'portrait'/);
+ assert.match(html,/const chosen=choosePortraitArt\(id,w,h,detail/);
+ assert.match(html,/const im=chosen\?\.image;/);
 });
 test('high definition cut-ins and quick specials are intact',()=>{
  assert.match(html,/portrait\(cutIn\.id,x,174,350,335,'cinematic'\)/);
  assert.match(html,/portrait\(win\.id,426,140,428,415,'cinematic'\)/);
  for(const binding of ["quickPulse:'KeyQ'","quickRiser:'KeyE'","quickRush:'KeyF'","quickSuper:'KeyT'"])assert.ok(html.includes(binding),binding);
+});
+test('HD portrait resolution and TAMAKI voice',()=>{
+ assert.match(html,/function portraitSourceDensity\(im,w,h\)/);
+ assert.match(html,/function choosePortraitArt\(id,w,h,detail/);
+ assert.match(html,/Math\.min\(visibleW\/w,visibleH\/h\)/);
+ assert.match(html,/quote:'月の静けさこそ、ぼくの力なのだ！'/);
+ assert.match(html,/\['QUICK SPECIALS','Q: PROJECTILE/);
 });
 test('12 pose indices and fixed-size atlases',()=>{
  assert.match(html,/for\(let k=0;k<12;k\+\+\)/);
