@@ -55,7 +55,7 @@ test('high definition cut-ins and quick specials are intact',()=>{
 });
 test('12 pose indices and fixed-size atlases',()=>{
  assert.match(html,/for\(let k=0;k<12;k\+\+\)/);
- assert.match(html,/naturalWidth===1600&&image\.naturalHeight===1200/);
+ assert.match(html,/naturalWidth===1600&&image\?\.naturalHeight===1200/);
  assert.match(audit,/const POSES=\[/);
  assert.match(audit,/getImageData\(0,0,400,400\)/);
 });
