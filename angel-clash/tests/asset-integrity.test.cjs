@@ -61,6 +61,28 @@ test('HD portrait resolution and TAMAKI voice',()=>{
  assert.match(html,/quote:'月の静けさこそ、ぼくの力なのだ！'/);
  assert.match(html,/\['QUICK SPECIALS','Q: PROJECTILE/);
 });
+test('sprite cleanup A/B mode never replaces a different costume atlas',()=>{
+ assert.match(html,/function repairedAtlasFor\(f,im\)/);
+ assert.match(html,/useCleanedAtlas&&im===images\[f\.id\+'Fight9'\]/);
+ assert.match(html,/toggleSpriteCleanup:\(enabled\)/);
+ assert.match(html,/if\(just\('F9'\)\)/);
+});
+test('HD atlas layout follows chosen costume sprite dimensions',()=>{
+ assert.match(html,/function usesModernAtlas\(f\)/);
+ assert.match(html,/if\(usesModernAtlas\(f\)\)return spriteFrame9\(f\)/);
+ assert.doesNotMatch(html,/const modern=!!fighterAtlas9\(f\)/);
+});
+test('portrait quality selection always prefers adequate source density',()=>{
+ assert.match(html,/function portraitSourceDensity\(im,w,h\)/);
+ assert.match(html,/if\(solo&&sd>0&&sd>=cd\)/);
+ assert.doesNotMatch(html,/sd>=cd\|\|large/);
+});
+test('audit supports candidate versus original same-pose comparison',()=>{
+ assert.match(audit,/id="compareOriginal"/);
+ assert.match(audit,/originalBaselines=Object\.create\(null\)/);
+ assert.match(audit,/paint\(reference,before\?selected:0,1/);
+ assert.match(audit,/URL\.revokeObjectURL/);
+});
 test('12 pose indices and fixed-size atlases',()=>{
  assert.match(html,/for\(let k=0;k<12;k\+\+\)/);
  assert.match(html,/naturalWidth===1600&&image\?\.naturalHeight===1200/);
