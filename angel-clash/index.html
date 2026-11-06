@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.8 — Atlas Format Integrity</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.9 — Sprite Cleanup A/B QA</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -230,7 +230,7 @@ function usesModernAtlas(f){
 }
 function repairedAtlasFor(f,im){
  // Never use an original atlas' cleaned pixels for a different costume atlas.
- return im===images[f.id+'Fight9']?combatAtlasFix[f.id]?.canvas:null;
+ return useCleanedAtlas&&im===images[f.id+'Fight9']?combatAtlasFix[f.id]?.canvas:null;
 }
 function artForCostume(id,kind,stage=stageIndex){
  return loadedCostumeArt(id,kind,stage)||images[id+'HD']||null;
@@ -318,6 +318,7 @@ function fighterAtlas9(f){
 /* v9.3 — Recalibrate and clean all 48 pose cells without redrawing the
  * approved characters. Derived RGBA atlases remain in browser memory only. */
 const combatAtlasFix=Object.create(null),combatAtlasStats=Object.create(null);
+let useCleanedAtlas=true;
 async function prepareCombatAtlas(id,img){
  if(!IDS.includes(id)||img.naturalWidth!==1600||img.naturalHeight!==1200)return;
  const canvas=document.createElement('canvas');canvas.width=1600;canvas.height=1200;
@@ -868,6 +869,11 @@ function stepLogic(){tick++;displayTick++;
   if(just('KeyP'))paused=!paused;
   if(touchPausePressed){paused=!paused;touchPausePressed=false;}
   if(just('KeyH'))debugHitbox=!debugHitbox;
+  if(just('F9')){
+   useCleanedAtlas=!useCleanedAtlas;
+   const actor=fighters[0];
+   if(actor)popText(useCleanedAtlas?'ALPHA CLEANUP ON':'ORIGINAL SPRITES',actor.x,actor.y-355,'#f5ddff');
+  }
   if(modeKind==='training'){
    if(just('KeyC'))cycleTrainingStage();
    if(just('KeyR')){fighters[0].hp=fighters[0].maxHp;fighters[1].hp=fighters[1].maxHp;fighters[0].meter=fighters[1].meter=100;fighters[0].x=370;fighters[1].x=912;projectiles=[];}
@@ -1423,7 +1429,7 @@ function drawFight(){g.save();if(shake>0)g.translate(rand(-shake,shake),rand(-sh
 }
 function drawAtmosphere(tint=.72){drawStage();rect(0,0,W,H,`rgba(15,5,35,${tint})`)}
 function titleScreen(){
- drawAtmosphere(.46);label('v9.8',1219,33,16,'#ecd8fa','right','Arial');
+ drawAtmosphere(.46);label('v9.9',1219,33,16,'#ecd8fa','right','Arial');
  // Four approved detailed character portraits, with native-size source images.
  // Dramatic framed group art, cropped rather than stretched.
  const bg=g.createLinearGradient(0,172,0,630);bg.addColorStop(0,'#35144d');bg.addColorStop(1,'#120826');
@@ -1513,7 +1519,7 @@ function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6')
  label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v9.8','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v9.9','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
@@ -1569,6 +1575,8 @@ window.AngelClashDebug={
  move:(p,k)=>{const f=fighters[p];if(!f)return false;return startAttack(f,k)},
  tick:(n=1)=>{for(let i=0;i<n;i++)stepLogic();renderAlpha=1;render()},
  spriteIntegrity:()=>structuredClone(combatAtlasStats),
+ spriteCleanup:()=>({enabled:useCleanedAtlas,stats:structuredClone(combatAtlasStats)}),
+ toggleSpriteCleanup:(enabled)=>{useCleanedAtlas=!!enabled;return useCleanedAtlas;},
  animationState:()=>fighters.map(f=>({id:f.id,walk:f.visual?.walk??0,crouch:f.visual?.crouch??0,air:f.visual?.air??0,land:f.visual?.land??0,lean:f.visual?.lean??0,pose:f.visual?.poseTo??0,blend:f.visual?.poseBlend??1})),
  chooseMode:(i=0)=>{menuIndex=i;chooseMenu()},
  setScene:(s)=>setScene(s)
