@@ -1,3 +1,25 @@
+# ANGEL CLASH v9.5 — Character source lock & visual regression QA (2026-11-06)
+
+**GitHub queue branch only; production deployment is not independently verified.** Previous generated v10 poster variants were repeatedly wrong (swapped character identities and proportions) and are explicitly rejected. **No v10 release is being claimed.**
+
+### Implementation
+- v9.4 undoes an unsafe v9.3 automatic per-pose head normalization. An inspection of a 12-pose candidate sheet showed the heuristic misidentifying punching arms and kicks as head width, giving highly inconsistent factors of 0.86–1.14. The runtime draws each source tile intact from one fixed center/bottom canvas layout instead.
+- v9.5 uses one character size factor for ITO, AKARI, TAMAKI, and NOX until validated source geometry can replace it. No stretching, squashing or hair-length reassignment.
+- Old rejected blond ITO portraits are no longer used as runtime fallbacks. Large portraits prefer the independently stored high-resolution solo images; if unavailable, they display a sharp identity-safe vector card. A cropped 920×552 four-person concept strip is never enlarged for a large cut-in.
+- Conservative alpha cleanup now preserves thinner hair details. It still requires CDN CORS readback and does **not** fix the incorrectly painted AKARI idle eye. No generated replacement atlas has been published.
+- New [sprite-audit.html](sprite-audit.html) provides per-character 12-frame views, fixed-ratio side-by-side comparison with idle, light/dark/checker backgrounds, zoom, pixel-alpha measurement when CORS allows, comparison with source-profile references, and local PNG/WebP import. Local files are handled in the browser only.
+
+### Regression checks executed
+- JavaScript parsed successfully after each source update.
+- Headless Canvas2D mock: 12 of 12 ITO/AKARI/TAMAKI/NOX pairings, 8 attempted move types per match, **540 total draw calls**, **216 source-atlas draw calls** with **0 invalid coordinates/rectangle bounds** and **0 exceptions**. These are structural smoke tests, not pixel-level visual approval or actual Safari performance tests.
+- `AngelClashDebug.spriteIntegrity()` reports cleanup availability and estimates; head metrics remain **diagnostics only**, never runtime pose scaling.
+- Visual source master QA and original art repainting remain incomplete. In particular AKARI's incorrect iris requires a new approved source frame. Avoid marking all 48 poses as visually corrected.
+
+### Canon
+See [CHARACTER_CANON.md](CHARACTER_CANON.md) for protected identities. In short: ITO long light-brown hair, AKARI dark short bob, TAMAKI dark short hair and glasses, NOX silver hair with wings. Do not use mistaken v10 generated promotional imagery as character reference.
+
+---
+
 # ANGEL CLASH v9.3 — Sprite integrity pass (2026-11-06)
 
 **Committed in `queue` — not yet confirmed deployed.** This is a **non-destructive rendering and transparency repair pass**, not a claim that all original illustrations have been manually repainted. The original four 1600×1200 sprite WebPs remain intact and are still used if processing fails.
