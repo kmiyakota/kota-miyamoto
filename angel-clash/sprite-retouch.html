@@ -18,6 +18,7 @@
 <div class="row"><label>ブラシ半径 <input id="radius" class="slider" type="range" min="1" max="24" value="4"><output id="radiusOut">4px</output></label></div>
 <div class="row"><label>不透明度 <input id="opacity" class="slider" type="range" min="5" max="100" value="80"><output id="opacityOut">80%</output></label></div>
 <div class="row"><label>修正色 <input id="color" type="color" value="#523441"></label><label>拡大 <input id="zoom" class="slider" type="range" min="1" max="6" step=".25" value="1"><output id="zoomOut">1.00×</output></label></div>
+<div class="row"><button id="edgeCleanup" disabled>このコマの半透明縁を補修</button></div>
 <div class="row"><button id="undo" disabled>戻す</button><button id="redo" disabled>やり直し</button><button id="resetFrame" class="danger" disabled>選択コマを原画に戻す</button></div>
 <h2>4. 透過・顔の品質</h2><div class="row check"><label><input type="checkbox" id="showCross" checked> センター線表示</label><label><input type="checkbox" id="samePose" checked> 右側は元画像の同じコマ</label></div>
 <div id="stats" class="status" role="status">画像を読み込んでください。</div>
@@ -51,7 +52,7 @@ const frameRect=k=>({x:(k%4)*400,y:Math.floor(k/4)*400});
 function captureFrame(k){const b=frameRect(k);return {frame:k,pixels:mctx.getImageData(b.x,b.y,400,400)};}
 function applySnapshot(snapshot){const b=frameRect(snapshot.frame);mctx.putImageData(snapshot.pixels,b.x,b.y);frame=snapshot.frame;}
 function histPush(){undoStack.push(captureFrame(frame));if(undoStack.length>MAX_HISTORY)undoStack.shift();redoStack.length=0;updateButtons();}
-function updateButtons(){ $('undo').disabled=!undoStack.length;$('redo').disabled=!redoStack.length;$('resetFrame').disabled=!canEdit;$('exportPNG').disabled=!canEdit;$('exportWEBP').disabled=!canEdit;}
+function updateButtons(){ $('edgeCleanup').disabled=!canEdit;$('undo').disabled=!undoStack.length;$('redo').disabled=!redoStack.length;$('resetFrame').disabled=!canEdit;$('exportPNG').disabled=!canEdit;$('exportWEBP').disabled=!canEdit;}
 function restore(payload){applySnapshot(payload);modified=true;refresh();}
 function makePoses(container){
  container.innerHTML='';poseNames.forEach((name,k)=>{
@@ -173,6 +174,33 @@ wc.addEventListener('pointermove',e=>{
 });
 const done=()=>{if(stroke){stroke=false;lastPoint=null;refresh();}};
 wc.addEventListener('pointerup',done);wc.addEventListener('pointercancel',done);wc.addEventListener('lostpointercapture',done);
+function repairAlphaFringe(){
+ if(!canEdit)return;
+ if(!window.confirm('選択中の400×400コマだけ、半透明エッジのRGBを近くの不透明画素に寄せます。透過率は変更しません。よろしいですか？'))return;
+ histPush();
+ const b=frameRect(frame),data=mctx.getImageData(b.x,b.y,400,400),a=data.data;
+ const originalPixels=new Uint8ClampedArray(a),W=400,H=400;
+ let fixed=0;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+  const p=(y*W+x)*4,alpha=originalPixels[p+3];
+  if(alpha<12||alpha>=230)continue;
+  let best=-1,bestScore=-1;
+  for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+   if(dx===0&&dy===0)continue;
+   const xx=x+dx,yy=y+dy;if(xx<0||xx>=W||yy<0||yy>=H)continue;
+   const n=(yy*W+xx)*4,aa=originalPixels[n+3];
+   const score=aa/(1+Math.abs(dx)+Math.abs(dy));
+   if(aa>=240&&score>bestScore){best=n;bestScore=score}
+  }
+  if(best<0)continue;
+  const blend=Math.min(.85,(1-alpha/255)*.65);
+  for(let c=0;c<3;c++)a[p+c]=Math.round(originalPixels[p+c]*(1-blend)+originalPixels[best+c]*blend);
+  // Preserve source alpha exactly: don't erase or fill gaps between hairs.
+  fixed++;
+ }
+ mctx.putImageData(data,b.x,b.y);modified=true;refresh();
+ setStatus((frame+1)+'コマの半透明縁を'+fixed+'画素補修しました。透明度は元画像と同じです。元に戻すこともできます。');
+}
 function exportImage(type){
  if(!canEdit)return;
  master.toBlob(blob=>{
@@ -193,6 +221,7 @@ $('color').addEventListener('input',e=>color=e.target.value);
 $('undo').addEventListener('click',()=>{if(!undoStack.length)return;redoStack.push(captureFrame(undoStack[undoStack.length-1].frame));restore(undoStack.pop());updateButtons()});
 $('redo').addEventListener('click',()=>{if(!redoStack.length)return;undoStack.push(captureFrame(redoStack[redoStack.length-1].frame));restore(redoStack.pop());updateButtons()});
 $('resetFrame').addEventListener('click',()=>{if(!canEdit||!window.confirm('このポーズのみ元画像に戻しますか？'))return;histPush();const b=frameRect(frame);mctx.drawImage(original,b.x,b.y,400,400,b.x,b.y,400,400);modified=true;refresh()});
+$('edgeCleanup').addEventListener('click',repairAlphaFringe);
 $('exportPNG').addEventListener('click',()=>exportImage('image/png'));$('exportWEBP').addEventListener('click',()=>exportImage('image/webp'));
 window.addEventListener('beforeunload',e=>{if(modified){e.preventDefault();e.returnValue='';}});
 refresh();
