@@ -1,3 +1,30 @@
+# ANGEL CLASH v9.10 — Final source-safe tuning pass (2026-11-06)
+
+**Implemented on GitHub `queue`, not confirmed deployed on Cloudflare Pages.** The creator rejected prior v10 promotional posters because character identities were swapped or redesigned. No generated poster has entered the game's source-asset manifest.
+
+## Final changes this pass
+
+1. **Native proportions.** All four 4×3 HD sprite sheets remain fixed at 400×400 cells, with a single uniform X/Y render scale and no per-pose head-zoom, vertical compression, strip warp, or face recentering.
+2. **HD/legacy costume compatibility.** Animation pose indices, tile size and source selection now derive from the *actual chosen atlas* (HD 1600×1200 vs legacy), not the mere existence of an optional v9 image. Original alpha repairs cannot be applied accidentally to a different costume atlas.
+3. **Higher-resolution cinematics.** Source-resolution choice uses actual pixels surviving the cover crop. Large cut-ins and round results reject low-resolution stage-composite fallbacks; the best eligible HD image is chosen. If no image passes, a canon-safe vector label is used.
+4. **Identity and dialogue.** ITO (light-brown long hair), AKARI (dark-brown bob), TAMAKI (dark short hair, glasses), and NOX (silver hair, wings) remain distinct. TAMAKI's quote has been corrected to use "ぼく" with "なのだ".
+5. **Input usability.** One-key specials remain Q (pulse), E (riser), F (rush), T (super with 100 meter); P2 uses Numpad7/8/9/Divide. The help screen now documents these controls.
+6. **Visual A/B diagnostics.** F9 switches between original HD sprite cells and the optional non-destructive transparent-edge cleaned bitmap (where CORS allows pixel readback). Game physics, collision and animation state are unchanged. Debug hooks: `AngelClashDebug.spriteCleanup()`, `toggleSpriteCleanup(true|false)`, `spriteIntegrity()`.
+7. **Pose inspection.** `sprite-audit.html` shows each fighter's 12 original cells, a selectable same-pose before/after comparison, light/dark/checker backgrounds, zoom, RGBA alpha metrics where readable and optional local PNG/WebP uploads.
+8. **Regression suite and CI.** `tests/asset-integrity.test.cjs` checks 13 source invariants. `tests/runtime-smoke.test.cjs` runs 24 simulated matchups, 192 attack attempts, 16 P1/P2 keyboard macro checks and two F9 toggles across HD/fallback Canvas2D modes. Zero invalid sprite coordinates and aspect violations in the simulations. A GitHub Actions workflow (`.github/workflows/angel-clash-integrity.yml`) runs both tests for relevant pushes and PRs.
+
+## Important limitations
+
+- **Actual source-level visual repair remains unfinished.** AKARI's mispainted/white idle iris, inconsistent painted anatomy, hairline alpha artifacts and other 48-frame illustration defects cannot be proven repaired by Canvas code. No unapproved generation has been substituted into the runtime.
+- The existing Wix-hosted 1600×1200 atlases are the current truth. High-DPI interpolation cannot invent details not painted in the original 400px poses.
+- All test numbers above are source/Canvas mocks, not screenshots from desktop Chrome or iPhone Safari. No CI completed run was observable at documentation time, despite the workflow source being committed.
+- Attempts to fetch the public Cloudflare URL were unsuccessful, including a second attempt made after a one-minute interval. This does **not** establish that the site is down; live deploy status remains unverified.
+- The `queue` and `work` branches have diverged significantly in the known repository history; do not force merge or overwrite the work branch to publish this game without a reconciled deployment plan.
+
+**Runtime safety rule:** do not mark a character master fixed until the correct 12 source poses pass identity, same-character head scale, alpha cutout, both-irises, attack silhouette and dark/light background visual comparison.
+
+---
+
 # ANGEL CLASH v9.6 — Identity-safe HD images and tested rendering (2026-11-06)
 
 **Implemented on the `queue` branch.** This update keeps established character faces/outfits consistent across the runtime UI and blocks obsolete promotional imagery from coming back if HD image loading fails.
