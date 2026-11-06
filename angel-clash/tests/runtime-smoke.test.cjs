@@ -71,8 +71,9 @@ function runMock(withHD){
  class Audio{constructor(){this.paused=true;this.volume=1}pause(){}play(){return Promise.resolve()}addEventListener(){}}
  const storage={getItem(){return null},setItem(){}};
  new Function('document','window','navigator','Image','Audio','requestAnimationFrame',
- 'setTimeout','localStorage','ResizeObserver','performance',js)(
- document,window,navigator,Image,Audio,()=>0,()=>0,storage,undefined,{now(){return 0}}
+ 'setTimeout','localStorage','ResizeObserver','performance','structuredClone',js)(
+ document,window,navigator,Image,Audio,()=>0,()=>0,storage,undefined,
+ {now(){return 0}},value=>JSON.parse(JSON.stringify(value))
  );
  const debug=window.AngelClashDebug;
  assert.ok(debug,'Debug hooks were not installed');
