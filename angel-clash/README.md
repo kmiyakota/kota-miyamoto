@@ -1,3 +1,24 @@
+# Source artwork repair workbench — 2026-11-06
+
+The unfinished part of ANGEL CLASH is **the underlying 4×12 character artwork** (incorrect AKARI idle iris, silhouettes/head sizes, hair transparency/edge fringes). Screen rendering, high-DPI cut-ins and aspect-preserving Canvas2D code alone cannot repaint broken source pixels.
+
+## Source-accurate editing now available
+A separate, non-destructive [sprite-retouch.html](sprite-retouch.html) has been added to the `queue` branch:
+- Loads the current character-specific 1600×1200 (4×3) transparent Wix atlas with CORS and also accepts a local PNG/WebP master when CORS prohibits editing.
+- Rejects 1600×1200 images whose first cell is effectively fully opaque, to avoid editing flattened preview images in place of the original RGBA source.
+- Preserves the exact 400×400 source-frame proportions. No generated character replacement, automatic head zoom, canvas slice warp or costume substitution.
+- Provides paint, alpha erase, color sampling and same-pose clone source brush (Alt+click), undo/redo with per-frame snapshots, zoom, 12-frame selection, checker/light/dark/purple transparency checks, and original-vs-edited comparison.
+- Has **per-pose alpha fringe RGB restoration** from nearby opaque pixels. It leaves the original alpha untouched, so real gaps between hair strands remain transparent.
+- Exports a separate 1600×1200 transparent PNG or WebP. The original source and live game remain unchanged until a corrected master is inspected and approved.
+
+## Still required before release
+- Actually repaint **AKARI's white/blank idle iris** using the correct source original, and inspect every pose of all four characters. The mere existence of the editor does NOT mean this work has happened.
+- Check same-character eye/hair/height consistency in 48 poses, and verify alpha edges against multiple backgrounds. Do not approve a generated image featuring wrong identities.
+- Stage the approved corrected atlases with a safe asset rollout, then test in real PC Chrome and iPhone Safari. Cloudflare public deployment remains unverified.
+- Source integrity tests now cover the retouch workbench and pass 15/15 simulated checks. They do not replace human image-by-image visual approval.
+
+---
+
 # ANGEL CLASH v9.10 — Final source-safe tuning pass (2026-11-06)
 
 **Implemented on GitHub `queue`, not confirmed deployed on Cloudflare Pages.** The creator rejected prior v10 promotional posters because character identities were swapped or redesigned. No generated poster has entered the game's source-asset manifest.
