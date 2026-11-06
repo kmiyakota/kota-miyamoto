@@ -1,3 +1,18 @@
+# ANGEL CLASH v9.6 — Identity-safe HD images and tested rendering (2026-11-06)
+
+**Implemented on the `queue` branch.** This update keeps established character faces/outfits consistent across the runtime UI and blocks obsolete promotional imagery from coming back if HD image loading fails.
+
+- In-fight HUD, large cut-ins, result and story screens load the approved solo HD artwork first. Large cut-ins never enlarge a cropped four-person compressed JPEG.
+- Removed loading of the old `original-characters.jpg` and low-resolution `portraits/*.webp` that are not used by the live renderer and can show rejected previous appearances. Their files remain in the repository for historical purposes; they are no longer loaded into gameplay.
+- When a character's HD artwork is unavailable, the fallback is a crisp character-name vector emblem instead of inventing or resurfacing a rejected face.
+- The 12-pose original combat atlases still use one source-locked uniform scale; the experimental alpha-cleanup attempts to preserve thin hair strands, and any CORS failure leaves original art unchanged.
+
+**Automated verification:** `node angel-clash/tests/asset-integrity.test.cjs` — 8/8 source consistency checks passed in simulated execution. Mock Canvas2D test: all 12 ordered fighter pairings passed in both simulated HD-asset and fallback modes; **540 total draw calls / 216 atlas calls / 0 invalid coordinate errors** with HD, **108 draw calls / 0 errors** in fallback. No claim is made about the physical browser or current Cloudflare production build.
+
+**Remaining source-illustration defects:** AKARI's white/blank idle iris and other pixel/pose anatomy defects cannot be repaired by runtime cropping or color cleanup alone; the originating 1600×1200 sprite master must be retouched and the revised atlas visually checked. Rejected v10 promotional concepts remain unapproved and unused. The source/alpha inspection page is [sprite-audit.html](sprite-audit.html), including a local PNG/WebP loader for CORS-free review.
+
+---
+
 # ANGEL CLASH v9.5 — Character source lock & visual regression QA (2026-11-06)
 
 **GitHub queue branch only; production deployment is not independently verified.** Previous generated v10 poster variants were repeatedly wrong (swapped character identities and proportions) and are explicitly rejected. **No v10 release is being claimed.**
