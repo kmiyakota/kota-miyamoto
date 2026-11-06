@@ -58,12 +58,18 @@ dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13px}dt{co
 <label>背景 <select id="background"><option value="checker">市松</option><option value="dark">暗色</option><option value="light">明色</option><option value="purple">紫</option></select></label>
 <label>倍率 <input id="zoom" type="range" min="1" max="5" step="0.25" value="1"><output id="zoomText">1.00×</output></label>
 <label><input id="head" type="checkbox"> 頭部を拡大して確認</label>
+<label>ローカル元画像 <input id="localFile" type="file" accept="image/png,image/webp" aria-label="選択キャラクターの1600×1200の画像を読み込む"></label>
+<button type="button" id="resetSource">元のWebPに戻す</button>
 </div>
 <div class="status" role="status" id="status">画像を読み込み中...</div>
 <h2>全12コマ</h2><div id="poses" class="poses"></div>
 </section>
 <aside class="panel">
 <h2>原画の固定条件</h2>
+<figure style="margin:8px 0 14px">
+<img id="canonRef" alt="キャラクターの旧プロフィール参考画像" style="max-width:100%;max-height:230px;border-radius:8px;border:1px solid #8063a0" loading="lazy">
+<figcaption>元の「３人について」のプロフィール画像。顔・髪型の比較用。戦闘衣装の正本ではありません。</figcaption>
+</figure>
 <div class="small">衣都：明るい茶色の長髪。灯：濃茶の短いボブ。環：暗色の短髪と眼鏡。NOX：承認済みの銀髪と翼。
 原画にない顔・衣装を新しく推測して補完しないでください。</div>
 <div class="status" style="margin-top:12px" id="identity">元画像を読み込んでいます。</div>
@@ -84,6 +90,12 @@ ito:'https://static.wixstatic.com/media/c3c31e_f84c2687cabd4c6e93fc0849d6d7e912~
 akari:'https://static.wixstatic.com/media/c3c31e_1b14461d63c84e919162bc2f9fa1e688~mv2.webp',
 tamaki:'https://static.wixstatic.com/media/c3c31e_7325a9b9a4cf463c998b729f7ab9dbe1~mv2.webp',
 nox:'https://static.wixstatic.com/media/c3c31e_7a96f82aa5634f8d9e1e2ffc768520d7~mv2.webp'};
+const CHARACTER_PROFILE_REFS={
+ito:'https://static.wixstatic.com/media/c3c31e_2c83bcf6d31e43da96fe813f5f588d00~mv2.png',
+akari:'https://static.wixstatic.com/media/c3c31e_64bd4c4c4ac14ef69cd41c70e6eab44c~mv2.png',
+tamaki:'https://static.wixstatic.com/media/c3c31e_94c725ed0bf849b3a66f00e22fce0c0e~mv2.png',
+nox:'https://static.wixstatic.com/media/c3c31e_217a23f143e04b08803d81317f80f876~mv2.png'};
+const localSources=Object.create(null);
 const POSES=['待機','歩行1','歩行2','しゃがみ・ガード','ジャンプ','弱パンチ','強パンチ','弱キック','強キック','必殺技','ダメージ','勝利'];
 let char='ito',selected=0,img=null,readable=false,zoom=1,loadedToken=0;
 const $=id=>document.getElementById(id),cell=(index)=>[(index%4)*400,Math.floor(index/4)*400];
@@ -126,6 +138,15 @@ function render(){
 function load(id){
  char=id;selected=0;img=null;readable=false;const token=++loadedToken;
  $('status').textContent=id.toUpperCase()+' の原画を読み込み中...';$('identity').textContent='元画像をロード中';
+ $('canonRef').src=CHARACTER_PROFILE_REFS[id];
+ $('canonRef').alt=id.toUpperCase()+' 旧プロフィールの参考画像';
+ $('localFile').value='';
+ if(localSources[id]){
+  const localImg=new Image();localImg.decoding='async';
+  localImg.onload=()=>{if(token!==loadedToken)return;img=localImg;readable=true;finish()};
+  localImg.onerror=()=>{if(token!==loadedToken)return;$('status').textContent='ローカル元画像が破損しているか読み込めません。'};
+  localImg.src=localSources[id];return;
+ }
  const a=new Image();a.crossOrigin='anonymous';a.decoding='async';
  a.onload=()=>{if(token!==loadedToken)return;img=a;readable=true;finish()};
  a.onerror=()=>{const b=new Image();b.decoding='async';b.onload=()=>{if(token!==loadedToken)return;img=b;readable=false;finish()};b.onerror=()=>{if(token!==loadedToken)return;$('status').textContent='画像が取得できません。元WebPが利用できるか確認してください。';};b.src=ASSETS[id];};a.src=ASSETS[id];
@@ -133,7 +154,7 @@ function load(id){
   const ok=img.naturalWidth===1600&&img.naturalHeight===1200;
   $('status').textContent=ok?'読み込み完了：元の12コマを表示中。縦横比の変更なし。':'画像サイズが想定と異なります（4列×3行・1600×1200が必要）。';
   $('identity').textContent='設定：'+({ito:'明茶色の長髪',akari:'濃茶色の短いボブ・待機の両目を要検査',tamaki:'暗色の短髪・眼鏡',nox:'銀髪・翼'}[id])+' / 画像の作画一致は未承認';
-  $('imgSize').textContent=img.naturalWidth+'×'+img.naturalHeight+(readable?' / アルファ計測可':' / 表示のみ');
+  $('imgSize').textContent=img.naturalWidth+'×'+img.naturalHeight+(localSources[id]?' / ローカル元画像':' / Wix元画像')+(readable?' / アルファ計測可':' / 表示のみ');
   $('note').textContent=readable?'透過の可視範囲を表示しています。頭部の描き間違いは人間による原画検証が必要です。':'元画像表示は可能ですが、画像サーバーのCORS設定により透過ピクセルの読み取りはできません。';
   render();
  }
@@ -143,6 +164,17 @@ $('background').addEventListener('change',e=>document.querySelectorAll('.canvasw
 $('head').addEventListener('change',render);
 $('zoom').addEventListener('input',e=>{zoom=Number(e.target.value);render()});
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();selected=(selected+(e.key==='ArrowRight'?1:11))%12;render()}});
+$('localFile').addEventListener('change',e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ if(!['image/png','image/webp'].includes(file.type)){$('status').textContent='PNGかWebPのみ受け付けます。';return;}
+ if(localSources[char])URL.revokeObjectURL(localSources[char]);
+ localSources[char]=URL.createObjectURL(file);
+ load(char);
+});
+$('resetSource').addEventListener('click',()=>{
+ if(localSources[char]){URL.revokeObjectURL(localSources[char]);delete localSources[char];}
+ load(char);
+});
 makeThumbs();load(char);
 })();
 </script>
