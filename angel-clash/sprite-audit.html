@@ -60,7 +60,8 @@ dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13px}dt{co
 <label><input id="head" type="checkbox"> 頭部を拡大して確認</label>
 <label><input id="compareOriginal" type="checkbox"> 右側：元WebPの同ポーズ</label>
 <label>ローカル元画像 <input id="localFile" type="file" accept="image/png,image/webp" aria-label="選択キャラクターの1600×1200の画像を読み込む"></label>
-<button type="button" id="loadAkariDraft">灯：透過修復候補を比較（未採用）</button>
+<button type="button" id="loadAlphaDraft">透過修復候補を比較（未採用）</button>
+<button type="button" id="loadEyeDraft">灯：虹彩試作を比較（未採用）</button>
 <button type="button" id="resetSource">元のWebPに戻す</button>
 </div>
 <div class="status" role="status" id="status">画像を読み込み中...</div>
@@ -98,8 +99,16 @@ akari:'https://static.wixstatic.com/media/c3c31e_64bd4c4c4ac14ef69cd41c70e6eab44
 tamaki:'https://static.wixstatic.com/media/c3c31e_94c725ed0bf849b3a66f00e22fce0c0e~mv2.png',
 nox:'https://static.wixstatic.com/media/c3c31e_217a23f143e04b08803d81317f80f876~mv2.png'};
 const localSources=Object.create(null);
+// All 4 drafts are based on the exact Wix FIGHT9 original WebPs.
+ // Artwork is NOT approved and the game never loads these URLs.
 const remoteDrafts=Object.freeze({
- akari:'https://static.wixstatic.com/media/c3c31e_a47b22f4bdaa43a1b2aeef84ed3591be~mv2.png'
+ ito:'https://static.wixstatic.com/media/c3c31e_18335341248043bd941a1e1b02809367~mv2.png',
+ akari:'https://static.wixstatic.com/media/c3c31e_d6996052e8b9463ebc9436ea4f7be442~mv2.png',
+ tamaki:'https://static.wixstatic.com/media/c3c31e_27b7ee6750954f1bbc5d4440664d4461~mv2.png',
+ nox:'https://static.wixstatic.com/media/c3c31e_cd46dafed2a84a81bce45ed53a997d0c~mv2.png'
+});
+const eyeDrafts=Object.freeze({
+ akari:'https://static.wixstatic.com/media/c3c31e_b5039ed0b76a41578307da8f56fce88a~mv2.png'
 });
 const selectedDrafts=Object.create(null);
 const POSES=['待機','歩行1','歩行2','しゃがみ・ガード','ジャンプ','弱パンチ','強パンチ','弱キック','強キック','必殺技','ダメージ','勝利'];
@@ -155,21 +164,23 @@ function fetchOriginalBaseline(id){
 function load(id){
  char=id;selected=0;img=null;readable=false;const token=++loadedToken;
  fetchOriginalBaseline(id);
- $('loadAkariDraft').disabled=id!=='akari';
+ $('loadAlphaDraft').disabled=!remoteDrafts[id];
+ $('loadEyeDraft').disabled=id!=='akari';
  $('status').textContent=id.toUpperCase()+' の原画を読み込み中...';$('identity').textContent='元画像をロード中';
  $('canonRef').src=CHARACTER_PROFILE_REFS[id];
  $('canonRef').alt=id.toUpperCase()+' 旧プロフィールの参考画像';
  $('localFile').value='';
  if(selectedDrafts[id]){
+  const url=selectedDrafts[id]==='eye'?eyeDrafts[id]:remoteDrafts[id];
   const candidate=new Image();candidate.crossOrigin='anonymous';candidate.decoding='async';
   candidate.onload=()=>{if(token!==loadedToken)return;img=candidate;readable=true;finish()};
   candidate.onerror=()=>{
    const fallback=new Image();fallback.decoding='async';
    fallback.onload=()=>{if(token!==loadedToken)return;img=fallback;readable=false;finish()};
    fallback.onerror=()=>{if(token!==loadedToken)return;$('status').textContent='修復候補はまだ読み込めません。元WebPに戻してください。'};
-   fallback.src=remoteDrafts[id];
+   fallback.src=url;
   };
-  candidate.src=remoteDrafts[id];return;
+  candidate.src=url;return;
  }
  if(localSources[id]){
   const localImg=new Image();localImg.decoding='async';
@@ -185,7 +196,7 @@ function load(id){
   $('status').textContent=ok?'読み込み完了：元の12コマを表示中。縦横比の変更なし。':'画像サイズが想定と異なります（4列×3行・1600×1200が必要）。';
   $('identity').textContent='設定：'+({ito:'明茶色の長髪',akari:'濃茶色の短いボブ・待機の両目を要検査',tamaki:'暗色の短髪・眼鏡',nox:'銀髪・翼'}[id])+' / 画像の作画一致は未承認';
   $('imgSize').textContent=img.naturalWidth+'×'+img.naturalHeight+
-   (selectedDrafts[id]?' / 透過修復候補・未採用':localSources[id]?' / ローカル元画像':' / Wix元画像')+
+   (selectedDrafts[id]?(selectedDrafts[id]==='eye'?' / 虹彩補修試作・未採用':' / 透過補正候補・未採用'):localSources[id]?' / ローカル元画像':' / Wix元画像')+
    (readable?' / アルファ計測可':' / 表示のみ');
   $('note').textContent=readable?'透過の可視範囲を表示しています。頭部の描き間違いは人間による原画検証が必要です。':'元画像表示は可能ですが、画像サーバーのCORS設定により透過ピクセルの読み取りはできません。';
   render();
@@ -197,9 +208,15 @@ $('head').addEventListener('change',render);
 $('compareOriginal').addEventListener('change',render);
 $('zoom').addEventListener('input',e=>{zoom=Number(e.target.value);render()});
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();selected=(selected+(e.key==='ArrowRight'?1:11))%12;render()}});
-$('loadAkariDraft').addEventListener('click',()=>{
+$('loadAlphaDraft').addEventListener('click',()=>{
+ if(!remoteDrafts[char])return;
+ selectedDrafts[char]='alpha';
+ $('compareOriginal').checked=true;
+ load(char);
+});
+$('loadEyeDraft').addEventListener('click',()=>{
  if(char!=='akari')return;
- selectedDrafts[char]=true;
+ selectedDrafts[char]='eye';
  $('compareOriginal').checked=true;
  load(char);
 });
