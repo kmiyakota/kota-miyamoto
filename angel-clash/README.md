@@ -1,3 +1,23 @@
+# ANGEL CLASH v9.11 — AKARI idle iris repair (2026-11-06)
+
+**AKARI's blank-white iris now has a verified pixel-level correction layer integrated into the game renderer.** The approved original 1600×1200 Wix WebP is kept intact; this change is a non-destructive sprite source *overlay*, not a completely regenerated atlas.
+
+- Source: `c3c31e_1b14461d63c84e919162bc2f9fa1e688~mv2.webp` (1600×1200, 4×3 source frames).
+- Correction layer: [AKARI idle iris RGB fix](https://static.wixstatic.com/media/c3c31e_7a87a744b19f463d965e3e1681dbca51~mv2.png), uploaded in READY state to the ANGEL CLASH Wix Media Manager.
+- Layer size: 400×400, fully transparent except for **6 opaque RGB pixels**, at local idle tile coordinates `x=208–210, y=75–76`. A verified read-back confirmed its pixel bounds, PNG dimensions, and that no translucent fringe was introduced.
+- The original WebP, its transparency, the other 11 AKARI poses, and all ITO/TAMAKI/NOX assets are unchanged.
+- `drawFighter() / drawPose()` applies the correction **only when `f.id === 'akari'`, the real base `akariFight9` atlas is selected, and pose index is 0**. Ground reflection receives the same retouch. Both X and Y share the original uniform scale. Other costume atlases and fallback sprites are untouched.
+- `AngelClashDebug.akariIdleEyeRepair()` reports whether the PNG image is loaded. The correction has no hitbox, input or physics changes.
+- The first coarse 13-pixel test was rejected upon visual inspection; the active 6-pixel patch uses a smaller, subtler eye-shaped correction.
+- Source integrity checks: **15/15 pass**. Mock Canvas2D gameplay: **24 matchups; 192 move attempts; 16 keyboard macro checks; 0 invalid sprite rectangles/aspect ratios; 20 iris patch draws** in simulated HD mode and no patch draws in fallback.
+- This is **not yet a flattened WebP master replacement**, nor proof of Cloudflare Pages deployment. The game-side patch was committed to GitHub `queue` as v9.11; public deployment and physical desktop/iPhone appearance remain to verify.
+
+## Remaining visual tasks
+- Review the repaired eye at live game size, not only a zoomed PNG comparison; if needed, refine the 6 source-color pixels after an actual Safari/Chrome screenshot.
+- Other 47 poses still need inspection for head/height consistency and alpha-fringe defects; these are tracked separately in [issue #1](https://github.com/kmiyakota/kota-miyamoto/issues/1).
+
+---
+
 # Source artwork repair workbench — 2026-11-06
 
 The unfinished part of ANGEL CLASH is **the underlying 4×12 character artwork** (incorrect AKARI idle iris, silhouettes/head sizes, hair transparency/edge fringes). Screen rendering, high-DPI cut-ins and aspect-preserving Canvas2D code alone cannot repaint broken source pixels.
