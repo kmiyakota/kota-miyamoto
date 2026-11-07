@@ -28,3 +28,34 @@ jobs:
         run: node angel-clash/tests/asset-integrity.test.cjs
       - name: Verify 4-character combat, quick special input, and F9 comparison
         run: node angel-clash/tests/runtime-smoke.test.cjs
+
+  production-smoke:
+    name: Verify Cloudflare Pages published ANGEL CLASH v9.12
+    if: github.event_name == 'push' && github.ref == 'refs/heads/queue'
+    needs: source-and-runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - name: Confirm Cloudflare serves the queue publication marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://suki-character-kobo.pages.dev/angel-clash/deployment.json'
+          marker='ANGEL-CLASH-V9.12-PUBLISH-20261107'
+          for attempt in $(seq 1 24); do
+            if curl -fLSsS --max-time 20 --header 'Cache-Control: no-cache' \
+              "${url}?verification=${GITHUB_RUN_ID}-${attempt}" \
+              -o /tmp/angel-clash-deployment.json 2>/tmp/angel-clash-curl.log \
+              && grep -Fq "$marker" /tmp/angel-clash-deployment.json; then
+              echo 'PASS: Cloudflare Pages serves ANGEL CLASH v9.12 publication marker.'
+              cat /tmp/angel-clash-deployment.json
+              exit 0
+            fi
+            echo "Attempt ${attempt}/24: deployment marker not yet visible."
+            if [ "$attempt" -lt 24 ]; then sleep 10; fi
+          done
+          echo 'ERROR: Cloudflare Pages did not return expected deployment marker.'
+          cat /tmp/angel-clash-curl.log || true
+          exit 1
