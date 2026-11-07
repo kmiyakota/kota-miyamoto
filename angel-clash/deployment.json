@@ -1,0 +1,19 @@
+{
+  "app": "ANGEL CLASH",
+  "version": "9.12",
+  "deploymentMarker": "ANGEL-CLASH-V9.12-PUBLISH-20261107",
+  "sourceBranch": "queue",
+  "sourceRevision": "9c69d7e66467771d865b1f7121751ed55264391f",
+  "updatedAt": "2026-11-07",
+  "highDefinitionCombat": {
+    "characters": [
+      "ito",
+      "akari",
+      "tamaki",
+      "nox"
+    ],
+    "atlas": "1600x1200",
+    "posesPerCharacter": 12
+  },
+  "status": "Static publication marker; actual Cloudflare availability requires HTTP check."
+}
