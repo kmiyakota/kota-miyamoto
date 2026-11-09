@@ -119,7 +119,10 @@ function runMock(withHD){
   assert.ok(stats.correctedAkariDrawCalls>0,'Corrected AKARI master never rendered');
   assert.equal(debug.akariIdleEyeRepair().bakedIntoSource,true);
   assert.equal(debug.akariIdleEyeRepair().loaded,true);
-  assert.equal(debug.akariIdleEyeRepair().pixelChanges,6);
+  assert.equal(debug.akariIdleEyeRepair().pixelChanges,13);
+  assert.deepEqual(debug.akariIdleEyeRepair().eyeRegion,{x:207,y:74,width:5,height:4});
+  assert.ok(debug.akariIdleEyeRepair().atlas.includes('c3c31e_16cac0b756874f78863a1b0cf7145efe'));
+  assert.equal(debug.akariIdleEyeRepair().otherPoseChanges,0);
   assert.equal(debug.akariIdleEyeRepair().alphaChanges,0);
  }else assert.equal(stats.correctedAkariDrawCalls,0);
  return stats;
@@ -127,4 +130,4 @@ function runMock(withHD){
 const fallback=runMock(false),hd=runMock(true);
 console.log('Fallback:',JSON.stringify(fallback));
 console.log('Mock-HD:',JSON.stringify(hd));
-console.log('PASS: 24 matchups, 192 requested moves, 16 keyboard macro checks, two F9 toggles, baked AKARI iris master, zero sprite rectangle/aspect violations');
+console.log('PASS: 24 matchups, 192 requested moves, 16 keyboard macro checks, two F9 toggles, 13-pixel AKARI iris master, zero sprite rectangle/aspect violations');
