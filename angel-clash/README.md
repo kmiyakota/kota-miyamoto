@@ -1,3 +1,17 @@
+# ANGEL CLASH v9.14 — AKARI natural-face combat sprites (2026-11-09)
+
+**Implemented on GitHub `queue`:** The new 12-pose AKARI action sheet based on the user's supplied natural-face portrait has replaced the previous eye pixel-retouch master in the actual combat renderer. The 1448×1086 4×3 generated composition was converted into a **genuinely transparent 1600×1200 lossless WebP atlas** with twelve **400×400 cells**, fixed source scale and origin in every pose, and matte decontamination to remove the image's false checkerboard background. The game chooses it for AKARI in matches, including idle, walking, crouching, jumping, punches, kicks, specials, hurt, and victory.
+
+- Current AKARI combat atlas: https://static.wixstatic.com/media/c3c31e_465e674d2bf2438ba00e9073377bfdb9~mv2.webp (READY, confirmed 1600×1200 RGBA WebP, 522,876 bytes)
+- Former v9.13 retouched atlas retained for rollback, **no longer used in the game**: https://static.wixstatic.com/media/c3c31e_16cac0b756874f78863a1b0cf7145efe~mv2.png
+- This image is extracted from a 12-pose composite, not a new individually redrawn 4K per-pose set: the original art detail is limited by each original 362×362 source cell.
+- No edits to ITO/TAMAKI/NOX character combat images, hitboxes, physics or stage-related outfits.
+- AKARI skips the older in-browser alpha/color fixer because the asset was already matted once offline; this avoids white/dirty edges being reprocessed. Diagnostic: `AngelClashDebug.akariBattleArtwork()`.
+- QA: tested transparent atlas cells for nonzero character alpha, zero opaque borders and no pose clipped at the cell edge. Mock Canvas2D smoke exercised 12 matchups and 120 move requests with 69 draw calls using AKARI's new combat asset, **zero nonfinite or out-of-range sprite draws**.
+- Production Cloudflare Pages deployment / iPhone Safari appearance have not been independently verified; `deployment.json` marker is updated to v9.14.
+
+---
+
 # ANGEL CLASH v9.13 — AKARI white-iris correction (2026-11-09)
 
 **Completed in GitHub `queue`:** Only AKARI's first combat idle pose has been updated. The previous six-pixel color patch was not sufficiently visible at battle scale, so the eye/iris contrast was adjusted in a **13-pixel local RGB region** (tile x=207–211, y=74–77), without resizing or modifying the character. The other 11 poses, all alpha pixels, and the ITO/TAMAKI/NOX atlases are unchanged.
