@@ -1,10 +1,10 @@
 {
   "app": "ANGEL CLASH",
-  "version": "9.12",
-  "deploymentMarker": "ANGEL-CLASH-V9.12-PUBLISH-20261107",
+  "version": "9.13",
+  "deploymentMarker": "ANGEL-CLASH-V9.13-AKARI-IRIS-20261109",
   "sourceBranch": "queue",
   "sourceRevision": "9c69d7e66467771d865b1f7121751ed55264391f",
-  "updatedAt": "2026-11-07",
+  "updatedAt": "2026-11-09",
   "highDefinitionCombat": {
     "characters": [
       "ito",
@@ -15,5 +15,13 @@
     "atlas": "1600x1200",
     "posesPerCharacter": 12
   },
-  "status": "Static publication marker; actual Cloudflare availability requires HTTP check."
+  "status": "Static queue publish marker; Cloudflare HTTP verification still required.",
+  "fix": {
+    "character": "akari",
+    "pose": 0,
+    "changedRgbPixels": 13,
+    "alphaChanges": 0,
+    "otherPoseChanges": 0,
+    "asset": "c3c31e_16cac0b756874f78863a1b0cf7145efe~mv2.png"
+  }
 }
