@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.15 — Original BGM and Voices</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.16 — BGM Only, Voices Awaiting Recording</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -581,39 +581,30 @@ function playMusic(which){
   a.play().then(()=>{if(trackName===name)liveTrack=a;else a.pause()}).catch(()=>a.pause());
  }catch{}
 }
-// System Japanese TTS is the initial character-voice layer. It requires no
-// voice-file downloads and deliberately does not imitate any real actor.
-const VOICE_SETTINGS=Object.freeze({
- ito:{rate:1.09,pitch:1.16},
- akari:{rate:.93,pitch:.94},
- tamaki:{rate:1.04,pitch:1.06},
- nox:{rate:.85,pitch:.76}
-});
+// v9.16: System speech synthesis is deliberately disabled. The creator will
+// supply recorded actor-style character lines; never fall back to robotic TTS.
+// Populate VOICE_CLIPS with approved OGG/MP3 URLs to activate voice playback.
+const VOICE_CLIPS=Object.freeze({});
+let liveVoice=null;
 function voiceLine(id,kind,important=false){
- if(settings.voice<=0)return false;
- const text=kind==='intro'?META[id]?.intro:kind==='win'?META[id]?.win:
-  kind==='super'?SUPER_LINES[id]:SPECIAL_SHOUTS[id]?.[kind];
- if(!text)return false;
- const synthVoice=window.speechSynthesis,Utterance=window.SpeechSynthesisUtterance;
- if(!synthVoice||!Utterance)return false;
+ const src=VOICE_CLIPS[id]?.[kind];
+ if(!src||settings.voice<=0)return false;
  const now=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
- if(!important&&(now-voiceLastAt<1500||synthVoice.speaking))return false;
+ if(!important&&(now-voiceLastAt<1250||liveVoice&&!liveVoice.paused))return false;
+ if(important)stopVoice();
  try{
-  if(important)synthVoice.cancel();
-  const utter=new Utterance(text),p=VOICE_SETTINGS[id]||VOICE_SETTINGS.ito;
-  utter.lang='ja-JP';utter.rate=p.rate;utter.pitch=p.pitch;utter.volume=settings.voice/100;
-  const choices=synthVoice.getVoices?.()||[];
-  const japanese=choices.find(v=>String(v.lang).toLowerCase()==='ja-jp')||choices.find(v=>String(v.lang).toLowerCase().startsWith('ja'));
-  if(japanese)utter.voice=japanese;
-  utter.onstart=()=>{voiceSpeaking=true;musicLevel()};
-  const restore=()=>{voiceSpeaking=false;musicLevel()};
-  utter.onend=restore;utter.onerror=restore;
-  synthVoice.speak(utter);voiceLastAt=now;voiceLastLine=id+':'+kind;
+  const clip=new Audio(src);clip.preload='none';clip.volume=settings.voice/100;
+  clip.onplay=()=>{voiceSpeaking=true;musicLevel()};
+  const finish=()=>{if(liveVoice===clip){liveVoice=null;voiceSpeaking=false;musicLevel()}};
+  clip.onended=finish;clip.onerror=finish;
+  const started=clip.play();
+  started?.catch?.(finish);
+  liveVoice=clip;voiceLastAt=now;voiceLastLine=id+':'+kind;
   return true;
- }catch(err){console.warn('Character voice unavailable:',err);return false}
+ }catch(err){console.warn('Recorded voice unavailable',id,kind,err);return false}
 }
 function stopVoice(){
- try{window.speechSynthesis?.cancel()}catch{}
+ if(liveVoice){try{liveVoice.pause();liveVoice.currentTime=0}catch{}liveVoice=null}
  voiceSpeaking=false;musicLevel();
 }
 
@@ -622,7 +613,7 @@ window.addEventListener('keydown',e=>{const code=e.code;if(['Space','ArrowUp','A
  if(!keys.has(code))newKeys.add(code);keys.add(code);audioReady();
  if(code==='Escape'){if(scene==='fight')paused=!paused;else if(scene==='select'||scene==='help'||scene==='options'||scene==='credits'||scene==='story'||scene==='result'||scene==='ending')setScene('menu');else if(scene==='menu')setScene('title')}
  if(code==='KeyM'){settings.music=settings.music?0:DEFAULT.music;saveSettings();musicLevel();if(settings.music>0)musicForScene()}
- if(code==='KeyV'){settings.voice=settings.voice?0:DEFAULT.voice;saveSettings();if(!settings.voice)stopVoice();}
+ if(code==='KeyV'&&Object.keys(VOICE_CLIPS).length){settings.voice=settings.voice?0:DEFAULT.voice;saveSettings();if(!settings.voice)stopVoice();}
 });
 window.addEventListener('keyup',e=>keys.delete(e.code));
 window.addEventListener('blur',()=>{keys.clear();newKeys.clear();Object.keys(virtual).forEach(k=>virtual[k]=false);touchTapped.clear();if(scene==='fight')paused=true});
@@ -741,7 +732,7 @@ function runResultAction(){
  if(resultActionIndex===2){pick=IDS.indexOf(fighters[0].id);pickRival=IDS.indexOf(fighters[1].id);setScene('select');return;}
  setScene('menu');
 }
-function optionValue(index){switch(index){case 0:return ['EASY','NORMAL','HARD'][settings.difficulty];case 1:return ['1','2','3'][settings.rounds-1];case 2:return settings.time===99?'99':settings.time===60?'60':'∞';case 3:return settings.music+'%';case 4:return settings.sfx+'%';case 5:return ['IDLE','GUARD','CPU'][settings.trainingDummy];case 6:return settings.showInput?'ON':'OFF';case 7:return settings.touchMode===0?'ASSIST':'CLASSIC';case 8:return settings.reduceShake?'OFF':'ON';case 9:return settings.reduceFlash?'OFF':'ON';case 10:return minimalFX()?'CLEAN':'CLASSIC';case 11:return settings.voice+'%';default:return ''}}
+function optionValue(index){switch(index){case 0:return ['EASY','NORMAL','HARD'][settings.difficulty];case 1:return ['1','2','3'][settings.rounds-1];case 2:return settings.time===99?'99':settings.time===60?'60':'∞';case 3:return settings.music+'%';case 4:return settings.sfx+'%';case 5:return ['IDLE','GUARD','CPU'][settings.trainingDummy];case 6:return settings.showInput?'ON':'OFF';case 7:return settings.touchMode===0?'ASSIST':'CLASSIC';case 8:return settings.reduceShake?'OFF':'ON';case 9:return settings.reduceFlash?'OFF':'ON';case 10:return minimalFX()?'CLEAN':'CLASSIC';case 11:return Object.keys(VOICE_CLIPS).length?settings.voice+'%':'WAITING FOR AUDIO';default:return ''}}
 function changeOption(n){const i=selectedOption;if(i===0)settings.difficulty=(settings.difficulty+3+n)%3;
  if(i===1)settings.rounds=1+(settings.rounds-1+3+n)%3;
  if(i===2)settings.time=([99,60,9999])[([99,60,9999].indexOf(settings.time)+3+n)%3];
@@ -753,7 +744,7 @@ function changeOption(n){const i=selectedOption;if(i===0)settings.difficulty=(se
  if(i===8)settings.reduceShake=!settings.reduceShake;
  if(i===9)settings.reduceFlash=!settings.reduceFlash;
  if(i===10)settings.fxMode=minimalFX()?'classic':'clean';
- if(i===11){settings.voice=clamp(settings.voice+n*10,0,100);if(!settings.voice)stopVoice();else voiceLine(IDS[pick]||'ito','intro',true)};
+ if(i===11&&Object.keys(VOICE_CLIPS).length){settings.voice=clamp(settings.voice+n*10,0,100);if(!settings.voice)stopVoice();else voiceLine(IDS[pick]||'ito','intro',true)};
  sound('select');saveSettings();}
 function moveFor(f,name,button='mp'){
  const base=MOVE[name];if(!base)return null;
@@ -1595,7 +1586,7 @@ function drawFight(){g.save();if(shake>0)g.translate(rand(-shake,shake),rand(-sh
 }
 function drawAtmosphere(tint=.72){drawStage();rect(0,0,W,H,`rgba(15,5,35,${tint})`)}
 function titleScreen(){
- drawAtmosphere(.46);label('v9.15',1219,33,16,'#ecd8fa','right','Arial');
+ drawAtmosphere(.46);label('v9.16',1219,33,16,'#ecd8fa','right','Arial');
  // Four approved detailed character portraits, with native-size source images.
  // Dramatic framed group art, cropped rather than stretched.
  const bg=g.createLinearGradient(0,172,0,630);bg.addColorStop(0,'#35144d');bg.addColorStop(1,'#120826');
@@ -1686,12 +1677,12 @@ function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6')
  label('◀   '+optionValue(i)+'   ▶',977,y,21,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v9.15','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v9.16','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
  'BGM — original WebAudio soundtrack (9 themes)',
- 'CHARACTER VOICES — Japanese system TTS (preview)',
+ 'CHARACTER VOICES — awaiting approved recordings',
  '',
  'Original game • No Street Fighter assets used',
  'Press ENTER / tap to return'];lines.forEach((t,i)=>label(t,640,234+i*36,i===0?38:i===1?24:18,i<2?'#ffe5b6':'#fff0f8','center','Arial'));}
@@ -1708,7 +1699,7 @@ function loop(now){if(last===0)last=now;const dt=clamp(now-last,0,90);last=now;a
 requestAnimationFrame(loop);
 musicForScene();
 window.AngelClashDebug={
- audioStatus:()=>({context:audio?.state||'locked',track:trackName,trackReady:!!MUSIC_THEMES[trackName],musicVolume:settings.music,sfxVolume:settings.sfx,voiceVolume:settings.voice,voiceSupported:!!(window.speechSynthesis&&window.SpeechSynthesisUtterance),lastVoice:voiceLastLine,notesScheduled}),
+ audioStatus:()=>({context:audio?.state||'locked',track:trackName,trackReady:!!MUSIC_THEMES[trackName],musicVolume:settings.music,sfxVolume:settings.sfx,voiceVolume:settings.voice,voiceSupported:Object.keys(VOICE_CLIPS).length>0,voiceSource:'recorded-files-only',lastVoice:voiceLastLine,notesScheduled}),
  previewVoice:(id='akari',kind='intro')=>voiceLine(id,kind,true),
  assetStatus:()=>({...assetStatus}),
  combatHD:()=>({enabled:useHDCombat,characters:Object.fromEntries(Object.keys(FIGHT9_URLS).map(id=>[id,!!images[id+'Fight9']?.naturalWidth&&images[id+'Fight9'].naturalWidth===1600]))}),
