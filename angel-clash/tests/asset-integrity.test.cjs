@@ -99,10 +99,10 @@ test('four original-source alpha drafts are audit-only and never loaded in the g
  assert.ok(!html.includes('c3c31e_b5039ed0b76a41578307da8f56fce88a'));
 });
 test('AKARI eye-only fix points to the verified 13-pixel master',()=>{
- assert.match(html,/c3c31e_16cac0b756874f78863a1b0cf7145efe~mv2\\.png/);
+ assert.match(html,/c3c31e_16cac0b756874f78863a1b0cf7145efe~mv2\.png/);
  assert.doesNotMatch(html,/c3c31e_c38bf273b0924fbe85f98e8aefc51bc6/);
  assert.match(html,/pixelChanges:13,alphaChanges:0,otherPoseChanges:0,pose:0/);
- assert.match(html,/eyeRegion:\\{x:207,y:74,width:5,height:4\\}/);
+ assert.match(html,/eyeRegion:\{x:207,y:74,width:5,height:4\}/);
 });
 test('12 pose indices and fixed-size atlases',()=>{
  assert.match(html,/for\(let k=0;k<12;k\+\+\)/);
