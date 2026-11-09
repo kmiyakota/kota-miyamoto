@@ -1,111 +1,117 @@
-/** ANGEL CLASH v9.15 original BGM / system-voice smoke test.
- * node angel-clash/tests/audio-smoke.test.cjs
- * WebAudio and speechSynthesis are simulated; no human listening QA.
+/** ANGEL CLASH v9.17 Suno soundtrack / recorded-voice-placeholder test.
+ * Run: node angel-clash/tests/audio-smoke.test.cjs
+ * Simulates AudioContext and HTMLAudioElement, not subjective listening or Safari.
  */
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),vm=require('node:vm');
-const source=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
-const script=source.match(/<script>([\s\S]*?)<\/script>/)?.[1];
-assert.ok(script,'Inline game script not found');new vm.Script(script);
-const events={},nodes={oscillator:0,buffer:0},utterances=[];
-let contextInstance=null,animationFrame=()=>{};
+const src=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const js=src.match(/<script>([\s\S]*?)<\/script>/)?.[1];assert.ok(js);new vm.Script(js);
+const TITLE='https://music.wixstatic.com/mp3/c3c31e_0bd90bedb4e540bb9e943eb4a3e241be.mp3';
+const BATTLE='https://music.wixstatic.com/mp3/c3c31e_ffb5c8da41fd4b36a342916385be0846.mp3';
+const media=[],events={},voiceUtterances=[],stats={oscillators:0,noiseSources:0};
+let ac=null,frame=()=>{};
 const param=()=>({value:1,setValueAtTime(){},exponentialRampToValueAtTime(){},setTargetAtTime(){}});
-function audioNode(){
- const node={connect(){return node},start(){},stop(){},frequency:param(),gain:param(),detune:{value:0},buffer:null};
- return node;
-}
+function node(){return {connect(){return this},start(){},stop(){},gain:param(),frequency:param(),detune:{value:0}}}
 class FakeAudioContext{
- constructor(){contextInstance=this;this.state='running';this.currentTime=5;this.sampleRate=48000;this.destination={};}
- createGain(){return audioNode()}
- createOscillator(){nodes.oscillator++;return audioNode()}
- createBufferSource(){nodes.buffer++;return audioNode()}
- createBiquadFilter(){return audioNode()}
- createBuffer(ch,length){return {getChannelData(){return new Float32Array(length)}}}
+ constructor(){ac=this;this.state='running';this.currentTime=1;this.sampleRate=44100;this.destination={}}
+ createOscillator(){stats.oscillators++;return node()}
+ createGain(){return node()}
+ createBiquadFilter(){return node()}
+ createBufferSource(){stats.noiseSources++;return node()}
+ createBuffer(c,size){return {getChannelData:()=>new Float32Array(size)}}
  resume(){this.state='running';return Promise.resolve()}
  suspend(){this.state='suspended';return Promise.resolve()}
 }
-const speechSynthesis={
- speaking:false,
- getVoices(){return [{name:'ja-jp local',lang:'ja-JP'}]},
- cancel(){this.speaking=false},
- speak(u){utterances.push({text:u.text,lang:u.lang,rate:u.rate,pitch:u.pitch});
-   this.speaking=true;u.onstart?.();u.onend?.();this.speaking=false;}
-};
-class Utterance{constructor(text){this.text=text}}
-const canvasCtx=new Proxy({measureText(text){return {width:String(text).length*12}}},
- {get(target,key){if(key in target)return target[key];
-  if(key==='createLinearGradient'||key==='createRadialGradient'||key==='createPattern')
-   return()=>({addColorStop(){}});
-  if(typeof key==='symbol')return undefined;
-  return ()=>{};},set(target,key,value){target[key]=value;return true;}});
-function element(){
- return {style:{},textContent:'',dataset:{},width:1280,height:720,
-  classList:{add(){},remove(){},toggle(){},contains(){return false}},
-  addEventListener(){},getContext(){return canvasCtx},getBoundingClientRect(){return {width:1280,height:720}},
-  querySelectorAll(){return []},closest(){return true},setPointerCapture(){}};
+class FakeAudio{
+ constructor(url){
+  this.src=url;this.volume=1;this.paused=true;this.currentTime=0;this.loop=false;
+  this.preload='none';this.listeners={};this.playCalls=0;this.pauseCalls=0;media.push(this);
+ }
+ addEventListener(type,fn){this.listeners[type]=fn}
+ play(){this.paused=false;this.playCalls++;this.listeners.playing?.();return Promise.resolve()}
+ pause(){this.paused=true;this.pauseCalls++}
 }
+const grad={addColorStop(){}};
+const canvas=new Proxy({measureText:s=>({width:String(s).length*11}),getImageData:()=>({data:new Uint8ClampedArray(400*400*4)})},{
+ get(o,k){if(k in o)return o[k];if(['createLinearGradient','createRadialGradient','createPattern'].includes(k))return()=>grad;
+  if(typeof k==='symbol')return undefined;return()=>{}},set(o,k,v){o[k]=v;return true}
+});
+function el(){return {style:{},classList:{add(){},remove(){},toggle(){},contains(){return false}},
+ addEventListener(){},getContext:()=>canvas,getBoundingClientRect:()=>({left:0,top:0,width:1280,height:720}),
+ querySelectorAll:()=>[],closest:()=>true,append(){},textContent:'',width:1280,height:720,dataset:{}}}
 const elements={},document={
- body:element(),documentElement:element(),hidden:false,
- createElement(){return element()},querySelectorAll(){return []},
- getElementById(id){return elements[id]||(elements[id]=element())},
- addEventListener(name,fn){events['document:'+name]=fn;}
+ body:el(),documentElement:el(),hidden:false,
+ getElementById(k){return elements[k]||(elements[k]=el())},
+ createElement(){return el()},querySelectorAll(){return []},
+ addEventListener(k,fn){events['document:'+k]=fn}
 };
+const speechSynthesis={speaking:false,cancel(){},getVoices:()=>[{lang:'ja-JP'}],speak(u){voiceUtterances.push(u.text)}};
 const window={
- AudioContext:FakeAudioContext,SpeechSynthesisUtterance:Utterance,speechSynthesis,
- devicePixelRatio:1,ANGEL_CLASH_STANDALONE:true,
- matchMedia(){return {matches:false}},addEventListener(name,fn){events['window:'+name]=fn}
+ AudioContext:FakeAudioContext,speechSynthesis,
+ SpeechSynthesisUtterance:class{constructor(text){this.text=text}},
+ devicePixelRatio:2,matchMedia(){return {matches:false}},
+ addEventListener(k,fn){events['window:'+k]=fn}
 };
 class Image{
  constructor(){this.naturalWidth=0;this.naturalHeight=0;this.listeners={}}
- addEventListener(name,fn){this.listeners[name]=fn}
- set src(value){this.url=value;
-  if(value.includes('~mv2.')){this.naturalWidth=1600;this.naturalHeight=1200}
-  else {this.naturalWidth=1280;this.naturalHeight=720}
+ addEventListener(k,fn){this.listeners[k]=fn}
+ set src(v){this.url=v;this.naturalWidth=v.includes('~mv2.')?1600:1280;
+  this.naturalHeight=v.includes('~mv2.')?1200:720;
   this.onload?.();this.listeners.load?.()}
  get src(){return this.url}
 }
-class Audio{constructor(){throw Error('No MP3 request should occur without a configured track')}}
-const storage={getItem(){return null},setItem(){}};
+const storage={getItem:()=>null,setItem(){}};
 new Function('document','window','navigator','Image','Audio','requestAnimationFrame',
- 'setTimeout','localStorage','ResizeObserver','performance','structuredClone',script)(
- document,window,{getGamepads(){return []}},Image,Audio,fn=>{animationFrame=fn},
- ()=>{},storage,undefined,{now(){return contextInstance?contextInstance.currentTime*1000:0}},
- value=>JSON.parse(JSON.stringify(value))
-);
-const debug=window.AngelClashDebug;
-assert.ok(debug,'Debug hooks missing');
-assert.equal(debug.audioStatus().context,'locked');
-assert.equal(debug.audioStatus().track,'title');
-assert.equal(debug.audioStatus().voiceVolume,70);
-function press(code){
- events['window:keydown']({code,preventDefault(){}});
- events['window:keyup']({code,preventDefault(){}});
+ 'setTimeout','localStorage','ResizeObserver','performance','structuredClone',js)(
+ document,window,{getGamepads:()=>[]},Image,FakeAudio,fn=>{frame=fn},()=>{},storage,undefined,
+ {now:()=>ac?ac.currentTime*1000:0},value=>JSON.parse(JSON.stringify(value)));
+const dbg=window.AngelClashDebug;
+assert.ok(dbg);
+function press(code){events['window:keydown']({code,preventDefault(){}});events['window:keyup']({code,preventDefault(){}})}
+assert.equal(dbg.audioStatus().track,'title');
+assert.equal(dbg.audioStatus().externalUrl,TITLE);
+assert.equal(dbg.audioStatus().gestureUnlocked,false);
+assert.equal(media.length,0,'Autoplay should not start before user gesture');
+press('Enter');
+assert.equal(dbg.audioStatus().gestureUnlocked,true);
+assert.equal(dbg.audioStatus().externalActive,true);
+assert.equal(media.length,1);
+assert.equal(media[0].src,TITLE);
+assert.equal(media[0].loop,true);
+assert.equal(media[0].playCalls,1);
+assert.equal(media[0].paused,false);
+assert.equal(media[0].volume,.75*.53);
+dbg.start('akari','ito','training');
+assert.equal(media[0].paused,true,'Title must stop on entering battle');
+assert.equal(dbg.audioStatus().externalUrl,BATTLE);
+assert.equal(dbg.audioStatus().externalActive,true);
+assert.equal(media.length,2);
+assert.equal(media[1].src,BATTLE);
+assert.equal(media[1].loop,true);
+const fightFiles=['sakura','sea','city','crystal','eclipse'];
+for(let stage=0;stage<5;stage++){
+ dbg.wardrobeStage(stage);
+ assert.equal(dbg.audioStatus().track,fightFiles[stage]);
+ assert.equal(dbg.audioStatus().externalUrl,BATTLE);
+ assert.equal(dbg.audioStatus().externalActive,true);
+ assert.equal(media.at(-1).src,BATTLE);
 }
-press('Enter'); // User gesture unlocks audio on iOS / desktop.
-for(let i=0;i<80;i++){contextInstance.currentTime+=.05;animationFrame(i*17);}
-assert.equal(debug.audioStatus().context,'running');
-assert.ok(debug.audioStatus().notesScheduled>40,'Procedural BGM scheduled no notes');
-assert.ok(nodes.oscillator>20,'WebAudio synthesizer was not used');
-assert.equal(debug.audioStatus().voiceSupported,true);
-debug.start('ito','nox','training');
-assert.equal(debug.audioStatus().track,'eclipse');
-assert.ok(utterances.some(u=>u.text.includes('日蝕の門')),'NOX introduction not spoken');
-debug.start('akari','ito','training');
-debug.wardrobeStage(0);assert.equal(debug.audioStatus().track,'sakura');
-debug.wardrobeStage(1);assert.equal(debug.audioStatus().track,'sea');
-debug.wardrobeStage(2);assert.equal(debug.audioStatus().track,'city');
-debug.wardrobeStage(3);assert.equal(debug.audioStatus().track,'crystal');
-debug.wardrobeStage(4);assert.equal(debug.audioStatus().track,'eclipse');
-debug.setMeter(0,100);debug.move(0,'super');
-assert.ok(utterances.some(u=>u.text.includes('スピード')),'AKARI super voice not spoken');
-const count=utterances.length;
-press('KeyV');assert.equal(debug.audioStatus().voiceVolume,0);
-assert.equal(debug.previewVoice('tamaki','win'),false);
-assert.equal(utterances.length,count,'Muted voice was still spoken');
-press('KeyV');assert.equal(debug.audioStatus().voiceVolume,70);
-assert.equal(debug.previewVoice('tamaki','win'),true);
-assert.ok(utterances.at(-1).text.includes('なのだ'),'TAMAKI voice is not canonical');
-press('KeyM');assert.equal(debug.audioStatus().musicVolume,0);
-press('KeyM');assert.equal(debug.audioStatus().musicVolume,75);
-console.log('PASS: 9 original themes configured, WebAudio unlocked after gesture, title music scheduled, 5 stage themes, NOX/AKARI/TAMAKI voices, music/voice mute and restore');
-console.log(JSON.stringify({oscillators:nodes.oscillator,noiseSources:nodes.buffer,voices:utterances.length,notesScheduled:debug.audioStatus().notesScheduled}));
+assert.equal(media.length,6,'Every new stage should restart the battle track');
+assert.equal(dbg.audioStatus().voiceSupported,false,'Synthetic voice fallback must stay disabled');
+assert.equal(dbg.previewVoice('akari','super'),false);
+assert.equal(voiceUtterances.length,0);
+press('KeyM');
+assert.equal(dbg.audioStatus().musicVolume,0);
+assert.equal(media.at(-1).paused,true,'Music mute should pause the MP3');
+press('KeyM');
+assert.equal(dbg.audioStatus().musicVolume,75);
+assert.equal(dbg.audioStatus().externalActive,true,'Unmute must restart MP3');
+assert.equal(media.at(-1).src,BATTLE);
+dbg.start('ito','nox','training');
+assert.equal(dbg.audioStatus().track,'eclipse');
+assert.equal(media.at(-1).src,BATTLE);
+// No voice file loaded by default.
+assert.equal(dbg.audioStatus().voiceSource,'recorded-files-only');
+assert.equal(voiceUtterances.length,0);
+console.log('PASS: two Suno MP3s, title autoplay guard, user gesture unlock, five battle stage switches, loop, mute/unmute, TTS disabled');
+console.log(JSON.stringify({audioElements:media.length,latestTrack:dbg.audioStatus().track,externalState:dbg.audioStatus().externalState,voiceUtterances:voiceUtterances.length}));
