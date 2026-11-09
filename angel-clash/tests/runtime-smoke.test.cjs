@@ -13,7 +13,7 @@ new vm.Script(js);
 const IDS=['ito','akari','tamaki','nox'];
 const MOVES=['lp','hp','lk','hk','pulse','riser','rush','super'];
 function runMock(withHD){
- const stats={matchups:0,moves:0,quickKeys:0,qaToggles:0,drawCalls:0,atlasDrawCalls:0,correctedAkariDrawCalls:0,invalid:0};
+ const stats={matchups:0,moves:0,quickKeys:0,qaToggles:0,drawCalls:0,atlasDrawCalls:0,naturalAkariDrawCalls:0,invalid:0};
  const gradient={addColorStop(){}};
  const context=new Proxy({
   globalAlpha:1,measureText(t){return {width:String(t).length*12}},
@@ -26,7 +26,7 @@ function runMock(withHD){
    return (...a)=>{
     if(k!=='drawImage')return;
     stats.drawCalls++;
-    if(a[0]?.url?.includes('c3c31e_c38bf273b0924fbe85f98e8aefc51bc6'))stats.correctedAkariDrawCalls++;
+    if(a[0]?.url?.includes('c3c31e_465e674d2bf2438ba00e9073377bfdb9'))stats.naturalAkariDrawCalls++;
     if(a.slice(1).some(x=>typeof x==='number'&&!Number.isFinite(x)))stats.invalid++;
     // 4×3 current sprite atlases: source frames must be 400px square.
     if(a.length===9&&a[3]===400&&a[4]===400){
@@ -64,7 +64,7 @@ function runMock(withHD){
    this.url=v;
    // Pretend only the known optional source files are decoded.
    if(withHD&&v.includes('~mv2.webp')){this.naturalWidth=1600;this.naturalHeight=1200;}
-   if(withHD&&v.includes('c3c31e_c38bf273b0924fbe85f98e8aefc51bc6')){this.naturalWidth=1600;this.naturalHeight=1200;}
+   if(withHD&&v.includes('c3c31e_465e674d2bf2438ba00e9073377bfdb9')){this.naturalWidth=1600;this.naturalHeight=1200;}
    else if(withHD&&v.includes('~mv2.png')){this.naturalWidth=1400;this.naturalHeight=1800;}
   }
   get src(){return this.url}
@@ -116,18 +116,18 @@ function runMock(withHD){
  assert.equal(stats.moves,96);
  if(withHD){
   assert.ok(stats.atlasDrawCalls>0,'No HD atlas frames drawn');
-  assert.ok(stats.correctedAkariDrawCalls>0,'Corrected AKARI master never rendered');
-  assert.equal(debug.akariIdleEyeRepair().bakedIntoSource,true);
-  assert.equal(debug.akariIdleEyeRepair().loaded,true);
-  assert.equal(debug.akariIdleEyeRepair().pixelChanges,13);
-  assert.deepEqual(debug.akariIdleEyeRepair().eyeRegion,{x:207,y:74,width:5,height:4});
-  assert.ok(debug.akariIdleEyeRepair().atlas.includes('c3c31e_16cac0b756874f78863a1b0cf7145efe'));
-  assert.equal(debug.akariIdleEyeRepair().otherPoseChanges,0);
-  assert.equal(debug.akariIdleEyeRepair().alphaChanges,0);
- }else assert.equal(stats.correctedAkariDrawCalls,0);
+  assert.ok(stats.naturalAkariDrawCalls>0,'New natural-face AKARI atlas never rendered');
+  assert.equal(debug.akariBattleArtwork().loaded,true);
+  assert.equal(debug.akariBattleArtwork().poseCount,12);
+  assert.equal(debug.akariBattleArtwork().frameWidth,400);
+  assert.equal(debug.akariBattleArtwork().frameHeight,400);
+  assert.equal(debug.akariBattleArtwork().postprocess,false);
+  assert.ok(debug.akariBattleArtwork().atlas.includes('c3c31e_465e674d2bf2438ba00e9073377bfdb9'));
+  assert.equal(debug.akariIdleEyeRepair().replacedByNaturalFaceArtwork,true);
+ }else assert.equal(stats.naturalAkariDrawCalls,0);
  return stats;
 }
 const fallback=runMock(false),hd=runMock(true);
 console.log('Fallback:',JSON.stringify(fallback));
 console.log('Mock-HD:',JSON.stringify(hd));
-console.log('PASS: 24 matchups, 192 requested moves, 16 keyboard macro checks, two F9 toggles, 13-pixel AKARI iris master, zero sprite rectangle/aspect violations');
+console.log('PASS: 24 matchups, 192 requested moves, 16 keyboard macro checks, two F9 toggles, new natural-face AKARI 12-pose atlas, zero sprite rectangle/aspect violations');
