@@ -1,9 +1,9 @@
 {
   "app": "ANGEL CLASH",
-  "version": "9.15",
-  "deploymentMarker": "ANGEL-CLASH-V9.15-AUDIO-20261109",
+  "version": "9.17",
+  "deploymentMarker": "ANGEL-CLASH-V9.17-SUNO-VOCAL-20261109",
   "sourceBranch": "queue",
-  "sourceRevision": "a7b024c5fb33f0457bc4371bf1260cfbe9f823af",
+  "sourceRevision": "175750634cd4a39ea78c32cf82def24df723261a",
   "updatedAt": "2026-11-09",
   "highDefinitionCombat": {
     "characters": [
@@ -15,7 +15,7 @@
     "atlas": "1600x1200",
     "posesPerCharacter": 12
   },
-  "status": "GitHub queue source version marker. HTTP confirmation of Cloudflare production release is still required.",
+  "status": "Both MP3 files confirmed READY on Wix CDN; game code updated on queue; Cloudflare HTML deployment not independently verified",
   "fix": {
     "character": "akari",
     "scope": "12 combat poses regenerated from natural-face reference",
@@ -29,20 +29,30 @@
     "previousPixelRetouchReplaced": true
   },
   "audio": {
-    "bgm": "original WebAudio (9 distinct themes, no required MP3)",
-    "voices": "Japanese system speech synthesis (prototype, not recorded actor voice)",
-    "voiceTriggers": [
-      "intro",
-      "special",
-      "super",
-      "victory"
-    ],
-    "settings": [
-      "music",
-      "sfx",
-      "voice"
-    ],
-    "audioStartsAfterGesture": true,
-    "automatedTests": "audio-smoke.test.cjs"
+    "title": {
+      "uploadedName": "FLY INTO THE LIGHT (1).mp3",
+      "url": "https://music.wixstatic.com/mp3/c3c31e_0bd90bedb4e540bb9e943eb4a3e241be.mp3",
+      "durationSeconds": 45.624,
+      "bytes": 1051678,
+      "ready": true
+    },
+    "battle": {
+      "uploadedName": "FLY INTO THE LIGHT.mp3",
+      "url": "https://music.wixstatic.com/mp3/c3c31e_ffb5c8da41fd4b36a342916385be0846.mp3",
+      "durationSeconds": 48.792,
+      "bytes": 1119550,
+      "ready": true,
+      "stages": [
+        "sakura",
+        "sea",
+        "city",
+        "crystal",
+        "eclipse"
+      ]
+    },
+    "transitions": "HTMLAudioElement.play after user interaction; loop enabled; WebAudio fallback",
+    "otherScenes": "Existing synthesized select, victory and ending themes",
+    "voice": "System TTS disabled, no external recordings yet",
+    "automatedTests": "angel-clash/tests/audio-smoke.test.cjs"
   }
 }
