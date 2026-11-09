@@ -28,11 +28,11 @@ jobs:
         run: node angel-clash/tests/asset-integrity.test.cjs
       - name: Verify 4-character combat, quick special input, and F9 comparison
         run: node angel-clash/tests/runtime-smoke.test.cjs
-      - name: Verify original BGM and Japanese character voice routing
+      - name: Verify Suno title/battle tracks, stage switching and autoplay guard
         run: node angel-clash/tests/audio-smoke.test.cjs
 
   production-smoke:
-    name: Verify Cloudflare Pages published ANGEL CLASH v9.15
+    name: Verify Cloudflare Pages published ANGEL CLASH v9.17
     if: github.event_name == 'push' && github.ref == 'refs/heads/queue'
     needs: source-and-runtime
     runs-on: ubuntu-latest
@@ -45,13 +45,13 @@ jobs:
         run: |
           set -euo pipefail
           url='https://suki-character-kobo.pages.dev/angel-clash/deployment.json'
-          marker='ANGEL-CLASH-V9.15-AUDIO-20261109'
+          marker='ANGEL-CLASH-V9.17-SUNO-VOCAL-20261109'
           for attempt in $(seq 1 24); do
             if curl -fLSsS --max-time 20 --header 'Cache-Control: no-cache' \
               "${url}?verification=${GITHUB_RUN_ID}-${attempt}" \
               -o /tmp/angel-clash-deployment.json 2>/tmp/angel-clash-curl.log \
               && grep -Fq "$marker" /tmp/angel-clash-deployment.json; then
-              echo 'PASS: Cloudflare Pages serves ANGEL CLASH v9.15 publication marker.'
+              echo 'PASS: Cloudflare Pages serves ANGEL CLASH v9.17 publication marker.'
               cat /tmp/angel-clash-deployment.json
               exit 0
             fi
