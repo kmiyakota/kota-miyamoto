@@ -1,3 +1,17 @@
+# ANGEL CLASH v9.15 — BGM and character voices (2026-11-09)
+
+**Implemented on GitHub `queue` (public Cloudflare rollout not confirmed):** Nine distinct **original procedural WebAudio soundtracks** now cover title/menu, character select, each of the five battle stages, victory screen, and ending. They are synthesized locally with melody, chord progression, bass and light drum patterns, with no MP3 files required. All melodies are original to ANGEL CLASH.
+
+**Japanese character voice preview:** The built-in browser/system `speechSynthesis` is wired to ITO, AKARI, TAMAKI and NOX's **canonical existing dialogue**. It speaks character introduction, specials/supers and match-winning lines. Rate and pitch are varied per character, and available Japanese system voices are preferred. It is **not licensed voice-actor recording and not a fixed voice across devices**. If a device has no accessible TTS voice, it silently skips dialogue rather than blocking the game.
+
+**Audio controls:** The existing MUSIC VOLUME and EFFECT VOLUME remain. OPTIONS now includes VOICE VOLUME (default 70%). Keyboard M toggles music; V toggles dialogue. The first game keyboard/touch interaction unlocks WebAudio for browser autoplay rules. BGM continues under combat, switches when entering a new scene, and also follows the Training Mode stage button.
+
+**Performance and future assets:** Audio is scheduled in short WebAudio windows from the existing game loop, with no permanent external audio download or polling timer. Original BGM arrangement and Japanese system TTS are **interim production sound**; actual professionally recorded character voice MP3/OGG clips and produced stage songs can be substituted without changing game input or physics. See [AUDIO_DESIGN.md](AUDIO_DESIGN.md).
+
+**Tests:** Existing 16/16 source checks and 24 matchup regression scenarios still pass. New [audio smoke test](tests/audio-smoke.test.cjs) passes with simulated AudioContext and speechSynthesis, checking source note scheduling, stage music switching, NOX/AKARI/TAMAKI speech and M/V toggles. **Actual iPhone Safari sound playback and Cloudflare deployment are not yet independently verified.**
+
+---
+
 # ANGEL CLASH v9.14 — AKARI natural-face combat sprites (2026-11-09)
 
 **Implemented on GitHub `queue`:** The new 12-pose AKARI action sheet based on the user's supplied natural-face portrait has replaced the previous eye pixel-retouch master in the actual combat renderer. The 1448×1086 4×3 generated composition was converted into a **genuinely transparent 1600×1200 lossless WebP atlas** with twelve **400×400 cells**, fixed source scale and origin in every pose, and matte decontamination to remove the image's false checkerboard background. The game chooses it for AKARI in matches, including idle, walking, crouching, jumping, punches, kicks, specials, hurt, and victory.
