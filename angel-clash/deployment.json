@@ -1,7 +1,7 @@
 {
   "app": "ANGEL CLASH",
-  "version": "9.13",
-  "deploymentMarker": "ANGEL-CLASH-V9.13-AKARI-IRIS-20261109",
+  "version": "9.14",
+  "deploymentMarker": "ANGEL-CLASH-V9.14-AKARI-NATURAL-FACE-20261109",
   "sourceBranch": "queue",
   "sourceRevision": "9c69d7e66467771d865b1f7121751ed55264391f",
   "updatedAt": "2026-11-09",
@@ -15,13 +15,17 @@
     "atlas": "1600x1200",
     "posesPerCharacter": 12
   },
-  "status": "Static queue publish marker; Cloudflare HTTP verification still required.",
+  "status": "Source committed to queue; actual Cloudflare delivery requires HTTP check.",
   "fix": {
     "character": "akari",
-    "pose": 0,
-    "changedRgbPixels": 13,
-    "alphaChanges": 0,
-    "otherPoseChanges": 0,
-    "asset": "c3c31e_16cac0b756874f78863a1b0cf7145efe~mv2.png"
+    "scope": "12 combat poses regenerated from natural-face reference",
+    "asset": "c3c31e_465e674d2bf2438ba00e9073377bfdb9~mv2.webp",
+    "width": 1600,
+    "height": 1200,
+    "transparent": true,
+    "poseCount": 12,
+    "frameSize": 400,
+    "otherCharactersUnchanged": true,
+    "previousPixelRetouchReplaced": true
   }
 }
