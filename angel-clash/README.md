@@ -1,3 +1,18 @@
+# ANGEL CLASH v9.17 — Suno vocal title and battle BGM (2026-11-09)
+
+The creator provided two **original Suno-generated vocal MP3s** and requested the first for the title screen and the second during combat. Both audio files have been uploaded to the project's Wix Media Manager and verified **READY** as public AUDIO assets. The game now directly plays these MP3s on the configured scenes, preserving full musical vocals, with looping and independent music volume.
+
+| Scene | Uploaded source | Verified URL | Duration |
+|---|---|---|---|
+| Title / menu / options / help / credits | `FLY INTO THE LIGHT (1).mp3` | https://music.wixstatic.com/mp3/c3c31e_0bd90bedb4e540bb9e943eb4a3e241be.mp3 | 45.624s |
+| All five battle stages (including boss and training) | `FLY INTO THE LIGHT.mp3` | https://music.wixstatic.com/mp3/c3c31e_ffb5c8da41fd4b36a342916385be0846.mp3 | 48.792s |
+
+The first page load **does not autoplay**; a keypress/touch gesture unlocks audio, as required by Safari and Chrome. Scene transitions stop the previous track; game stage changes restart the battle song. MP3 playback is not mixed on top of the temporary WebAudio music. If an MP3 fails to load/play, the matching built-in original synth music acts as a fallback. Character-select, results, and ending retain their earlier generated music until separate tracks are provided. **Robotic system TTS remains disabled** pending the creator's own recorded voices.
+
+Source QA: `audio-smoke.test.cjs` tests two assigned URLs, no pre-gesture autoplay, looping, stage routing, music mute/unmute, and silence of unprovided voices. Real iPhone Safari audio and Cloudflare Pages production deployment remain unverified in the current session.
+
+---
+
 # ANGEL CLASH v9.15 — BGM and character voices (2026-11-09)
 
 **Implemented on GitHub `queue` (public Cloudflare rollout not confirmed):** Nine distinct **original procedural WebAudio soundtracks** now cover title/menu, character select, each of the five battle stages, victory screen, and ending. They are synthesized locally with melody, chord progression, bass and light drum patterns, with no MP3 files required. All melodies are original to ANGEL CLASH.
