@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.14 — AKARI Natural-Face Animation</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.15 — Original BGM and Voices</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -248,7 +248,7 @@ const MOVE={
  super:{startup:9,active:1,recovery:36,damage:245,reach:0,stun:35,block:25,knock:55,level:'mid',gain:0},
  throw:{startup:5,active:2,recovery:24,damage:114,reach:88,stun:28,block:0,knock:63,level:'throw',gain:10}
 };
-const DEFAULT={difficulty:1,rounds:2,time:99,music:75,sfx:75,touch:100,hitboxes:false,trainingDummy:0,showInput:false,touchMode:0,reduceFlash:false,reduceShake:false,crispStages:true,fxMode:'clean'};
+const DEFAULT={difficulty:1,rounds:2,time:99,music:75,sfx:75,voice:70,touch:100,hitboxes:false,trainingDummy:0,showInput:false,touchMode:0,reduceFlash:false,reduceShake:false,crispStages:true,fxMode:'clean'};
 let settings={...DEFAULT};
 try{settings={...settings,...JSON.parse(localStorage.getItem('angel-clash-settings')||'{}')}}catch{}
 function saveSettings(){try{localStorage.setItem('angel-clash-settings',JSON.stringify(settings))}catch{}}
@@ -451,28 +451,184 @@ for(let i=0;i<5;i++){loadImage('stage'+i,`assets/stages/stage${i}-hd.webp`);imag
 // this is preferable to displaying half a character on every other step.
 let atlasMeta={tileWidth:396,tileHeight:336,cols:12,groups:{idle:[1,1],walk:[1,1,1,1],crouch:[1,1,1],jump:[9,9,9],punch:[12,13],kick:[14,14],special:[16,17],hit:[20,20],victory:[1,1]}};
 // Atlas layout is bundled above; JSON metadata remains in source package for editors.
-const MUSIC_IDS={title:'title',menu:'title',select:'select',sakura:'stage-ito',sea:'stage-akari',city:'stage-tamaki',crystal:'stage-crystal',eclipse:'boss',result:'victory',ending:'ending'};
-let audio=null,liveTrack=null,trackName='',musicLoaded={},lastSound=0;
-function audioReady(){if(!audio){try{audio=new(window.AudioContext||window.webkitAudioContext)()}catch{}}
- if(audio?.state==='suspended')audio.resume();}
-function synth(freq,duration=0.12,form='triangle',vol=.045,detune=0){if(!audio||settings.sfx<=0)return;const o=audio.createOscillator(),v=audio.createGain();o.type=form;o.frequency.setValueAtTime(max(30,freq),audio.currentTime);o.detune.value=detune;o.frequency.exponentialRampToValueAtTime(max(27,freq*.63),audio.currentTime+duration);v.gain.setValueAtTime(max(.001,vol*settings.sfx/100),audio.currentTime);v.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(v).connect(audio.destination);o.start();o.stop(audio.currentTime+duration+.02)}
-function sound(type){if(type==='hit'){synth(125,.13,'sawtooth',.075);synth(500,.045)}else if(type==='block'){synth(330,.08,'square',.028)}else if(type==='fire'){synth(750,.22,'sawtooth',.045);synth(410,.14,'triangle',.04)}else if(type==='ko'){synth(280,.5,'sawtooth',.06);synth(95,.6,'triangle',.055)}else if(type==='jump')synth(510,.08);else if(type==='confirm'){synth(730,.10);synth(1040,.07)}else if(type==='select')synth(530,.055);else if(type==='win'){[392,494,587,784].forEach((f,i)=>setTimeout(()=>synth(f,.24,'triangle',.03),i*100))}}
-function playMusic(which){const name=MUSIC_IDS[which]||which;if(trackName===name)return;trackName=name;if(liveTrack){liveTrack.pause();liveTrack=null}
- if(settings.music<=0)return;if(window.ANGEL_CLASH_STANDALONE)return;const file=`assets/music/${name}.mp3`;
- // Optional Suno tracks are loaded automatically when included in the assets/music folder.
- const a=new Audio(file);a.loop=true;a.volume=settings.music/100*.53;a.preload='none';a.play().then(()=>{if(trackName===name)liveTrack=a;else a.pause()}).catch(()=>{a.pause()});}
-function musicLevel(){if(liveTrack)liveTrack.volume=settings.music/100*.53;if(settings.music===0&&liveTrack){liveTrack.pause();liveTrack=null}}
+// v9.15: Original, lightweight, procedurally composed themes.
+// No missing MP3 request at launch. Music is unlocked after a user gesture,
+// which is required by PC browsers and iPhone Safari.
+const MUSIC_IDS={title:'title',menu:'title',select:'select',sakura:'sakura',sea:'sea',city:'city',crystal:'crystal',eclipse:'eclipse',result:'victory',ending:'ending'};
+const MUSIC_THEMES=Object.freeze({
+ title:  {bpm:117,root:45,minor:true, chords:[0,5,7,3],melody:[0,-1,2,4,-1,4,3,-1,2,-1,0,2,4,-1,2,-1]},
+ select: {bpm:136,root:50,minor:true, chords:[0,3,5,7],melody:[0,2,4,5,4,2,0,-1,2,4,5,7,5,4,2,-1]},
+ sakura: {bpm:147,root:52,minor:false,chords:[0,5,9,7],melody:[0,2,4,7,5,4,2,-1,4,5,7,9,7,5,4,2]},
+ sea:    {bpm:142,root:43,minor:false,chords:[0,7,5,9],melody:[0,4,5,7,9,7,5,4,2,4,5,7,4,2,0,-1]},
+ city:   {bpm:132,root:48,minor:true, chords:[0,8,5,7],melody:[0,-1,3,4,2,-1,0,2,3,6,5,3,2,-1,0,-1]},
+ crystal:{bpm:126,root:47,minor:true, chords:[0,5,3,7],melody:[0,-1,4,7,9,-1,7,4,2,4,7,5,4,-1,2,-1]},
+ eclipse:{bpm:156,root:42,minor:true, chords:[0,1,8,7],melody:[0,0,3,4,7,6,4,-1,0,3,5,7,9,7,5,3]},
+ victory:{bpm:112,root:48,minor:false,chords:[0,5,7,0],melody:[0,2,4,7,9,7,4,2,5,7,9,11,9,7,4,-1]},
+ ending: {bpm:96, root:43,minor:false,chords:[0,5,9,0],melody:[0,-1,2,4,5,-1,4,2,0,2,4,7,5,4,2,-1]}
+});
+const MUSIC_EXTERNAL_FILES=Object.freeze({}); // Optional future licensed/owned OGG/MP3 overrides.
+let audio=null,liveTrack=null,trackName='',musicMaster=null,musicNoise=null,musicStep=0,musicClock=0,notesScheduled=0,lastSound=0;
+let voiceLastAt=-1e9,voiceSpeaking=false,voiceLastLine='';
+function musicLevel(){
+ if(liveTrack){liveTrack.volume=settings.music/100*.53;if(settings.music===0){liveTrack.pause();liveTrack=null;}}
+ if(musicMaster&&audio){
+  const target=settings.music/100*.37*(voiceSpeaking?.51:1);
+  musicMaster.gain.setTargetAtTime(target,audio.currentTime,.035);
+ }
+ if(audio&&audio.state==='running'&&settings.music>0&&musicClock<audio.currentTime)musicClock=audio.currentTime+.045;
+}
+function audioReady(){
+ if(!audio){
+  try{
+   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+   audio=new AC();musicMaster=audio.createGain();musicMaster.connect(audio.destination);
+   musicLevel();
+  }catch(err){console.warn('WebAudio unavailable:',err);audio=null;musicMaster=null;return;}
+ }
+ if(audio.state==='suspended'){try{const resume=audio.resume();resume?.catch?.(()=>{});}catch{}}
+ if(audio.state==='running'&&musicClock<audio.currentTime)musicClock=audio.currentTime+.045;
+}
+function synth(freq,duration=.12,form='triangle',vol=.045,detune=0){
+ if(!audio||audio.state!=='running'||settings.sfx<=0)return;
+ const o=audio.createOscillator(),v=audio.createGain();o.type=form;
+ o.frequency.setValueAtTime(Math.max(30,freq),audio.currentTime);
+ o.detune.value=detune;
+ o.frequency.exponentialRampToValueAtTime(Math.max(27,freq*.63),audio.currentTime+duration);
+ v.gain.setValueAtTime(Math.max(.001,vol*settings.sfx/100),audio.currentTime);
+ v.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);
+ o.connect(v);v.connect(audio.destination);o.start();o.stop(audio.currentTime+duration+.02);
+}
+function sound(type){
+ if(type==='hit'){synth(125,.13,'sawtooth',.075);synth(500,.045)}
+ else if(type==='block')synth(330,.08,'square',.028);
+ else if(type==='fire'){synth(750,.22,'sawtooth',.045);synth(410,.14,'triangle',.04)}
+ else if(type==='ko'){synth(280,.5,'sawtooth',.06);synth(95,.6,'triangle',.055)}
+ else if(type==='jump')synth(510,.08);
+ else if(type==='confirm'){synth(730,.10);synth(1040,.07)}
+ else if(type==='select')synth(530,.055);
+ else if(type==='win')[392,494,587,784].forEach((f,i)=>setTimeout(()=>synth(f,.24,'triangle',.03),i*100));
+}
+function midiFreq(n){return 440*Math.pow(2,(n-69)/12)}
+function musicNote(midi,when,duration,level,form='triangle'){
+ if(!audio||!musicMaster)return;
+ const osc=audio.createOscillator(),g=audio.createGain();
+ osc.type=form;osc.frequency.setValueAtTime(midiFreq(midi),when);
+ g.gain.setValueAtTime(.0001,when);
+ g.gain.exponentialRampToValueAtTime(Math.max(.0002,level),when+.014);
+ g.gain.exponentialRampToValueAtTime(.0001,when+duration);
+ osc.connect(g);g.connect(musicMaster);osc.start(when);osc.stop(when+duration+.035);
+ notesScheduled++;
+}
+function musicPercussion(when,kind){
+ if(!audio||!musicMaster)return;
+ if(kind==='kick'){
+  const o=audio.createOscillator(),g=audio.createGain();o.type='sine';
+  o.frequency.setValueAtTime(130,when);o.frequency.exponentialRampToValueAtTime(42,when+.16);
+  g.gain.setValueAtTime(.20,when);g.gain.exponentialRampToValueAtTime(.0001,when+.18);
+  o.connect(g);g.connect(musicMaster);o.start(when);o.stop(when+.19);notesScheduled++;return;
+ }
+ if(!musicNoise){
+  const size=Math.max(128,Math.floor(audio.sampleRate*.07));
+  musicNoise=audio.createBuffer(1,size,audio.sampleRate);
+  const a=musicNoise.getChannelData(0);for(let i=0;i<size;i++)a[i]=Math.random()*2-1;
+ }
+ const src=audio.createBufferSource(),g=audio.createGain(),filter=audio.createBiquadFilter();
+ src.buffer=musicNoise;filter.type='highpass';filter.frequency.value=kind==='snare'?1850:5400;
+ g.gain.setValueAtTime(kind==='snare'?.085:.017,when);
+ g.gain.exponentialRampToValueAtTime(.0001,when+(kind==='snare'?.095:.038));
+ src.connect(filter);filter.connect(g);g.connect(musicMaster);src.start(when);src.stop(when+(kind==='snare'?.11:.045));
+ notesScheduled++;
+}
+function scheduleMusicStep(cfg,pos,when){
+ const scale=cfg.minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11];
+ const tonic=cfg.root+cfg.chords[Math.floor(pos/16)%cfg.chords.length];
+ const step=pos%16,unit=60/cfg.bpm/4;
+ const degree=cfg.melody[step];
+ if(degree>=0){
+  const pitch=tonic+scale[degree%7]+12*(1+Math.floor(degree/7));
+  musicNote(pitch,when,unit*.90,.095,cfg.minor?'triangle':'sawtooth');
+ }
+ if(step%4===0){
+  musicNote(tonic-12,when,unit*3.55,.16,'triangle');
+  const third=cfg.minor?3:4;
+  for(const n of [0,third,7])musicNote(tonic+n,when,unit*3.85,.025,'sine');
+  musicPercussion(when,'kick');
+ }
+ if(step%8===4)musicPercussion(when,'snare');
+ if(step%2===1)musicPercussion(when,'hat');
+}
+function updateMusic(){
+ if(!audio||audio.state!=='running'||!musicMaster||!settings.music||liveTrack)return;
+ const cfg=MUSIC_THEMES[trackName];if(!cfg)return;
+ if(musicClock<audio.currentTime-.35)musicClock=audio.currentTime+.04;
+ if(musicClock<=0)musicClock=audio.currentTime+.04;
+ let queued=0;
+ while(musicClock<audio.currentTime+.18&&queued++<8){
+  scheduleMusicStep(cfg,musicStep,musicClock);
+  musicStep=(musicStep+1)%64;
+  musicClock+=60/cfg.bpm/4;
+ }
+}
+function playMusic(which){
+ const name=MUSIC_IDS[which]||which;
+ if(trackName===name)return;
+ trackName=name;musicStep=0;musicClock=audio?audio.currentTime+.055:0;
+ if(liveTrack){liveTrack.pause();liveTrack=null}
+ const file=MUSIC_EXTERNAL_FILES[name];
+ if(!file||settings.music<=0||window.ANGEL_CLASH_STANDALONE)return;
+ try{
+  const a=new Audio(file);a.loop=true;a.volume=settings.music/100*.53;a.preload='none';
+  a.play().then(()=>{if(trackName===name)liveTrack=a;else a.pause()}).catch(()=>a.pause());
+ }catch{}
+}
+// System Japanese TTS is the initial character-voice layer. It requires no
+// voice-file downloads and deliberately does not imitate any real actor.
+const VOICE_SETTINGS=Object.freeze({
+ ito:{rate:1.09,pitch:1.16},
+ akari:{rate:.93,pitch:.94},
+ tamaki:{rate:1.04,pitch:1.06},
+ nox:{rate:.85,pitch:.76}
+});
+function voiceLine(id,kind,important=false){
+ if(settings.voice<=0)return false;
+ const text=kind==='intro'?META[id]?.intro:kind==='win'?META[id]?.win:
+  kind==='super'?SUPER_LINES[id]:SPECIAL_SHOUTS[id]?.[kind];
+ if(!text)return false;
+ const synthVoice=window.speechSynthesis,Utterance=window.SpeechSynthesisUtterance;
+ if(!synthVoice||!Utterance)return false;
+ const now=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+ if(!important&&(now-voiceLastAt<1500||synthVoice.speaking))return false;
+ try{
+  if(important)synthVoice.cancel();
+  const utter=new Utterance(text),p=VOICE_SETTINGS[id]||VOICE_SETTINGS.ito;
+  utter.lang='ja-JP';utter.rate=p.rate;utter.pitch=p.pitch;utter.volume=settings.voice/100;
+  const choices=synthVoice.getVoices?.()||[];
+  const japanese=choices.find(v=>String(v.lang).toLowerCase()==='ja-jp')||choices.find(v=>String(v.lang).toLowerCase().startsWith('ja'));
+  if(japanese)utter.voice=japanese;
+  utter.onstart=()=>{voiceSpeaking=true;musicLevel()};
+  const restore=()=>{voiceSpeaking=false;musicLevel()};
+  utter.onend=restore;utter.onerror=restore;
+  synthVoice.speak(utter);voiceLastAt=now;voiceLastLine=id+':'+kind;
+  return true;
+ }catch(err){console.warn('Character voice unavailable:',err);return false}
+}
+function stopVoice(){
+ try{window.speechSynthesis?.cancel()}catch{}
+ voiceSpeaking=false;musicLevel();
+}
+
 window.addEventListener('keydown',e=>{const code=e.code;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Numpad0','NumpadEnter','F9'].includes(code))e.preventDefault();
  if(remapTarget){KEYMAP[remapTarget.p][remapTarget.k]=code;remapTarget=null;sound('confirm');return}
  if(!keys.has(code))newKeys.add(code);keys.add(code);audioReady();
  if(code==='Escape'){if(scene==='fight')paused=!paused;else if(scene==='select'||scene==='help'||scene==='options'||scene==='credits'||scene==='story'||scene==='result'||scene==='ending')setScene('menu');else if(scene==='menu')setScene('title')}
- if(code==='KeyM'){settings.music=settings.music?0:DEFAULT.music;saveSettings();musicLevel();if(settings.music>0)playMusic(scene==='fight'?STAGES[stageIndex].kind:scene)}
+ if(code==='KeyM'){settings.music=settings.music?0:DEFAULT.music;saveSettings();musicLevel();if(settings.music>0)musicForScene()}
+ if(code==='KeyV'){settings.voice=settings.voice?0:DEFAULT.voice;saveSettings();if(!settings.voice)stopVoice();}
 });
 window.addEventListener('keyup',e=>keys.delete(e.code));
 window.addEventListener('blur',()=>{keys.clear();newKeys.clear();Object.keys(virtual).forEach(k=>virtual[k]=false);touchTapped.clear();if(scene==='fight')paused=true});
-document.addEventListener('visibilitychange',()=>{if(document.hidden){keys.clear();Object.keys(virtual).forEach(k=>virtual[k]=false);touchTapped.clear();if(scene==='fight')paused=true;last=0;acc=0;}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){keys.clear();Object.keys(virtual).forEach(k=>virtual[k]=false);touchTapped.clear();if(scene==='fight')paused=true;last=0;acc=0;stopVoice();audio?.suspend?.();}});
 function setScene(next){scene=next;transition=18;if(next==='story')requestStageBoard(activeWardrobeStage());musicForScene();}
-function musicForScene(){if(scene==='fight')playMusic(STAGES[stageIndex].kind);else if(scene==='title'||scene==='menu')playMusic('title');else if(scene==='select')playMusic('select');else if(scene==='result')playMusic('result');else if(scene==='ending')playMusic('ending');}
+function musicForScene(){if(scene==='fight')playMusic(STAGES[stageIndex].kind);else if(scene==='title'||scene==='menu'||scene==='options'||scene==='help'||scene==='credits')playMusic('title');else if(scene==='select'||scene==='story')playMusic('select');else if(scene==='result')playMusic('result');else if(scene==='ending')playMusic('ending');}
 const touchRoot=document.getElementById('touch'),touchHint=document.getElementById('notice');
 let touchPausePressed=false;
 const touchActions=document.getElementById('touch-actions'),touchModeButton=document.getElementById('touch-mode'),touchPauseButton=document.getElementById('touch-pause'),touchStageButton=document.getElementById('touch-stage');
@@ -561,7 +717,7 @@ function beginMatch(a,b,kind=modeKind){modeKind=kind;challengeMode=kind;const ai
  stageIndex=ai?4:kind==='arcade'?arcadeStep%4:(IDS.indexOf(a)*2+IDS.indexOf(b)+arcadeStep)%4;
  ensureStageWardrobe(stageIndex);
  fighters=[newFighter(a,0,340),newFighter(b,1,945)];round=1;wins=[0,0];timer=settings.time;freeze=100;announcer='ROUND 1';announcerTick=100;endDelay=0;projectiles=[];particles=[];floatingText=[];impactRings=[];cutIn=null;paused=false;roundFrames=0;drawRounds=0;maxCombo=[0,0];
- tick=0;for(let p=0;p<2;p++){history[p]=[];inputDisplays[p]=[]};setScene('fight');}
+ tick=0;for(let p=0;p<2;p++){history[p]=[];inputDisplays[p]=[]};setScene('fight');voiceLine(b==='nox'?b:a,'intro',true);}
 function resetRound(){round++;for(let i=0;i<2;i++){const f=fighters[i];f.x=i===0?340:945;f.y=FLOOR;f.dx=f.dy=0;f.hp=f.maxHp;f.meter=clamp(f.meter*.65,0,100);f.face=i===0?1:-1;f.act='idle';f.move=null;f.moveName='';f.moveFrame=0;f.stun=f.blockstun=f.hitstop=f.inv=0;f.onGround=true;f.airUsed=false;f.combo=0;f.hitTargets.clear();f.inputBuffer=[];f.kickTaps=[];f.charging=0;f.guard=100;f.parry=0;f.dash=0;f.dashCooldown=0;f.burstCool=0;f.aiPlan={};f.visual=newVisualRig(f.x);}
  cutIn=null;impactRings=[];timer=settings.time;roundFrames=0;freeze=100;announcer=`ROUND ${round}`;announcerTick=100;endDelay=0;projectiles=[];particles=[];}
 function chooseMenu(){sound('confirm');if(menuIndex<=3){modeKind=['arcade','cpu','local','training'][menuIndex];pick=0;pickRival=2;setScene('select')}
@@ -585,11 +741,11 @@ function runResultAction(){
  if(resultActionIndex===2){pick=IDS.indexOf(fighters[0].id);pickRival=IDS.indexOf(fighters[1].id);setScene('select');return;}
  setScene('menu');
 }
-function optionValue(index){switch(index){case 0:return ['EASY','NORMAL','HARD'][settings.difficulty];case 1:return ['1','2','3'][settings.rounds-1];case 2:return settings.time===99?'99':settings.time===60?'60':'∞';case 3:return settings.music+'%';case 4:return settings.sfx+'%';case 5:return ['IDLE','GUARD','CPU'][settings.trainingDummy];case 6:return settings.showInput?'ON':'OFF';case 7:return settings.touchMode===0?'ASSIST':'CLASSIC';case 8:return settings.reduceShake?'OFF':'ON';case 9:return settings.reduceFlash?'OFF':'ON';case 10:return minimalFX()?'CLEAN':'CLASSIC';default:return ''}}
+function optionValue(index){switch(index){case 0:return ['EASY','NORMAL','HARD'][settings.difficulty];case 1:return ['1','2','3'][settings.rounds-1];case 2:return settings.time===99?'99':settings.time===60?'60':'∞';case 3:return settings.music+'%';case 4:return settings.sfx+'%';case 5:return ['IDLE','GUARD','CPU'][settings.trainingDummy];case 6:return settings.showInput?'ON':'OFF';case 7:return settings.touchMode===0?'ASSIST':'CLASSIC';case 8:return settings.reduceShake?'OFF':'ON';case 9:return settings.reduceFlash?'OFF':'ON';case 10:return minimalFX()?'CLEAN':'CLASSIC';case 11:return settings.voice+'%';default:return ''}}
 function changeOption(n){const i=selectedOption;if(i===0)settings.difficulty=(settings.difficulty+3+n)%3;
  if(i===1)settings.rounds=1+(settings.rounds-1+3+n)%3;
  if(i===2)settings.time=([99,60,9999])[([99,60,9999].indexOf(settings.time)+3+n)%3];
- if(i===3){settings.music=clamp(settings.music+n*10,0,100);musicLevel();if(settings.music>0&&!liveTrack){trackName='';playMusic(scene)}}
+ if(i===3){settings.music=clamp(settings.music+n*10,0,100);musicLevel()}
  if(i===4)settings.sfx=clamp(settings.sfx+n*10,0,100);
  if(i===5)settings.trainingDummy=(settings.trainingDummy+3+n)%3;
  if(i===6)settings.showInput=!settings.showInput;
@@ -597,6 +753,7 @@ function changeOption(n){const i=selectedOption;if(i===0)settings.difficulty=(se
  if(i===8)settings.reduceShake=!settings.reduceShake;
  if(i===9)settings.reduceFlash=!settings.reduceFlash;
  if(i===10)settings.fxMode=minimalFX()?'classic':'clean';
+ if(i===11){settings.voice=clamp(settings.voice+n*10,0,100);if(!settings.voice)stopVoice();else voiceLine(IDS[pick]||'ito','intro',true)};
  sound('select');saveSettings();}
 function moveFor(f,name,button='mp'){
  const base=MOVE[name];if(!base)return null;
@@ -630,7 +787,7 @@ function startAttack(f,name,button='mp'){
  if(name==='super'){cutIn={id:f.id,side:f.side,life:56,max:56};impactRings.push({x:f.x,y:f.y-200,r:35,life:32,max:32,color:f.c.color});}
  if(name==='rush')f.dash=0;
  if(['pulse','riser','rush'].includes(name)&&f.move?.tier!==0&&Math.random()<.55)popText(SPECIAL_SHOUTS[f.id]?.[name]||'SPECIAL!',f.x,f.y-350,f.c.light);
- if(['pulse','riser','rush','super'].includes(name))sound('fire');else if(name==='throw')sound('select');
+ if(['pulse','riser','rush','super'].includes(name)){sound('fire');voiceLine(f.id,name,name==='super')}else if(name==='throw')sound('select');
  return true;
 }
 function hasAttack(f){return f.act==='attack'&&f.move!==null}
@@ -844,7 +1001,7 @@ function finishRound(){endDelay=0;
  if(fighters[0].hp===fighters[1].hp){drawRounds++;if(drawRounds<3){round--;resetRound();return;}
   winner=0;drawRounds=0;
  }else winner=fighters[0].hp>fighters[1].hp?0:1;
- wins[winner]++;if(wins[winner]>=settings.rounds){resultWinner=winner;resultActionIndex=0;sound(winner===0?'win':'ko');setScene('result');}
+ wins[winner]++;if(wins[winner]>=settings.rounds){resultWinner=winner;resultActionIndex=0;sound(winner===0?'win':'ko');setScene('result');voiceLine(fighters[winner].id,'win',true);}
  else resetRound();
 }
 function stepLogic(){tick++;displayTick++;
@@ -864,8 +1021,8 @@ function stepLogic(){tick++;displayTick++;
   if(scene==='help'&&just('ArrowLeft','KeyA','ArrowRight','KeyD'))helpPage=(helpPage+1)%2;
   if(just('Enter','Space','KeyJ'))setScene('menu');
  }else if(scene==='options'){
-  if(just('ArrowUp','KeyW'))selectedOption=(selectedOption+10)%11;
-  if(just('ArrowDown','KeyS'))selectedOption=(selectedOption+1)%11;
+  if(just('ArrowUp','KeyW'))selectedOption=(selectedOption+11)%12;
+  if(just('ArrowDown','KeyS'))selectedOption=(selectedOption+1)%12;
   if(just('ArrowLeft','KeyA'))changeOption(-1);
   if(just('ArrowRight','KeyD','Enter','Space'))changeOption(1);
  }else if(scene==='result'){
@@ -1438,7 +1595,7 @@ function drawFight(){g.save();if(shake>0)g.translate(rand(-shake,shake),rand(-sh
 }
 function drawAtmosphere(tint=.72){drawStage();rect(0,0,W,H,`rgba(15,5,35,${tint})`)}
 function titleScreen(){
- drawAtmosphere(.46);label('v9.12',1219,33,16,'#ecd8fa','right','Arial');
+ drawAtmosphere(.46);label('v9.15',1219,33,16,'#ecd8fa','right','Arial');
  // Four approved detailed character portraits, with native-size source images.
  // Dramatic framed group art, cropped rather than stretched.
  const bg=g.createLinearGradient(0,172,0,630);bg.addColorStop(0,'#35144d');bg.addColorStop(1,'#120826');
@@ -1522,18 +1679,19 @@ function helpScreen(){drawAtmosphere(.82);label('HOW TO PLAY',640,92,67,'#ffe5a9
  rows.forEach((r,i)=>label(r,640,215+i*55,21,'#fff1f7','center','Arial'));
  }
  label('← → CHANGE PAGE           ENTER BACK',640,673,19,'#fff2af');}
-const OPTION_NAMES=['CPU DIFFICULTY','ROUNDS TO WIN','TIME LIMIT','MUSIC VOLUME','EFFECT VOLUME','TRAINING DUMMY','SHOW INPUT HISTORY','TOUCH MODE','SCREEN SHAKE','SCREEN FLASH','VISUAL EFFECTS'];
+const OPTION_NAMES=['CPU DIFFICULTY','ROUNDS TO WIN','TIME LIMIT','MUSIC VOLUME','EFFECT VOLUME','TRAINING DUMMY','SHOW INPUT HISTORY','TOUCH MODE','SCREEN SHAKE','SCREEN FLASH','VISUAL EFFECTS','VOICE VOLUME'];
 function optionScreen(){drawAtmosphere(.8);label('OPTIONS',640,115,66,'#fff0b6');glassPanel(240,183,798,458,'#f3b7e7');OPTION_NAMES.forEach((name,i)=>{
- const y=215+i*39;if(i===selectedOption)roundRect(269,y-18,740,36,6,'#d45bad6a');
- label(name,300,y,23,i===selectedOption?'#ffefa9':'#f8d7f8','left','Arial');
- label('◀   '+optionValue(i)+'   ▶',977,y,23,'#fff5f8','right','Arial');
+ const y=215+i*33;if(i===selectedOption)roundRect(269,y-16,740,31,6,'#d45bad6a');
+ label(name,300,y,21,i===selectedOption?'#ffefa9':'#f8d7f8','left','Arial');
+ label('◀   '+optionValue(i)+'   ▶',977,y,21,'#fff5f8','right','Arial');
  });label('↑ ↓ ITEM  •  ← → CHANGE  •  ESC BACK',640,679,19,'#fff3c3');}
 function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2');glassPanel(299,195,684,425,'#e6b4f6');
- const lines=['ANGEL CLASH v9.12','2D ARCADE FIGHTING GAME','',
+ const lines=['ANGEL CLASH v9.15','2D ARCADE FIGHTING GAME','',
  'CHARACTER DESIGN — user-supplied original artwork',
  'GAME DESIGN / PROGRAMMING — ANGEL CLASH Project',
  'SPRITE SOURCE — user-supplied visual-development sheet',
- 'BGM — optional Suno tracks (not yet supplied)',
+ 'BGM — original WebAudio soundtrack (9 themes)',
+ 'CHARACTER VOICES — Japanese system TTS (preview)',
  '',
  'Original game • No Street Fighter assets used',
  'Press ENTER / tap to return'];lines.forEach((t,i)=>label(t,640,234+i*40,i===0?38:i===1?24:18,i<2?'#ffe5b6':'#fff0f8','center','Arial'));}
@@ -1546,10 +1704,12 @@ function render(){g.setTransform(pixelRatio,0,0,pixelRatio,0,0);g.clearRect(0,0,
 let last=0,acc=0;
 function loop(now){if(last===0)last=now;const dt=clamp(now-last,0,90);last=now;acc+=dt;let count=0;
  while(acc>=STEP&&count++<5){stepLogic();acc-=STEP}
- if(count===6)acc=0;renderAlpha=clamp(acc/STEP,0,1);render();requestAnimationFrame(loop)}
+ if(count===6)acc=0;updateMusic();renderAlpha=clamp(acc/STEP,0,1);render();requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 musicForScene();
 window.AngelClashDebug={
+ audioStatus:()=>({context:audio?.state||'locked',track:trackName,trackReady:!!MUSIC_THEMES[trackName],musicVolume:settings.music,sfxVolume:settings.sfx,voiceVolume:settings.voice,voiceSupported:!!(window.speechSynthesis&&window.SpeechSynthesisUtterance),lastVoice:voiceLastLine,notesScheduled}),
+ previewVoice:(id='akari',kind='intro')=>voiceLine(id,kind,true),
  assetStatus:()=>({...assetStatus}),
  combatHD:()=>({enabled:useHDCombat,characters:Object.fromEntries(Object.keys(FIGHT9_URLS).map(id=>[id,!!images[id+'Fight9']?.naturalWidth&&images[id+'Fight9'].naturalWidth===1600]))}),
  toggleCombatHD:(v)=>{useHDCombat=!!v;for(const fighter of fighters)if(fighter.visual){const k=spriteFrame(fighter);fighter.visual.poseFrom=k;fighter.visual.poseTo=k;fighter.visual.poseBlend=1;}},
