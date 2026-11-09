@@ -1,9 +1,9 @@
 {
   "app": "ANGEL CLASH",
-  "version": "9.14",
-  "deploymentMarker": "ANGEL-CLASH-V9.14-AKARI-NATURAL-FACE-20261109",
+  "version": "9.15",
+  "deploymentMarker": "ANGEL-CLASH-V9.15-AUDIO-20261109",
   "sourceBranch": "queue",
-  "sourceRevision": "9c69d7e66467771d865b1f7121751ed55264391f",
+  "sourceRevision": "a7b024c5fb33f0457bc4371bf1260cfbe9f823af",
   "updatedAt": "2026-11-09",
   "highDefinitionCombat": {
     "characters": [
@@ -15,7 +15,7 @@
     "atlas": "1600x1200",
     "posesPerCharacter": 12
   },
-  "status": "Source committed to queue; actual Cloudflare delivery requires HTTP check.",
+  "status": "GitHub queue source version marker. HTTP confirmation of Cloudflare production release is still required.",
   "fix": {
     "character": "akari",
     "scope": "12 combat poses regenerated from natural-face reference",
@@ -27,5 +27,22 @@
     "frameSize": 400,
     "otherCharactersUnchanged": true,
     "previousPixelRetouchReplaced": true
+  },
+  "audio": {
+    "bgm": "original WebAudio (9 distinct themes, no required MP3)",
+    "voices": "Japanese system speech synthesis (prototype, not recorded actor voice)",
+    "voiceTriggers": [
+      "intro",
+      "special",
+      "super",
+      "victory"
+    ],
+    "settings": [
+      "music",
+      "sfx",
+      "voice"
+    ],
+    "audioStartsAfterGesture": true,
+    "automatedTests": "audio-smoke.test.cjs"
   }
 }
