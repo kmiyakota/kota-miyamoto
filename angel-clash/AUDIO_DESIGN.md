@@ -1,3 +1,14 @@
+# v9.17 — Licensed/creator-supplied Suno music integrated
+
+**Active audio sources:**
+
+- **Title / menu:** `FLY INTO THE LIGHT (1).mp3`, [Wix READY MP3](https://music.wixstatic.com/mp3/c3c31e_0bd90bedb4e540bb9e943eb4a3e241be.mp3)
+- **Battle / all five stages:** `FLY INTO THE LIGHT.mp3`, [Wix READY MP3](https://music.wixstatic.com/mp3/c3c31e_ffb5c8da41fd4b36a342916385be0846.mp3)
+
+Both use the game's existing music volume and HTMLAudioElement loop; other scenes keep the local WebAudio patterns. Playback requires a user gesture. Voice recordings are still absent and the temporary Japanese TTS was disabled in v9.16. When making more songs, use each new user's original MP3 URL in `MUSIC_EXTERNAL_FILES` and retain local synth compositions as fallback.
+
+---
+
 # ANGEL CLASH — Music & Voice Design (v9.15)
 
 ## In-game audio state
