@@ -635,7 +635,7 @@ const touchActions=document.getElementById('touch-actions'),touchModeButton=docu
 function cycleTrainingStage(){
  if(scene!=='fight'||modeKind!=='training')return;
  stageIndex=(stageIndex+1)%5;stageCacheKey=-1;
- ensureStageWardrobe(stageIndex);sound('select');
+ ensureStageWardrobe(stageIndex);musicForScene();sound('select');
 }
 function applyTouchMode(){document.body.classList.toggle('touch-classic',settings.touchMode===1);if(touchModeButton)touchModeButton.textContent=settings.touchMode===0?'4 BUTTONS':'6 BUTTONS';}
 applyTouchMode();
@@ -1694,7 +1694,7 @@ function creditsScreen(){drawAtmosphere(.83);label('CREDITS',640,113,72,'#ffe5b2
  'CHARACTER VOICES — Japanese system TTS (preview)',
  '',
  'Original game • No Street Fighter assets used',
- 'Press ENTER / tap to return'];lines.forEach((t,i)=>label(t,640,234+i*40,i===0?38:i===1?24:18,i<2?'#ffe5b6':'#fff0f8','center','Arial'));}
+ 'Press ENTER / tap to return'];lines.forEach((t,i)=>label(t,640,234+i*36,i===0?38:i===1?24:18,i<2?'#ffe5b6':'#fff0f8','center','Arial'));}
 function drawTransition(){if(transition>0){g.globalAlpha=transition/18*.28;rect(0,0,W,H,'#110723');g.globalAlpha=1;transition--}}
 function render(){g.setTransform(pixelRatio,0,0,pixelRatio,0,0);g.clearRect(0,0,W,H);g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
  switch(scene){case'title':titleScreen();break;case'menu':menuScreen();break;case'select':selectScreen();break;case'story':storyScreen();break;case'fight':drawFight();break;case'result':resultScreen();break;case'ending':endingScreen();break;case'help':helpScreen();break;case'options':optionScreen();break;case'credits':creditsScreen();break;default:titleScreen()}
@@ -1723,7 +1723,7 @@ window.AngelClashDebug={
     spriteReady:!!loadedCostumeArt(f.id,'sprite'),
     portraitReady:!!loadedCostumeArt(f.id,'portrait'),
     specialReady:!!loadedCostumeArt(f.id,'special')}]))}),
- wardrobeStage:(n=0)=>{stageIndex=clamp(Math.round(n),0,4);stageCacheKey=-1;ensureStageWardrobe(stageIndex);return WARDROBE[stageIndex].en},
+ wardrobeStage:(n=0)=>{stageIndex=clamp(Math.round(n),0,4);stageCacheKey=-1;ensureStageWardrobe(stageIndex);if(scene==='fight')musicForScene();return WARDROBE[stageIndex].en},
  visualFX:()=>settings.fxMode,
  setVisualFX:(v)=>{settings.fxMode=v==='classic'?'classic':'clean';saveSettings()},
  state:()=>({scene,modeKind,stageIndex,round,wins:[...wins],timer,score,freeze,paused,endDelay,roundFrames,maxCombo:[...maxCombo],cutIn:cutIn?{...cutIn}:null,fighters:fighters.map(f=>({id:f.id,hp:f.hp,meter:f.meter,guard:f.guard,parry:f.parry,dash:f.dash,aiPlan:f.aiPlan?.type,x:f.x,y:f.y,act:f.act,stun:f.stun,moveName:f.moveName})),projectiles:projectiles.length}),
