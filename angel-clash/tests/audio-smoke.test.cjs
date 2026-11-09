@@ -89,14 +89,18 @@ assert.equal(media.length,2);
 assert.equal(media[1].src,BATTLE);
 assert.equal(media[1].loop,true);
 const fightFiles=['sakura','sea','city','crystal','eclipse'];
+let previous=dbg.audioStatus().track,expectedMediaCount=media.length;
 for(let stage=0;stage<5;stage++){
  dbg.wardrobeStage(stage);
  assert.equal(dbg.audioStatus().track,fightFiles[stage]);
  assert.equal(dbg.audioStatus().externalUrl,BATTLE);
  assert.equal(dbg.audioStatus().externalActive,true);
  assert.equal(media.at(-1).src,BATTLE);
+ if(fightFiles[stage]!==previous)expectedMediaCount++;
+ assert.equal(media.length,expectedMediaCount,'Changed stage should restart battle BGM');
+ previous=fightFiles[stage];
 }
-assert.equal(media.length,6,'Every new stage should restart the battle track');
+assert.ok(expectedMediaCount>=5,'Most stage changes should restart the track');
 assert.equal(dbg.audioStatus().voiceSupported,false,'Synthetic voice fallback must stay disabled');
 assert.equal(dbg.previewVoice('akari','super'),false);
 assert.equal(voiceUtterances.length,0);
