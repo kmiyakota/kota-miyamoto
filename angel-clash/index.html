@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.12 — AKARI Source Iris Master Restored</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#160d30"><meta name="description" content="ANGEL CLASH — ITO、AKARI、TAMAKIが戦うオリジナル2Dアーケード対戦格闘ゲーム"><title>ANGEL CLASH v9.13 — AKARI Iris Contrast Fix</title><style>:root{color-scheme:dark;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);--safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#100721;font-family:Georgia,serif;touch-action:none}body{display:flex;align-items:center;justify-content:center}
 #shell{position:relative;width:min(100vw,177.77778dvh);height:auto;aspect-ratio:16 / 9;max-width:100vw;max-height:100dvh;overflow:hidden;background:#110625;box-shadow:0 0 80px #a34eda5c;isolation:isolate}
 #game{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;touch-action:none;user-select:none}
@@ -301,13 +301,14 @@ for(const [id,url] of Object.entries(HD_ART_URLS))loadOptionalArt(id+'HD',url);
 // v9.0: genuine 12-pose animation atlases made from the approved original character
 // action sheets (ITO / AKARI / TAMAKI / NOX). Real transparency, no captions, 4x3,
 // 400x400 source pixels per pose. Original v5 atlases are retained as fallback.
-// v9.12: AKARI's six corrected idle-iris pixels are baked into a new
-// full-resolution RGBA 4×3 sprite MASTER. No post-render patch overlay is
-// necessary. Byte-level comparison verified 6 RGB pixels changed, 0 alpha
-// changes and no changes outside the idle eye across all 12 frames.
+// v9.13: AKARI's faint/white iris is restored at normal game size by repainting
+// 13 RGB pixels, confined to idle tile coordinates x=207–211, y=74–77.
+// This self-contained 1600x1200 RGBA master is based on the same canonical 12-pose
+// original; zero alpha changes and zero changes in the other 11 poses.
+// The v9.12 six-pixel master remains in Wix for instant rollback.
 const FIGHT9_URLS=Object.freeze({
  ito:'https://static.wixstatic.com/media/c3c31e_f84c2687cabd4c6e93fc0849d6d7e912~mv2.webp',
- akari:'https://static.wixstatic.com/media/c3c31e_c38bf273b0924fbe85f98e8aefc51bc6~mv2.png',
+ akari:'https://static.wixstatic.com/media/c3c31e_16cac0b756874f78863a1b0cf7145efe~mv2.png',
  tamaki:'https://static.wixstatic.com/media/c3c31e_7325a9b9a4cf463c998b729f7ab9dbe1~mv2.webp',
  nox:'https://static.wixstatic.com/media/c3c31e_7a96f82aa5634f8d9e1e2ffc768520d7~mv2.webp'
 });
@@ -1580,7 +1581,7 @@ window.AngelClashDebug={
  move:(p,k)=>{const f=fighters[p];if(!f)return false;return startAttack(f,k)},
  tick:(n=1)=>{for(let i=0;i<n;i++)stepLogic();renderAlpha=1;render()},
  spriteIntegrity:()=>structuredClone(combatAtlasStats),
- akariIdleEyeRepair:()=>({bakedIntoSource:true,loaded:images.akariFight9?.naturalWidth===1600&&images.akariFight9?.naturalHeight===1200,pixelChanges:6,alphaChanges:0,otherPoseChanges:0,atlas:FIGHT9_URLS.akari}),
+ akariIdleEyeRepair:()=>({bakedIntoSource:true,loaded:images.akariFight9?.naturalWidth===1600&&images.akariFight9?.naturalHeight===1200,pixelChanges:13,alphaChanges:0,otherPoseChanges:0,pose:0,eyeRegion:{x:207,y:74,width:5,height:4},atlas:FIGHT9_URLS.akari}),
  spriteCleanup:()=>({enabled:useCleanedAtlas,stats:structuredClone(combatAtlasStats)}),
  toggleSpriteCleanup:(enabled)=>{useCleanedAtlas=!!enabled;return useCleanedAtlas;},
  animationState:()=>fighters.map(f=>({id:f.id,walk:f.visual?.walk??0,crouch:f.visual?.crouch??0,air:f.visual?.air??0,land:f.visual?.land??0,lean:f.visual?.lean??0,pose:f.visual?.poseTo??0,blend:f.visual?.poseBlend??1})),
