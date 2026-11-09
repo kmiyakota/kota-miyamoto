@@ -1,3 +1,17 @@
+# ANGEL CLASH v9.13 — AKARI white-iris correction (2026-11-09)
+
+**Completed in GitHub `queue`:** Only AKARI's first combat idle pose has been updated. The previous six-pixel color patch was not sufficiently visible at battle scale, so the eye/iris contrast was adjusted in a **13-pixel local RGB region** (tile x=207–211, y=74–77), without resizing or modifying the character. The other 11 poses, all alpha pixels, and the ITO/TAMAKI/NOX atlases are unchanged.
+
+- Active new 1600×1200 RGBA source: https://static.wixstatic.com/media/c3c31e_16cac0b756874f78863a1b0cf7145efe~mv2.png (Wix Media Manager, READY, verified 1600×1200).
+- Original production reference retained: https://static.wixstatic.com/media/c3c31e_1b14461d63c84e919162bc2f9fa1e688~mv2.webp.
+- Previous v9.12 six-pixel master retained for rollback: https://static.wixstatic.com/media/c3c31e_c38bf273b0924fbe85f98e8aefc51bc6~mv2.png.
+- The final corrected atlas is the original production 12-pose master with only 13 edited RGB pixels inside the idle eye. This is a deliberate small eye detail repair, not a replacement of other art, game mechanics, or outfits.
+- Code and mock Canvas2D QA: four matchup scenarios, 40 move inputs, 96 valid modern-atlas draws, zero invalid draw coordinates. A real Chrome/Safari visual and Cloudflare Pages rollout are **not** yet independently verified.
+- Publication smoke marker: [deployment.json](deployment.json). On supported GitHub Actions runs, the queue workflow also polls the deployed marker.
+- Diagnostic: `AngelClashDebug.akariIdleEyeRepair()` reports the updated 13-pixel master and whether the image is loaded.
+
+---
+
 # ANGEL CLASH v9.11 — AKARI idle iris repair (2026-11-06)
 
 **AKARI's blank-white iris now has a verified pixel-level correction layer integrated into the game renderer.** The approved original 1600×1200 Wix WebP is kept intact; this change is a non-destructive sprite source *overlay*, not a completely regenerated atlas.
